@@ -1,0 +1,15 @@
+{
+  "name": "bacera-theme",
+  "version": "1.0.0",
+  "description": "WordPress Theme with Tailwind CSS",
+  "scripts": {
+    "dev": "tailwindcss -i ./assets/css/input.css -o ./assets/css/main.css --watch",
+    "build": "tailwindcss -i ./assets/css/input.css -o ./assets/css/main.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "postcss-cli": "^11.0.0"
+  }
+}

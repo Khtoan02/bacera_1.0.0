@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add your custom layer rules below */
+@layer base {
+  body {
+    @apply text-gray-800 antialiased leading-relaxed;
+  }
+}
