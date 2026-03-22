@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,6 +7,6 @@
 /* Add your custom layer rules below */
 @layer base {
   body {
-    @apply text-gray-800 antialiased leading-relaxed;
+    @apply font-sans text-body-reg text-gray-800 antialiased;
   }
 }
