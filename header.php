@@ -27,6 +27,7 @@ $homepage_js = $is_homepage ? 'true' : 'false';
     id="site-header"
     x-data="{
         scrolled: false,
+        isMenuOpen: false,
         activeMenu: null,
         accountOpen: false,
         isHomepage: <?php echo $homepage_js; ?>,
@@ -38,13 +39,21 @@ $homepage_js = $is_homepage ? 'true' : 'false';
             window.addEventListener('scroll', onScroll, { passive: true });
         },
         get isTransparent() {
-            return this.isHomepage && !this.scrolled && this.activeMenu === null && !this.accountOpen;
+            return this.isHomepage && !this.scrolled && !this.isMenuOpen && !this.accountOpen;
         }
     }"
-    @keydown.escape.window="activeMenu = null; accountOpen = false"
-    :class="isTransparent ? 'bg-transparent' : 'bg-white shadow-sm'"
-    class="fixed top-0 left-0 w-full z-50 transition-all duration-500"
+    @keydown.escape.window="activeMenu = null; isMenuOpen = false; accountOpen = false"
+    class="fixed top-0 left-0 w-full z-50"
 >
+    <!--
+        Background layer:
+        - On HOVER (scrolled=false): transition:none → instant white (syncs with mega menu)
+        - On SCROLL (scrolled=true):  transition smooth 400ms → nice fade in
+    -->
+    <div class="absolute inset-0 -z-10 bg-white"
+         :class="isTransparent ? 'opacity-0 shadow-none' : 'opacity-100 shadow-sm'"
+         :style="scrolled ? 'transition: opacity 0.4s ease, box-shadow 0.4s ease' : 'transition: none'"
+    ></div>
     <div class="hidden lg:grid h-[76px] w-full" style="grid-template-columns: 1fr minmax(0, 1232px) 1fr;">
 
         
@@ -76,8 +85,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                     ?>
                     <div class="flex items-center h-full <?php echo $has_sub ? 'cursor-pointer' : ''; ?>"
                          <?php if ($has_sub): ?>
-                         @mouseenter="activeMenu = '<?php echo $item['key']; ?>'"
-                         @mouseleave="activeMenu = null"
+                         @mouseenter="isMenuOpen = true; activeMenu = '<?php echo $item['key']; ?>'"
+                         @mouseleave="isMenuOpen = false; activeMenu = null"
                          <?php endif; ?>>
 
                         <?php if ($item['type'] === 'link'): ?>
@@ -107,8 +116,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
                 <!-- LANGUAGE SWITCHER — right side of container -->
                 <div class="flex items-center h-full group relative cursor-pointer"
-                     @mouseenter="activeMenu = 'lang'"
-                     @mouseleave="activeMenu = null">
+                     @mouseenter="isMenuOpen = true; activeMenu = 'lang'"
+                     @mouseleave="isMenuOpen = false; activeMenu = null">
                     <div class="flex items-center gap-1.5 px-4 h-full text-[14px] font-medium font-sans transition-colors select-none"
                          :class="isTransparent ? 'text-stone-200 hover:text-white' : 'text-stone-600 hover:text-accent-500'">
                         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -227,15 +236,15 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
     <!-- SHOP PANEL -->
     <div x-show="activeMenu === 'shop'"
-         @mouseenter="activeMenu = 'shop'"
-         @mouseleave="activeMenu = null"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-1"
-         class="absolute top-full left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60]"
+         @mouseenter="isMenuOpen = true; activeMenu = 'shop'"
+         @mouseleave="isMenuOpen = false; activeMenu = null"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="absolute top-full left-0 right-0 bg-white shadow-xl z-[60]"
          style="display:none">
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <!-- Promo left -->
@@ -274,15 +283,15 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
     <!-- WORKSHOP PANEL -->
     <div x-show="activeMenu === 'workshop'"
-         @mouseenter="activeMenu = 'workshop'"
-         @mouseleave="activeMenu = null"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-1"
-         class="absolute top-full left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60]"
+         @mouseenter="isMenuOpen = true; activeMenu = 'workshop'"
+         @mouseleave="isMenuOpen = false; activeMenu = null"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="absolute top-full left-0 right-0 bg-white shadow-xl z-[60]"
          style="display:none">
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <!-- Promo left -->
@@ -323,15 +332,15 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
     <!-- ABOUT PANEL -->
     <div x-show="activeMenu === 'about'"
-         @mouseenter="activeMenu = 'about'"
-         @mouseleave="activeMenu = null"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-1"
-         class="absolute top-full left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60]"
+         @mouseenter="isMenuOpen = true; activeMenu = 'about'"
+         @mouseleave="isMenuOpen = false; activeMenu = null"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="absolute top-full left-0 right-0 bg-white shadow-xl z-[60]"
          style="display:none">
         <div class="max-w-[1232px] mx-auto px-6 py-6 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
@@ -364,15 +373,15 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
     <!-- LANGUAGE PANEL -->
     <div x-show="activeMenu === 'lang'"
-         @mouseenter="activeMenu = 'lang'"
-         @mouseleave="activeMenu = null"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-1"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 -translate-y-1"
-         class="absolute top-full right-0 w-48 bg-white rounded-b-2xl border border-stone-200 border-t-0 shadow-xl z-[60] py-1.5"
+         @mouseenter="isMenuOpen = true; activeMenu = 'lang'"
+         @mouseleave="isMenuOpen = false; activeMenu = null"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="absolute top-full right-0 w-48 bg-white rounded-b-2xl shadow-xl z-[60] py-1.5"
          style="display:none">
         <button onclick="mstSwitchLang('en','English')"  class="w-full flex items-center gap-2.5 px-4 py-2.5 text-accent-500  text-[13px] font-medium font-sans hover:bg-stone-50 transition-colors">🇺🇸 <span>English</span></button>
         <div class="h-px bg-stone-100 mx-3"></div>
