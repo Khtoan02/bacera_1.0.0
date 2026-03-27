@@ -145,13 +145,30 @@ $brand_colors = [
                 <!-- Buttons -->
                 <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100 flex flex-col h-full">
                     <h3 class="text-h2 font-bold text-gray-900 mb-8">Buttons</h3>
-                    <div class="flex flex-wrap gap-4 items-center p-8 bg-gray-50 rounded-2xl mb-4 border border-gray-100/50">
-                        <?php get_template_part('app/Views/components/button', null, ['text' => 'Primary Button', 'type' => 'primary']); ?>
-                        <?php get_template_part('app/Views/components/button', null, ['text' => 'Accent Button', 'type' => 'accent']); ?>
+                    
+                    <!-- Light Background Buttons -->
+                    <div class="flex flex-col gap-4 mb-6">
+                        <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100 pb-2">Light Theme</h4>
+                        <div class="flex flex-wrap gap-4 items-center p-6 bg-stone-50 rounded-2xl border border-gray-100/50">
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Primary', 'variant' => 'primary']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Secondary', 'variant' => 'secondary']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Outline', 'variant' => 'outline']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Ghost Button', 'variant' => 'ghost']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Ghost Disabled', 'variant' => 'ghost', 'disabled' => true]); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Disabled', 'variant' => 'primary', 'disabled' => true]); ?>
+                        </div>
                     </div>
-                    <div class="flex flex-wrap gap-4 items-center p-8 bg-white border border-gray-200 shadow-sm rounded-2xl">
-                        <?php get_template_part('app/Views/components/button', null, ['text' => 'Outline Button', 'type' => 'outline']); ?>
-                        <?php get_template_part('app/Views/components/button', null, ['text' => 'Ghost Button', 'type' => 'ghost']); ?>
+
+                    <!-- Dark Background Buttons -->
+                    <div class="flex flex-col gap-4">
+                        <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100 pb-2">Dark Theme</h4>
+                        <div class="flex flex-wrap gap-4 items-center p-6 bg-stone-800 rounded-2xl shadow-inner">
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Light Solid', 'variant' => 'light']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Secondary Light', 'variant' => 'secondary-light']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Light Outline', 'variant' => 'outline-light']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Ghost Light', 'variant' => 'ghost-light']); ?>
+                            <?php get_template_part('app/Views/components/button', null, ['text' => 'Ghost Light Disabled', 'variant' => 'ghost-light', 'disabled' => true]); ?>
+                        </div>
                     </div>
                 </section>
 
@@ -180,26 +197,79 @@ $brand_colors = [
             <!-- Form Controls -->
             <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100">
                 <h3 class="text-h2 font-bold text-gray-900 mb-8">Form Controls</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                    <?php get_template_part('app/Views/components/input', null, ['label' => 'Input Text Field', 'placeholder' => 'Ví dụ: Họ và tên của bạn']); ?>
-                    <?php get_template_part('app/Views/components/select', null, ['label' => 'Select / Dropdown']); ?>
-                    <?php get_template_part('app/Views/components/datepicker', null, ['label' => 'Date / Time Picker']); ?>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <!-- Text Inputs Column -->
+                    <div class="flex flex-col gap-6">
+                        <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-gray-100 pb-2">Inputs</h4>
+                        <?php get_template_part('app/Views/components/input', null, ['placeholder' => 'Placeholder (Default)', 'state' => 'default']); ?>
+                        <?php get_template_part('app/Views/components/input', null, ['value' => 'Typing....', 'state' => 'typing']); ?>
+                        <?php get_template_part('app/Views/components/input', null, ['value' => 'Filled text', 'state' => 'filled']); ?>
+                        <?php get_template_part('app/Views/components/input', null, ['value' => 'Filled text', 'state' => 'error']); ?>
+                        <?php get_template_part('app/Views/components/input', null, ['value' => 'Filled text', 'state' => 'disabled']); ?>
+                    </div>
+
+                    <!-- Selects Column -->
+                    <div class="flex flex-col gap-6">
+                        <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-gray-100 pb-2">Selects</h4>
+                        <?php get_template_part('app/Views/components/select', null, ['label' => 'Select City', 'value' => 'Hanoi', 'state' => 'default']); ?>
+                        <?php get_template_part('app/Views/components/select', null, ['label' => 'Select City', 'value' => 'Hanoi', 'state' => 'focus']); ?>
+                        <?php get_template_part('app/Views/components/select', null, ['label' => 'Select City', 'value' => 'Hanoi', 'state' => 'filled']); ?>
+                        <!-- Showcase Datepicker alongside selects visually -->
+                        <div class="pt-6 border-t border-gray-100 mt-auto hidden lg:block">
+                            <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-4">Date/Time Picker</h4>
+                            <?php get_template_part('app/Views/components/datepicker'); ?>
+                        </div>
+                    </div>
+
+                    <!-- Textareas Column -->
+                    <div class="flex flex-col gap-6">
+                        <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-gray-100 pb-2">Textareas</h4>
+                        <?php get_template_part('app/Views/components/textarea', null, ['placeholder' => 'Placeholder', 'state' => 'default']); ?>
+                        <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Typing...', 'state' => 'typing']); ?>
+                        <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Filled', 'state' => 'filled']); ?>
+                        <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Typing...', 'state' => 'error']); ?>
+                        <!-- Disabled Textarea -->
+                        <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Filled', 'state' => 'disabled']); ?>
+                    </div>
                 </div>
             </section>
 
             <!-- Navigation Controls -->
-            <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100">
-                <div class="mb-12">
-                    <h3 class="text-h2 font-bold text-gray-900 mb-4">Tabs</h3>
-                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+            <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-stone-100 flex flex-col md:flex-row gap-10">
+                <div class="flex-1">
+                    <h3 class="text-[28px] font-bold text-stone-900 mb-6 font-display">Tabs</h3>
+                    <div class="bg-stone-50 p-6 rounded-2xl border border-stone-200">
                         <?php get_template_part('app/Views/components/tabs'); ?>
                     </div>
                 </div>
-                <div class="">
-                    <h3 class="text-h2 font-bold text-gray-900 mb-4">Pagination</h3>
-                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <div class="flex-1">
+                    <h3 class="text-[28px] font-bold text-stone-900 mb-6 font-display">Pagination</h3>
+                    <div class="bg-stone-50 p-6 rounded-2xl border border-stone-200 h-[104px] flex items-center justify-center">
                         <?php get_template_part('app/Views/components/pagination'); ?>
                     </div>
+                </div>
+            </section>
+
+            <!-- Interactive Overlays -->
+            <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-stone-100">
+                <h3 class="text-[28px] font-bold text-stone-900 mb-6 font-display">Interactive Overlays</h3>
+                <div class="bg-stone-50 p-10 rounded-2xl border border-stone-200 flex justify-center items-center" x-data="{ modalOpen: false }">
+                    <!-- Trigger Button -->
+                    <button type="button" @click="modalOpen = true" class="px-6 py-4 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg shadow-md transition-colors">
+                        Launch Demo Modal
+                    </button>
+                    
+                    <!-- Include Modal Component -->
+                    <?php 
+                        get_template_part('app/Views/components/modal', null, [
+                            'title' => 'Ready to start your workshop?',
+                            'desc' => 'You are about to book the Hand-building Pottery workshop. Once confirmed, you will receive an email with instructions.',
+                            'confirm' => 'Confirm Booking',
+                            'cancel' => 'Cancel',
+                            'is_preview' => false // true would trap it in absolute container, false uses fixed viewport
+                        ]); 
+                    ?>
                 </div>
             </section>
 

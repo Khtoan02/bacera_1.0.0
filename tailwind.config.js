@@ -36,6 +36,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['"Bricolage Grotesque"', 'sans-serif'],
+        display: ['"Bricolage Grotesque"', 'sans-serif'],
+        serif: ['"Gowun Batang"', 'serif'],
       },
       fontSize: {
         'h1': ['28px', { lineHeight: '29px', letterSpacing: '-0.03em', fontWeight: '400' }],

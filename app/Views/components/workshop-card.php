@@ -24,18 +24,10 @@ $class = isset($args['class']) ? $args['class'] : '';
             className="self-stretch flex-1"
             src="<?php echo esc_url($image); ?>" 
             alt="<?php echo esc_attr($title); ?>" 
-            class="self-stretch flex-1 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            class="self-stretch flex-1 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 z-0"
         >
-
-        <!-- Add to cart Hover slide-up (Matching State 2 vs State 1 in Figma wrapper) -->
-        <div class="w-full h-16 absolute bottom-0 left-0 overflow-hidden z-10 flex items-end">
-            <button class="w-[calc(100%-24px)] p-4 absolute left-[12px] top-[60px] opacity-0 group-hover:top-0 group-hover:opacity-100 bg-accent-500 rounded-lg inline-flex justify-center items-center gap-2 transition-all duration-300">
-                <div class="justify-start text-stone-200 text-base font-medium leading-5">Add to cart</div>
-            </button>
-        </div>
-        
-        <!-- Gradient Overlay underneath the button -->
-        <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-gray-900/30 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <!-- Optional subtle hover dimming (no cart buttons here) -->
+        <div class="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 pointer-events-none transition-colors duration-300 z-10"></div>
     </div>
 
     <!-- Content Block Formatted strictly per Figma snippet -->

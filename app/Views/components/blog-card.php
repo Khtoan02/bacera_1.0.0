@@ -28,12 +28,12 @@ $class = isset($args['class']) ? $args['class'] : '';
     <div class="self-stretch flex flex-col justify-start items-start gap-1">
         
         <!-- Category -->
-        <div class="self-stretch justify-start text-stone-400 text-base font-normal font-['Inter_18pt'] leading-4">
+        <div class="self-stretch justify-start text-stone-400 text-[16px] font-normal font-sans leading-4">
             <?php echo esc_html($category); ?>
         </div>
         
         <!-- Title -->
-        <h3 class="self-stretch justify-start text-stone-800 text-xl font-medium font-['Inter_Variable'] leading-6 group-hover:text-stone-500 transition-colors">
+        <h3 class="self-stretch justify-start text-stone-800 text-[20px] font-medium font-sans leading-6 group-hover:text-stone-500 transition-colors">
             <?php echo esc_html($title); ?>
         </h3>
         

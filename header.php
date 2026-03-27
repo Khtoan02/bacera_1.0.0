@@ -2,6 +2,8 @@
 /**
  * Header
  */
+$is_homepage = is_front_page() || is_page_template('templates/template-home-page.php');
+$homepage_js = $is_homepage ? 'true' : 'false';
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -9,209 +11,437 @@
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="profile" href="https://gmpg.org/xfn/11">
-    
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Gowun+Batang:wght@400;700&family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <?php wp_head(); ?>
 </head>
 <body <?php body_class('bg-stone-50 font-sans antialiased overflow-x-hidden'); ?>>
 <?php wp_body_open(); ?>
 
 <div id="page" class="flex flex-col min-h-screen">
-    
-    <!-- Header Container -->
-    <header class="w-full bg-white relative z-50 border-b border-stone-200">
-        <div class="max-w-[1920px] mx-auto px-4 lg:px-8 py-4 flex justify-between items-center h-[76px]">
-            
-            <!-- Logo area -->
-            <a href="<?php echo esc_url(home_url('/')); ?>" class="w-24 h-8 relative flex items-center justify-center hover:opacity-80 transition-opacity">
-                <!-- Fallback geometric logo matching the Figma export -->
-                <div class="w-2 h-6 absolute left-[45px] top-0 bg-stone-600"></div>
-                <div class="w-20 h-5 absolute left-0 top-[4px] bg-stone-600"></div>
-                <?php if (has_custom_logo()) {
-                    $custom_logo_id = get_theme_mod('custom_logo');
-                    $logo = wp_get_attachment_image_src($custom_logo_id , 'full');
-                    echo '<img src="'.esc_url($logo[0]).'" class="absolute inset-0 w-full h-full object-contain bg-white z-10" alt="'.get_bloginfo('name').'">';
-                } ?>
-            </a>
 
-            <!-- Navigation Links -->
-            <nav class="hidden lg:flex items-stretch justify-center gap-8 h-[76px]">
-                
-                <!-- Shop Mega Menu -->
-                <div class="group flex items-center h-full cursor-pointer relative">
-                    <div class="flex items-center gap-1 group-hover:text-accent-500 text-stone-600 transition-colors">
-                        <span class="text-[17px] font-medium font-sans">Shop</span>
-                        <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    
-                    <!-- Dropdown Panel -->
-                    <div class="absolute top-[76px] left-[50%] -translate-x-[50%] w-[1000px] bg-white rounded-lg shadow-xl shadow-stone-900/5 border border-stone-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 cursor-default p-6 z-[60]">
-                        <div class="flex">
-                            <!-- Left: Title & CTA -->
-                            <div class="w-64 shrink-0 flex flex-col justify-start items-start pr-6">
-                                <h3 class="text-stone-800 text-[20px] font-medium leading-[28px] mb-2 font-['Bricolage_Grotesque']">Mua hàng theo công năng</h3>
-                                <p class="text-stone-600 text-[15px] font-normal leading-relaxed mb-6">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng, tiện lợi và dễ dàng hơn.</p>
-                                <a href="#" class="mt-auto px-6 py-3.5 bg-accent-500 hover:bg-accent-600 text-white text-[15px] font-medium rounded-lg transition-colors whitespace-nowrap text-center">Xem tất cả</a>
-                            </div>
-                            
-                            <!-- Divider -->
-                            <div class="w-px bg-stone-200 self-stretch mx-4"></div>
-                            
-                            <!-- Right: Category Grid -->
-                            <!-- Note: Added custom classes to simulate the Figma boxes -->
-                            <div class="flex-1 pl-4 grid grid-cols-4 gap-4">
-                                <?php 
-                                $categories = [
-                                    ['name' => 'Kitchen', 'icon' => 'M4 6h16M4 10h16M4 14h16M4 18h16'],
-                                    ['name' => 'Plates', 'icon' => 'M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2Z'],
-                                    ['name' => 'Vases', 'icon' => 'M3 3h18l-3 18H6L3 3z'],
-                                    ['name' => 'Storage', 'icon' => 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'],
-                                    ['name' => 'Teapots', 'icon' => 'M13 10V3L4 14h7v8L20 11h-7z'],
-                                    ['name' => 'Drinkware', 'icon' => 'M12 2l-3 5h6l-3-5zm0 5v15M6 7l12 0 M8 22h8'],
-                                    ['name' => 'Bowls', 'icon' => 'M2 12A10 10 0 0 0 22 12Z'],
-                                    ['name' => 'Serveware', 'icon' => 'M3 3h18v18H3z']
-                                ];
-                                foreach($categories as $index => $cat): 
-                                    if ($index < 7): // Show 7 blocks per design
-                                ?>
-                                <a href="#" class="group/cat flex flex-col items-center justify-center p-4 h-[120px] rounded-lg border border-stone-200 hover:border-accent-400 hover:shadow-md transition-all">
-                                    <div class="w-12 h-12 mb-3 bg-stone-100 rounded-lg flex items-center justify-center text-stone-700 group-hover/cat:text-accent-500 transition-colors">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $cat['icon']; ?>"/></svg>
-                                    </div>
-                                    <span class="text-stone-600 text-[14px] font-medium"><?php echo $cat['name']; ?></span>
-                                </a>
-                                <?php endif; endforeach; ?>
-                            </div>
+
+<header
+    id="site-header"
+    x-data="{
+        scrolled: false,
+        activeMenu: null,
+        accountOpen: false,
+        isHomepage: <?php echo $homepage_js; ?>,
+        init() {
+            const heroEl = document.getElementById('hero');
+            const threshold = heroEl ? heroEl.offsetHeight * 0.85 : window.innerHeight * 0.85;
+            const onScroll = () => { this.scrolled = window.scrollY > threshold; };
+            onScroll();
+            window.addEventListener('scroll', onScroll, { passive: true });
+        },
+        get isTransparent() {
+            return this.isHomepage && !this.scrolled && this.activeMenu === null && !this.accountOpen;
+        }
+    }"
+    @keydown.escape.window="activeMenu = null; accountOpen = false"
+    :class="isTransparent ? 'bg-transparent' : 'bg-white shadow-sm'"
+    class="fixed top-0 left-0 w-full z-50 transition-all duration-500"
+>
+    <div class="hidden lg:grid h-[76px] w-full" style="grid-template-columns: 1fr minmax(0, 1232px) 1fr;">
+
+        
+        <a href="<?php echo esc_url(home_url('/')); ?>"
+           class="flex items-center justify-center pr-6 xl:pr-8 transition-colors">
+            <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>"
+                 class="h-9 w-auto object-contain transition-all duration-300"
+                 :class="isTransparent ? 'brightness-0 invert' : 'brightness-100'"
+                 alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+        </a>
+
+        <!-- ② CENTER — the 1232px container itself (middle grid column) -->
+        <div class="flex items-stretch justify-between min-w-0">
+
+                <!-- NAV MENU — left side of container -->
+                <nav class="flex items-stretch">
+
+                    <?php
+                    // Menu definitions: [key, label, type(mega|dropdown|link)]
+                    $nav_items = [
+                        ['key'=>'shop',     'label'=>'Shop',     'type'=>'mega'],
+                        ['key'=>'workshop', 'label'=>'Workshop', 'type'=>'mega'],
+                        ['key'=>'about',    'label'=>'About us', 'type'=>'dropdown'],
+                        ['key'=>'blog',     'label'=>'Blog',     'type'=>'link', 'url'=>'#'],
+                        ['key'=>'contact',  'label'=>'Contact',  'type'=>'link', 'url'=>'#'],
+                    ];
+                    foreach ($nav_items as $item):
+                        $has_sub = in_array($item['type'], ['mega','dropdown']);
+                    ?>
+                    <div class="flex items-center h-full <?php echo $has_sub ? 'cursor-pointer' : ''; ?>"
+                         <?php if ($has_sub): ?>
+                         @mouseenter="activeMenu = '<?php echo $item['key']; ?>'"
+                         @mouseleave="activeMenu = null"
+                         <?php endif; ?>>
+
+                        <?php if ($item['type'] === 'link'): ?>
+                        <a href="<?php echo esc_url($item['url']); ?>"
+                           class="flex items-center h-full px-4 text-[15px] font-medium font-sans transition-colors"
+                           :class="isTransparent ? 'text-stone-200 hover:text-white' : 'text-stone-600 hover:text-accent-500'">
+                            <?php echo esc_html($item['label']); ?>
+                        </a>
+                        <?php else: ?>
+                        <div class="flex items-center gap-1 px-4 h-full text-[15px] font-medium font-sans transition-colors select-none"
+                             :class="[
+                                 isTransparent ? 'text-stone-200 hover:text-white' : 'text-stone-600 hover:text-accent-500',
+                                 activeMenu === '<?php echo $item['key']; ?>' ? (isTransparent ? '!text-white' : '!text-accent-500') : ''
+                             ]">
+                            <span><?php echo esc_html($item['label']); ?></span>
+                            <svg class="w-3.5 h-3.5 transition-transform duration-200"
+                                 :class="activeMenu === '<?php echo $item['key']; ?>' ? 'rotate-180' : ''"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+
+                </nav><!-- /nav -->
+
+                <!-- LANGUAGE SWITCHER — right side of container -->
+                <div class="flex items-center h-full group relative cursor-pointer"
+                     @mouseenter="activeMenu = 'lang'"
+                     @mouseleave="activeMenu = null">
+                    <div class="flex items-center gap-1.5 px-4 h-full text-[14px] font-medium font-sans transition-colors select-none"
+                         :class="isTransparent ? 'text-stone-200 hover:text-white' : 'text-stone-600 hover:text-accent-500'">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m-6.716 2.582A11.953 11.953 0 0112 10.5c2.998 0 5.74-1.1 7.843-2.918"/>
+                        </svg>
+                        <span id="mst-current-lang">English</span>
+                        <svg class="w-3 h-3 transition-transform duration-200"
+                             :class="activeMenu === 'lang' ? 'rotate-180' : ''"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
                     </div>
                 </div>
 
-                <!-- Workshop Mega Menu -->
-                <div class="group flex items-center h-full cursor-pointer relative">
-                    <div class="flex items-center gap-1 group-hover:text-accent-500 text-stone-600 transition-colors">
-                        <span class="text-[17px] font-medium font-sans">Workshop</span>
-                        <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <!-- /Language -->
+        </div><!-- /② center container -->
+
+        <!-- ③ ACTIONS — right column, aligned to LEFT (hugs container) -->
+        <div class="flex items-center gap-5 pl-6 xl:pl-8 pr-6 xl:pr-10">
+
+            <!-- Search -->
+            <button class="w-9 h-9 flex items-center justify-center rounded-lg transition-all hover:scale-110 focus:outline-none"
+                    :class="isTransparent ? 'text-stone-200 hover:text-white' : 'text-stone-600 hover:text-accent-500'">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+
+            <!-- Cart -->
+            <div class="relative">
+                <button class="w-9 h-9 flex items-center justify-center rounded-lg transition-all hover:scale-110 focus:outline-none"
+                        :class="isTransparent ? 'text-stone-200 hover:text-white' : 'text-stone-600 hover:text-accent-500'">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                </button>
+                <div class="absolute -top-1 -right-1 bg-accent-500 min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center text-white text-[10px] font-bold shadow-sm">1</div>
+            </div>
+
+            <!-- Account -->
+            <div class="relative" @click.away="accountOpen = false">
+                <button @click="accountOpen = !accountOpen"
+                        class="flex items-center gap-2 hover:opacity-80 transition-all focus:outline-none">
+                    <div class="w-8 h-8 rounded-full overflow-hidden border-2 transition-colors"
+                         :class="isTransparent ? 'border-white/30' : 'border-stone-200'">
+                        <img src="https://ui-avatars.com/api/?name=Tran+Mai&background=3d2f26&color=E67258&bold=true"
+                             class="w-full h-full object-cover" alt="Avatar">
                     </div>
-
-                    <!-- Dropdown Panel -->
-                    <div class="absolute top-[76px] left-[50%] -translate-x-[50%] w-[1280px] h-auto min-h-[400px] bg-white rounded-lg shadow-xl shadow-stone-900/5 border border-stone-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 cursor-default p-8 z-[60]">
-                        <div class="flex">
-                            <!-- Left: Title & CTA -->
-                            <div class="w-64 shrink-0 flex flex-col justify-start items-start pr-8">
-                                <h3 class="text-stone-800 text-[20px] font-medium leading-[28px] mb-2 font-['Bricolage_Grotesque']">Khám phá workshop</h3>
-                                <p class="text-stone-600 text-[15px] font-normal leading-relaxed">Khám phá workshop làm gốm và trải nghiệm nghệ thuật thủ công đầy cảm hứng cùng chúng tôi.</p>
-                                <a href="#" class="mt-8 px-6 py-3.5 bg-accent-500 hover:bg-accent-600 text-white text-[15px] font-medium rounded-lg transition-colors whitespace-nowrap text-center">Xem tất cả lịch</a>
-                            </div>
-                            
-                            <!-- Divider -->
-                            <div class="w-px bg-stone-200 self-stretch mx-2"></div>
-                            
-                            <!-- Right: Horizontal cards grid (2x2) -->
-                            <div class="flex-1 pl-8 grid grid-cols-2 gap-x-8 gap-y-6">
-                                <?php 
-                                $workshops = [
-                                    ['title' => 'Pottery Wheel Throwing', 'desc' => 'A peaceful, hands-on journey for beginners and curious minds.', 'price' => 'From $38.00/Person', 'detail' => 'Day:13/16 - Noon: 1/16'],
-                                    ['title' => 'Hand-building Pottery', 'desc' => 'Shape, carve, and create your own ceramic piece by hand.', 'price' => 'From $38.00/Person', 'detail' => 'Day:13/16 - Noon: 1/16'],
-                                    ['title' => 'Hanoi School Class', 'desc' => 'Shape, carve, and create your own ceramic piece by hand.', 'price' => 'Contact us', 'detail' => 'Book Your School Visit'],
-                                    ['title' => 'Team-building Pottery', 'desc' => 'Shape, carve, and create your own ceramic piece by hand.', 'price' => 'Contact us', 'detail' => 'Start Organize Your Event']
-                                ];
-                                foreach($workshops as $ws): 
-                                ?>
-                                <a href="#" class="group/ws flex items-center gap-5 p-2 rounded-xl hover:bg-stone-50 transition-colors">
-                                    <div class="w-[140px] h-[140px] overflow-hidden rounded-lg shrink-0 relative bg-neutral-200">
-                                        <img src="https://placehold.co/140x140?text=Workshop" class="w-full h-full object-cover group-hover/ws:scale-105 transition-transform duration-700" alt="">
-                                    </div>
-                                    <div class="flex flex-col flex-1 truncate">
-                                        <h4 class="text-stone-800 text-[17px] font-medium mb-1 truncate whitespace-nowrap group-hover/ws:text-accent-500 transition-colors font-['Bricolage_Grotesque']"><?php echo $ws['title']; ?></h4>
-                                        <p class="text-stone-600 text-[14px] leading-snug opacity-80 mb-3 text-wrap"><?php echo $ws['desc']; ?></p>
-                                        <div class="mt-auto">
-                                            <p class="text-stone-800 text-[15px] font-medium truncate"><?php echo $ws['price']; ?></p>
-                                            <p class="text-stone-500 text-[12px] mt-1 flex items-center gap-1">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                <?php echo $ws['detail']; ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </a>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- About Us Simple Dropdown -->
-                <div class="group flex items-center h-full cursor-pointer relative">
-                    <div class="flex items-center gap-1 group-hover:text-accent-500 text-stone-600 transition-colors">
-                        <span class="text-[17px] font-medium font-sans">About us</span>
-                        <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                    </div>
-                    <!-- Dropdown List -->
-                    <div class="absolute top-[76px] left-0 w-56 bg-white rounded-lg shadow-lg border border-stone-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 cursor-default py-2 z-[60]">
-                        <a href="#" class="block px-5 py-2.5 text-stone-600 text-[15px] hover:bg-stone-50 hover:text-accent-500 transition-colors border-b border-stone-100 last:border-none">About us</a>
-                        <a href="#" class="block px-5 py-2.5 text-stone-600 text-[15px] hover:bg-stone-50 hover:text-accent-500 transition-colors border-b border-stone-100 last:border-none">Our team</a>
-                        <a href="#" class="block px-5 py-2.5 text-stone-600 text-[15px] hover:bg-stone-50 hover:text-accent-500 transition-colors border-b border-stone-100 last:border-none">Our video</a>
-                        <a href="#" class="block px-5 py-2.5 text-stone-600 text-[15px] hover:bg-stone-50 hover:text-accent-500 transition-colors border-b border-stone-100 last:border-none">Our process</a>
-                        <a href="#" class="block px-5 py-2.5 text-stone-600 text-[15px] hover:bg-stone-50 hover:text-accent-500 transition-colors border-b border-stone-100 last:border-none">Sustainability</a>
-                    </div>
-                </div>
-
-                <!-- Standard Links -->
-                <a href="#" class="flex items-center h-full text-stone-600 hover:text-accent-500 text-[17px] font-medium transition-colors">Blog</a>
-                <a href="#" class="flex items-center h-full text-stone-600 hover:text-accent-500 text-[17px] font-medium transition-colors">Contact</a>
-
-            </nav>
-
-            <!-- Actions Right Side -->
-            <div class="flex items-center gap-5 shrink-0">
-                
-                <!-- Language Selector -->
-                <div class="hidden lg:flex items-center gap-1 cursor-pointer group">
-                    <span class="text-stone-600 text-[15px] group-hover:text-accent-500 transition-colors">English</span>
-                    <svg class="w-4 h-4 text-stone-600 group-hover:text-accent-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-
-                <!-- Divider -->
-                <div class="w-px h-6 bg-stone-300 opacity-60 hidden lg:block"></div>
-
-                <!-- Search Icon -->
-                <button class="text-stone-700 hover:text-accent-500 transition-colors focus:outline-none">
-                    <svg class="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <span class="hidden xl:block text-[13px] font-medium font-sans transition-colors leading-none"
+                          :class="isTransparent ? 'text-stone-200' : 'text-stone-700'">Trần Mai</span>
+                    <svg class="w-3 h-3 transition-transform duration-200 hidden xl:block"
+                         :class="[accountOpen ? 'rotate-180' : '', isTransparent ? 'text-stone-300' : 'text-stone-400']"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
                 </button>
 
-                <!-- Shopping Cart -->
-                <div class="relative cursor-pointer group hover:-translate-y-0.5 transition-transform">
-                    <button class="text-stone-700 hover:text-accent-500 transition-colors focus:outline-none">
-                        <svg class="w-[26px] h-[26px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    </button>
-                    <!-- Enhanced Badge based on Figma -->
-                    <div class="absolute -top-1 -right-2 bg-accent-500 flex flex-col items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold shadow-sm shadow-accent-500/50">
-                        01
+                <!-- Account dropdown panel -->
+                <div x-show="accountOpen"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 translate-y-1"
+                     class="absolute right-0 top-full mt-3 w-60 bg-white rounded-2xl shadow-xl border border-stone-200 py-2 z-[80]"
+                     style="display:none">
+                    <!-- User info -->
+                    <div class="px-4 py-3 border-b border-stone-100 mb-1">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full overflow-hidden bg-primary-100 shrink-0">
+                                <img src="https://ui-avatars.com/api/?name=Tran+Mai&background=3d2f26&color=E67258&bold=true" class="w-full h-full" alt="">
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-stone-800 text-[14px] font-semibold truncate">Trần Mai</p>
+                                <p class="text-stone-400 text-[12px] truncate">tran.mai@email.com</p>
+                            </div>
+                        </div>
                     </div>
+                    <?php
+                    $acct_menu = [
+                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'Tài khoản của tôi',      'url'=>'#'],
+                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Điểm tích lũy',             'url'=>'#'],
+                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'Đơn hàng của tôi',   'url'=>'#'],
+                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',   'label'=>'Workshop đã đăng ký',     'url'=>'#'],
+                    ];
+                    foreach ($acct_menu as $am): ?>
+                    <a href="<?php echo esc_url($am['url']); ?>"
+                       class="flex items-center gap-3 px-4 py-2.5 text-stone-600 text-[14px] font-medium font-sans hover:bg-stone-50 hover:text-accent-500 transition-colors group/ai">
+                        <div class="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center shrink-0 group-hover/ai:bg-accent-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $am['icon']; ?>"/></svg>
+                        </div>
+                        <?php echo esc_html($am['label']); ?>
+                    </a>
+                    <?php endforeach; ?>
+                    <div class="h-px bg-stone-100 mx-4 my-1.5"></div>
+                    <a href="<?php echo esc_url(wp_logout_url(home_url())); ?>"
+                       class="flex items-center gap-3 px-4 py-2.5 text-stone-500 text-[14px] font-medium font-sans hover:bg-red-50 hover:text-red-500 transition-colors group/lo">
+                        <div class="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center shrink-0 group-hover/lo:bg-red-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        </div>
+                        Đăng xuất
+                    </a>
                 </div>
+            </div><!-- /account -->
 
-                <!-- User Profile -->
-                <div class="hidden lg:flex items-center gap-2 cursor-pointer group hover:bg-stone-50 px-2 py-1 rounded-full transition-colors">
-                    <div class="w-[34px] h-[34px] bg-stone-800 rounded-full flex flex-col justify-center items-center text-accent-500 text-[16px] font-bold shadow-inner">
-                        <img src="https://ui-avatars.com/api/?name=Tran+Mai&background=333&color=E67258&bold=true" class="w-full h-full rounded-full" alt="Avatar">
+        </div><!-- /actions -->
+
+    </div><!-- /desktop grid 3-col -->
+
+    <!-- ══════════════════════════════════════════
+         MEGA MENU PANELS
+         Full-width panels, content aligned to
+         max-w-[1232px] container (same as page)
+    ══════════════════════════════════════════ -->
+
+    <!-- SHOP PANEL -->
+    <div x-show="activeMenu === 'shop'"
+         @mouseenter="activeMenu = 'shop'"
+         @mouseleave="activeMenu = null"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-1"
+         class="absolute top-full left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60]"
+         style="display:none">
+        <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
+            <!-- Promo left -->
+            <div class="w-52 shrink-0 flex flex-col justify-between py-1">
+                <div>
+                    <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Mua hàng theo công năng</h3>
+                    <p class="text-stone-500 text-[13px] font-normal font-sans leading-relaxed">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng hơn.</p>
+                </div>
+                <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả</a>
+            </div>
+            <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+            <!-- Category grid -->
+            <div class="flex-1 grid grid-cols-4 gap-3">
+                <?php
+                $shop_cats = [
+                    ['name'=>'Kitchen',   'path'=>'M4 6h16M4 10h16M4 14h16M4 18h16'],
+                    ['name'=>'Plates',    'path'=>'M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10A5 5 0 0112 7z'],
+                    ['name'=>'Vases',     'path'=>'M3 3h18l-3 18H6L3 3z'],
+                    ['name'=>'Storage',   'path'=>'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
+                    ['name'=>'Teapots',   'path'=>'M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z'],
+                    ['name'=>'Drinkware', 'path'=>'M9 17V7m0 0a3 3 0 106 0v10'],
+                    ['name'=>'Bowls',     'path'=>'M3 10c0 5.523 4.477 10 10 10s10-4.477 10-10H3z'],
+                    ['name'=>'Serveware', 'path'=>'M4 7h16M4 12h8m-8 5h16'],
+                ];
+                foreach ($shop_cats as $sc): ?>
+                <a href="#" class="group/sc flex flex-col items-center justify-center py-4 px-3 h-[96px] rounded-xl border border-stone-200 hover:border-accent-400 hover:bg-neutral-100 transition-all">
+                    <div class="w-9 h-9 mb-2 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 group-hover/sc:bg-accent-500 group-hover/sc:text-white transition-all">
+                        <svg class="w-4.5 h-4.5 w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $sc['path']; ?>"/></svg>
                     </div>
-                    <span class="text-stone-700 text-[15px] font-medium leading-none mb-[2px]">Trần Mai</span>
-                    <svg class="w-4 h-4 text-stone-500 group-hover:text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-                
-                <!-- Mobile Menu Button -->
-                <div class="flex items-center lg:hidden">
-                    <button type="button" class="text-stone-700 hover:text-accent-500 p-2 focus:outline-none">
-                        <svg class="block h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                    </button>
-                </div>
-
+                    <span class="text-stone-600 text-[12px] font-medium font-sans group-hover/sc:text-accent-500 transition-colors text-center leading-tight"><?php echo $sc['name']; ?></span>
+                </a>
+                <?php endforeach; ?>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content Area -->
-    <main id="primary" class="site-main flex-grow bg-stone-50">
+    <!-- WORKSHOP PANEL -->
+    <div x-show="activeMenu === 'workshop'"
+         @mouseenter="activeMenu = 'workshop'"
+         @mouseleave="activeMenu = null"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-1"
+         class="absolute top-full left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60]"
+         style="display:none">
+        <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
+            <!-- Promo left -->
+            <div class="w-52 shrink-0 flex flex-col justify-between py-1">
+                <div>
+                    <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Khám phá workshop</h3>
+                    <p class="text-stone-500 text-[13px] font-normal font-sans leading-relaxed">Trải nghiệm nghệ thuật làm gốm thủ công đầy cảm hứng cùng chúng tôi.</p>
+                </div>
+                <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả lịch</a>
+            </div>
+            <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+            <!-- Workshop cards: 2x2 grid -->
+            <div class="flex-1 grid grid-cols-2 gap-4">
+                <?php
+                $mega_workshops = [
+                    ['title'=>'Pottery Wheel Throwing','desc'=>'A peaceful, hands-on journey for beginners and curious minds.','price'=>'From 950,000 VND','detail'=>'Day:13/16 – Noon: 1/16'],
+                    ['title'=>'Hand-building Pottery', 'desc'=>'Shape, carve, and create your own ceramic piece by hand.',     'price'=>'From 950,000 VND','detail'=>'Day:13/16 – Noon: 1/16'],
+                    ['title'=>'Hanoi School Class',    'desc'=>'Special courses for students wanting deeper techniques.',       'price'=>'Contact us',       'detail'=>'Book Your School Visit'],
+                    ['title'=>'Team-building Pottery', 'desc'=>'A unique bonding experience for your team to create together.','price'=>'Contact us',       'detail'=>'Organise a Group Event'],
+                ];
+                foreach ($mega_workshops as $mw): ?>
+                <a href="#" class="group/mw flex items-center gap-4 p-3 rounded-xl hover:bg-stone-50 transition-colors">
+                    <div class="w-[88px] h-[88px] overflow-hidden rounded-xl shrink-0 bg-primary-200">
+                        <img src="https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=120"
+                             class="w-full h-full object-cover group-hover/mw:scale-105 transition-transform duration-500" alt="">
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <h4 class="text-stone-800 text-[14px] font-semibold font-sans mb-1 group-hover/mw:text-accent-500 transition-colors leading-snug"><?php echo $mw['title']; ?></h4>
+                        <p class="text-stone-500 text-[12px] font-sans leading-snug mb-2 line-clamp-2 opacity-80"><?php echo $mw['desc']; ?></p>
+                        <p class="text-stone-800 text-[13px] font-medium font-sans"><?php echo $mw['price']; ?></p>
+                        <p class="text-stone-400 text-[11px] font-sans mt-0.5"><?php echo $mw['detail']; ?></p>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABOUT PANEL -->
+    <div x-show="activeMenu === 'about'"
+         @mouseenter="activeMenu = 'about'"
+         @mouseleave="activeMenu = null"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-1"
+         class="absolute top-full left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60]"
+         style="display:none">
+        <div class="max-w-[1232px] mx-auto px-6 py-6 flex gap-8">
+            <div class="w-52 shrink-0 flex flex-col justify-between py-1">
+                <div>
+                    <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Về chúng tôi</h3>
+                    <p class="text-stone-500 text-[13px] font-normal font-sans leading-relaxed">Xưởng gốm Bacera — nơi nghệ thuật thủ công gặp gỡ tâm hồn.</p>
+                </div>
+                <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-accent-500 hover:bg-accent-600 text-white text-[13px] font-medium rounded-xl transition-colors">Đọc thêm</a>
+            </div>
+            <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+            <nav class="flex-1 grid grid-cols-3 gap-x-8 gap-y-1 content-start py-1">
+                <?php
+                $about_links = [
+                    ['label'=>'About us',      'desc'=>'Our story & values',   'url'=>'#'],
+                    ['label'=>'Our team',      'desc'=>'Meet the craftspeople', 'url'=>'#'],
+                    ['label'=>'Our video',     'desc'=>'Behind the wheel',      'url'=>'#'],
+                    ['label'=>'Our process',   'desc'=>'From clay to ceramic',  'url'=>'#'],
+                    ['label'=>'Sustainability','desc'=>'Earth-conscious craft',  'url'=>'#'],
+                ];
+                foreach ($about_links as $al): ?>
+                <a href="<?php echo esc_url($al['url']); ?>"
+                   class="flex flex-col gap-0.5 px-3 py-3 rounded-xl hover:bg-stone-50 hover:text-accent-500 transition-colors group/al">
+                    <span class="text-stone-800 text-[14px] font-medium font-sans group-hover/al:text-accent-500 transition-colors"><?php echo esc_html($al['label']); ?></span>
+                    <span class="text-stone-400 text-[12px] font-sans"><?php echo esc_html($al['desc']); ?></span>
+                </a>
+                <?php endforeach; ?>
+            </nav>
+        </div>
+    </div>
+
+    <!-- LANGUAGE PANEL -->
+    <div x-show="activeMenu === 'lang'"
+         @mouseenter="activeMenu = 'lang'"
+         @mouseleave="activeMenu = null"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-1"
+         class="absolute top-full right-0 w-48 bg-white rounded-b-2xl border border-stone-200 border-t-0 shadow-xl z-[60] py-1.5"
+         style="display:none">
+        <button onclick="mstSwitchLang('en','English')"  class="w-full flex items-center gap-2.5 px-4 py-2.5 text-accent-500  text-[13px] font-medium font-sans hover:bg-stone-50 transition-colors">🇺🇸 <span>English</span></button>
+        <div class="h-px bg-stone-100 mx-3"></div>
+        <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-stone-600 text-[13px] font-sans hover:bg-stone-50 hover:text-accent-500 transition-colors">🇻🇳 <span>Tiếng Việt</span></button>
+        <div class="h-px bg-stone-100 mx-3"></div>
+        <button onclick="mstSwitchLang('fr','Français')" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-stone-600 text-[13px] font-sans hover:bg-stone-50 hover:text-accent-500 transition-colors">🇫🇷 <span>Français</span></button>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         MOBILE HEADER
+    ══════════════════════════════════════════ -->
+    <div class="flex lg:hidden items-center justify-between h-[64px] px-4"
+         x-data="{ mobileOpen: false }">
+        <a href="<?php echo esc_url(home_url('/')); ?>">
+            <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>"
+                 class="h-8 w-auto object-contain transition-all duration-300"
+                 :class="isTransparent ? 'brightness-0 invert' : 'brightness-100'"
+                 alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+        </a>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <button class="w-9 h-9 flex items-center justify-center" :class="isTransparent ? 'text-stone-200' : 'text-stone-700'">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                </button>
+                <div class="absolute -top-1 -right-1 bg-accent-500 w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold">1</div>
+            </div>
+            <button @click="mobileOpen = !mobileOpen" class="w-9 h-9 flex items-center justify-center focus:outline-none"
+                    :class="isTransparent ? 'text-stone-200' : 'text-stone-700'">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path x-show="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                    <path x-show="mobileOpen"  stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <!-- Mobile menu -->
+        <div x-show="mobileOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             class="absolute top-[64px] left-0 right-0 bg-white border-b border-stone-200 shadow-xl z-[60] py-3"
+             style="display:none">
+            <nav class="flex flex-col">
+                <?php foreach (['Shop','Workshop','About us','Blog','Contact'] as $ml): ?>
+                <a href="#" class="px-5 py-3 text-stone-700 text-[15px] font-medium border-b border-stone-100 last:border-0 hover:text-accent-500 transition-colors"><?php echo $ml; ?></a>
+                <?php endforeach; ?>
+            </nav>
+            <div class="flex items-center gap-4 px-5 mt-3 pt-3 border-t border-stone-100">
+                <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="text-stone-600 text-sm">🇻🇳 Tiếng Việt</button>
+                <span class="text-stone-300">·</span>
+                <button onclick="mstSwitchLang('en','English')" class="text-accent-500 text-sm font-semibold">🇺🇸 English</button>
+            </div>
+        </div>
+    </div>
+
+</header>
+
+<!-- Language switch JS -->
+<script>
+function mstSwitchLang(lang, label) {
+    document.getElementById('mst-current-lang').textContent = label;
+    if (typeof window.mstTranslatePage === 'function') window.mstTranslatePage(lang);
+}
+</script>
+
+<!-- Spacer for non-homepage (homepage overlaps with hero) -->
+<?php if (!$is_homepage): ?>
+<div class="hidden lg:block h-[76px]"></div>
+<div class="block lg:hidden h-[64px]"></div>
+<?php endif; ?>
+
+<!-- Main Content Area -->
+<?php

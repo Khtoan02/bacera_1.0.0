@@ -1,14 +1,26 @@
 <?php
-$tabs = isset($args['tabs']) ? $args['tabs'] : ['Tổng quan Workshop', 'Kế hoạch chi tiết', 'Đánh giá (12)', 'Quy định'];
+$tabs = isset($args['tabs']) ? $args['tabs'] : ['Tab-item 1', 'Tab-item 2', 'Tab-item 3', 'Tab-item 4', 'Tab-item 5'];
 $active = isset($args['active']) ? $args['active'] : 0;
 ?>
-<div class="border-b border-gray-200">
-    <nav class="-mb-px flex space-x-10 overflow-x-auto hide-scrollbar" aria-label="Tabs">
+<div class="w-full flex flex-col mt-4" x-data="{ activeTab: <?php echo esc_attr($active); ?> }">
+    <!-- Tab Links Container -->
+    <nav class="flex gap-4 overflow-x-auto hide-scrollbar z-10" aria-label="Tabs">
         <?php foreach($tabs as $index => $tab): ?>
-            <?php $isActive = $index === $active; ?>
-            <a href="#" class="<?php echo $isActive ? 'border-primary-600 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'; ?> whitespace-nowrap py-4 px-1 border-b-[3px] font-bold text-body-reg transition-all uppercase tracking-wide">
-                <?php echo esc_html($tab); ?>
+            <a href="#" @click.prevent="activeTab = <?php echo $index; ?>" class="cursor-pointer inline-flex flex-col justify-center items-center gap-2 group transition-opacity font-sans pb-[2px]">
+                <!-- Text -->
+                <span class="text-[16px] leading-[1.2] transition-all"
+                      :class="activeTab === <?php echo $index; ?> ? 'text-stone-700 font-medium' : 'text-stone-700 opacity-50 font-normal group-hover:opacity-80'">
+                    <?php echo esc_html($tab); ?>
+                </span>
+                
+                <!-- Local Underline Effect -->
+                <div class="w-full h-[2px] transition-colors"
+                     :class="activeTab === <?php echo $index; ?> ? 'bg-stone-700' : 'bg-transparent group-hover:bg-stone-400'"></div>
             </a>
         <?php endforeach; ?>
     </nav>
+    
+    <!-- Global Divider line matching the 2px thickness (placed directly under the local underlines) -->
+    <!-- Negative margin pulls it up to visually overlap the transparent/colored underlines -->
+    <div class="w-full h-[2px] bg-stone-300 -mt-[4px] z-0"></div>
 </div>
