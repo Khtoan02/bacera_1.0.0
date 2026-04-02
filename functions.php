@@ -12,6 +12,26 @@ define( 'BACERA_THEME_DIR', trailingslashit( get_template_directory() ) );
 define( 'BACERA_THEME_URI', trailingslashit( get_template_directory_uri() ) );
 define( 'BACERA_THEME_VERSION', '1.0.0' );
 
+// Customer logout handler — runs at priority 1, before anything else
+add_action( 'init', function() {
+    if ( empty( $_GET['bacera_logout'] ) ) return;
+    // Clear the HttpOnly cookie server-side
+    $params = [
+        'expires'  => time() - 3600,
+        'path'     => COOKIEPATH ?: '/',
+        'domain'   => COOKIE_DOMAIN ?: '',
+        'secure'   => is_ssl(),
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ];
+    setcookie( 'bacera_customer_auth', '', $params );
+    // Also clear with plain path in case domain differs
+    setcookie( 'bacera_customer_auth', '', time() - 3600, '/', '' );
+    unset( $_COOKIE['bacera_customer_auth'] );
+    wp_safe_redirect( home_url( '/' ) );
+    exit;
+}, 1 );
+
 // Simple Autoloader for MVC
 spl_autoload_register(function ($class) {
     // Project-specific namespace prefix

@@ -32,7 +32,6 @@ $brand_colors = [
 <main class="min-h-screen bg-gray-50/50 py-20 font-sans selection:bg-primary-500/10 selection:text-primary-800">
     <div class="max-w-[85rem] mx-auto px-4 md:px-6 lg:px-8">
         
-        <!-- Header -->
         <header class="mb-20 text-center relative z-10 rounded-[3rem] bg-white p-12 md:p-20 shadow-sm border border-gray-100 overflow-hidden">
             <div class="absolute inset-0 -z-10 flex items-center justify-center pointer-events-none opacity-30">
                 <div class="w-[40rem] h-[40rem] bg-gradient-to-tr from-primary-200 via-transparent to-accent-100 rounded-full blur-[100px]"></div>
@@ -48,15 +47,11 @@ $brand_colors = [
 
         <div class="space-y-16">
 
-            <!-- ============================================== -->
-            <!-- 1. FOUNDATIONS                                 -->
-            <!-- ============================================== -->
             <div class="flex items-center gap-6 py-4 mt-8">
                 <h2 class="text-4xl font-black text-gray-900 tracking-tight shrink-0">1. Foundations</h2>
                 <div class="h-1 flex-1 bg-gray-200 rounded-full"></div>
             </div>
 
-            <!-- Typography Section -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div class="mb-10">
                     <h3 class="text-h2 font-bold text-gray-900">Typography</h3>
@@ -101,7 +96,6 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- Colors Section -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100 relative">
                 <div class="mb-10">
                     <h3 class="text-h2 font-bold text-gray-900">Colors</h3>
@@ -132,21 +126,16 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- ============================================== -->
-            <!-- 2. MOLECULES                                   -->
-            <!-- ============================================== -->
             <div class="flex items-center gap-6 py-4 mt-24">
                 <h2 class="text-4xl font-black text-gray-900 tracking-tight shrink-0">2. Molecules</h2>
                 <div class="h-1 flex-1 bg-gray-200 rounded-full"></div>
             </div>
 
-            <!-- Buttons & Badges -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-                <!-- Buttons -->
+                
                 <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100 flex flex-col h-full">
                     <h3 class="text-h2 font-bold text-gray-900 mb-8">Buttons</h3>
                     
-                    <!-- Light Background Buttons -->
                     <div class="flex flex-col gap-4 mb-6">
                         <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100 pb-2">Light Theme</h4>
                         <div class="flex flex-wrap gap-4 items-center p-6 bg-stone-50 rounded-2xl border border-gray-100/50">
@@ -159,7 +148,6 @@ $brand_colors = [
                         </div>
                     </div>
 
-                    <!-- Dark Background Buttons -->
                     <div class="flex flex-col gap-4">
                         <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-100 pb-2">Dark Theme</h4>
                         <div class="flex flex-wrap gap-4 items-center p-6 bg-stone-800 rounded-2xl shadow-inner">
@@ -172,7 +160,6 @@ $brand_colors = [
                     </div>
                 </section>
 
-                <!-- Badges & Alerts -->
                 <div class="flex flex-col gap-8 h-full">
                     <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100 flex-1">
                         <h3 class="text-h2 font-bold text-gray-900 mb-8">Badges & Tags</h3>
@@ -194,12 +181,11 @@ $brand_colors = [
                 </div>
             </div>
 
-            <!-- Form Controls -->
             <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100">
                 <h3 class="text-h2 font-bold text-gray-900 mb-8">Form Controls</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <!-- Text Inputs Column -->
+                    
                     <div class="flex flex-col gap-6">
                         <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-gray-100 pb-2">Inputs</h4>
                         <?php get_template_part('app/Views/components/input', null, ['placeholder' => 'Placeholder (Default)', 'state' => 'default']); ?>
@@ -209,33 +195,30 @@ $brand_colors = [
                         <?php get_template_part('app/Views/components/input', null, ['value' => 'Filled text', 'state' => 'disabled']); ?>
                     </div>
 
-                    <!-- Selects Column -->
                     <div class="flex flex-col gap-6">
                         <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-gray-100 pb-2">Selects</h4>
                         <?php get_template_part('app/Views/components/select', null, ['label' => 'Select City', 'value' => 'Hanoi', 'state' => 'default']); ?>
                         <?php get_template_part('app/Views/components/select', null, ['label' => 'Select City', 'value' => 'Hanoi', 'state' => 'focus']); ?>
                         <?php get_template_part('app/Views/components/select', null, ['label' => 'Select City', 'value' => 'Hanoi', 'state' => 'filled']); ?>
-                        <!-- Showcase Datepicker alongside selects visually -->
+                        
                         <div class="pt-6 border-t border-gray-100 mt-auto hidden lg:block">
                             <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-4">Date/Time Picker</h4>
                             <?php get_template_part('app/Views/components/datepicker'); ?>
                         </div>
                     </div>
 
-                    <!-- Textareas Column -->
                     <div class="flex flex-col gap-6">
                         <h4 class="text-[12px] font-bold text-gray-500 uppercase tracking-widest mb-2 border-b border-gray-100 pb-2">Textareas</h4>
                         <?php get_template_part('app/Views/components/textarea', null, ['placeholder' => 'Placeholder', 'state' => 'default']); ?>
                         <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Typing...', 'state' => 'typing']); ?>
                         <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Filled', 'state' => 'filled']); ?>
                         <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Typing...', 'state' => 'error']); ?>
-                        <!-- Disabled Textarea -->
+                        
                         <?php get_template_part('app/Views/components/textarea', null, ['value' => 'Filled', 'state' => 'disabled']); ?>
                     </div>
                 </div>
             </section>
 
-            <!-- Navigation Controls -->
             <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-stone-100 flex flex-col md:flex-row gap-10">
                 <div class="flex-1">
                     <h3 class="text-[28px] font-bold text-stone-900 mb-6 font-display">Tabs</h3>
@@ -251,16 +234,14 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- Interactive Overlays -->
             <section class="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-stone-100">
                 <h3 class="text-[28px] font-bold text-stone-900 mb-6 font-display">Interactive Overlays</h3>
                 <div class="bg-stone-50 p-10 rounded-2xl border border-stone-200 flex justify-center items-center" x-data="{ modalOpen: false }">
-                    <!-- Trigger Button -->
+                    
                     <button type="button" @click="modalOpen = true" class="px-6 py-4 bg-accent-500 hover:bg-accent-600 text-white font-medium rounded-lg shadow-md transition-colors">
                         Launch Demo Modal
                     </button>
                     
-                    <!-- Include Modal Component -->
                     <?php 
                         get_template_part('app/Views/components/modal', null, [
                             'title' => 'Ready to start your workshop?',
@@ -273,17 +254,13 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- ============================================== -->
-            <!-- 3. ORGANISMS                                   -->
-            <!-- ============================================== -->
             <div class="flex items-center gap-6 py-4 mt-24">
                 <h2 class="text-4xl font-black text-gray-900 tracking-tight shrink-0">3. Organisms</h2>
                 <div class="h-1 flex-1 bg-gray-200 rounded-full"></div>
             </div>
 
-            <!-- Main Cards -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
-            <!-- Workshop Card Section -->
+            
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div class="flex items-center gap-3 mb-8 border-b border-gray-100 pb-8">
                     <span class="w-3 h-3 rounded-full bg-accent-500"></span>
@@ -300,7 +277,6 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- Product Card Section -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div class="flex items-center gap-3 mb-8 border-b border-gray-100 pb-8">
                     <span class="w-3 h-3 rounded-full bg-primary-600"></span>
@@ -317,7 +293,6 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- Blog Card -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div class="flex items-center gap-3 mb-8 border-b border-gray-100 pb-8">
                     <span class="w-3 h-3 rounded-full bg-neutral-300"></span>
@@ -334,7 +309,6 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- Separated Collection Cards Section (Bento Grid) -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div class="mb-10 border-b border-gray-100 pb-8">
                     <h3 class="text-h2 font-bold text-gray-900 mb-2 flex items-center gap-3">
@@ -346,7 +320,7 @@ $brand_colors = [
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
-                    <!-- Banner Full (16:9 => w-[1232px] in JSX specs) -->
+                    
                     <div class="lg:col-span-12">
                         <?php get_template_part('app/Views/components/collection-card', null, [
                             'ratio' => '16/9', 
@@ -354,7 +328,6 @@ $brand_colors = [
                         ]); ?>
                     </div>
                     
-                    <!-- 3:4 Portrait (w-[452px] in JSX specs) -->
                     <div class="lg:col-span-4 h-full">
                         <?php get_template_part('app/Views/components/collection-card', null, [
                             'ratio' => 'auto',
@@ -365,7 +338,6 @@ $brand_colors = [
                         ]); ?>
                     </div>
 
-                    <!-- 4:3 (w-[764px] / w-[608px] in JSX specs) -->
                     <div class="lg:col-span-8 flex flex-col gap-6">
                         <?php get_template_part('app/Views/components/collection-card', null, [
                             'ratio' => '4/3', 
@@ -374,7 +346,6 @@ $brand_colors = [
                             'image' => 'https://placehold.co/800x600/eae3d1/111827?text=Landscape'
                         ]); ?>
                         
-                        <!-- Demonstrating 2 smaller 4:3 cards splitting the grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
                             <?php get_template_part('app/Views/components/collection-card', null, [
                                 'ratio' => '4/3', 
@@ -392,7 +363,6 @@ $brand_colors = [
                 </div>
             </section>
 
-            <!-- Modals Section -->
             <section class="bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div class="flex items-center gap-3 mb-8">
                     <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
@@ -406,7 +376,6 @@ $brand_colors = [
         </div>
     </div>
 
-    <!-- Toast Component for JS -->
     <div id="copy-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-4 rounded-[1.5rem] shadow-2xl shadow-gray-900/40 text-[15px] font-medium z-50 flex items-center gap-3 transition-all duration-400 opacity-0 translate-y-8 pointer-events-none">
         <svg class="w-6 h-6 text-accent-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
         <span>Copied <span id="toast-hex" class="font-mono text-accent-400 font-bold ml-1"></span></span>

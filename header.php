@@ -1,10 +1,44 @@
 <?php
-/**
- * Header
- * Architecture: CSS-native hover (zero-latency), Alpine only for scroll state.
- */
 $is_homepage = is_front_page() || is_page_template('templates/template-home-page.php');
 $homepage_js = $is_homepage ? 'true' : 'false';
+
+// ── Bacera Customer Session ──────────────────────────────────────────────────
+global $wpdb;
+$bacera_customer    = null;
+$bacera_auth_cookie = $_COOKIE['bacera_customer_auth'] ?? '';
+if ( $bacera_auth_cookie ) {
+    $decoded = base64_decode( $bacera_auth_cookie, true );
+    if ( $decoded && strpos( $decoded, '|' ) !== false ) {
+        $customer_id = (int) explode( '|', $decoded )[0];
+        if ( $customer_id > 0 ) {
+            $bacera_customer = $wpdb->get_row(
+                $wpdb->prepare(
+                    "SELECT id, name, phone, email FROM {$wpdb->prefix}bacera_customers WHERE id = %d LIMIT 1",
+                    $customer_id
+                ),
+                ARRAY_A
+            );
+        }
+    }
+}
+$cust_name   = $bacera_customer ? ( $bacera_customer['name'] ?: $bacera_customer['phone'] ?: $bacera_customer['email'] ) : '';
+$cust_email  = $bacera_customer['email']  ?? '';
+$cust_phone  = $bacera_customer['phone']  ?? '';
+$cust_sub    = $cust_email ?: $cust_phone;
+$avatar_name = rawurlencode( $cust_name ?: 'Khach hang' );
+$avatar_url  = "https://ui-avatars.com/api/?name={$avatar_name}&background=3d2f26&color=E67258&bold=true";
+
+// Find auth page by template via direct DB query (safe before wp() runs)
+$auth_page_id = $wpdb->get_var(
+    "SELECT p.ID FROM {$wpdb->posts} p
+     INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+     WHERE p.post_type = 'page'
+       AND p.post_status = 'publish'
+       AND pm.meta_key = '_wp_page_template'
+       AND pm.meta_value IN ('templates/template-auth.php','template-auth.php')
+     LIMIT 1"
+);
+$auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/auth/' );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -219,13 +253,10 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
 <header id="site-header" class="fixed top-0 left-0 w-full z-50">
 
-    <!-- BG layer (CSS controlled) -->
     <div class="hdr-bg"></div>
 
-    <!-- ════════ DESKTOP (lg+) ════════ -->
     <div class="hidden lg:grid h-[76px] w-full" style="grid-template-columns: 1fr minmax(0, 1232px) 1fr;">
 
-        <!-- ① LOGO -->
         <a href="<?php echo esc_url(home_url('/')); ?>"
            class="flex items-center justify-center pr-6 xl:pr-8">
             <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>"
@@ -233,10 +264,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
         </a>
 
-        <!-- ② CENTER NAV CONTAINER -->
         <div class="flex items-stretch justify-between">
 
-            <!-- NAV MENU -->
             <nav class="flex items-stretch" id="hdr-nav">
 
                 <?php
@@ -268,9 +297,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                 </div>
                 <?php endforeach; ?>
 
-            </nav><!-- /nav -->
+            </nav>
 
-            <!-- LANGUAGE (position:relative so dropdown anchors to trigger) -->
             <div class="hdr-nav-item flex items-center h-full relative" id="lang-trigger">
                 <div class="hdr-link flex items-center gap-1.5 px-4 h-full text-[14px] font-medium font-sans cursor-pointer select-none">
                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -281,7 +309,7 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </div>
-                <!-- Lang dropdown: nested inside trigger → anchors correctly -->
+
                 <div class="lang-dropdown" id="lang-panel">
                     <button onclick="mstSwitchLang('en','English')"  class="w-full flex items-center gap-2.5 px-4 py-3 text-[#d95f47] text-[13px] font-medium font-sans hover:bg-stone-50 transition-colors">🇺🇸 <span>English</span></button>
                     <div class="h-px bg-stone-100 mx-3"></div>
@@ -291,19 +319,16 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                 </div>
             </div>
 
-        </div><!-- /center -->
+        </div>
 
-        <!-- ③ ACTIONS -->
         <div class="flex items-center gap-5 pl-6 xl:pl-8 pr-6 xl:pr-10">
 
-            <!-- Search -->
             <button id="search-btn" class="hdr-icon w-9 h-9 flex items-center justify-center hover:scale-110 transition-transform focus:outline-none" title="Tìm kiếm">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </button>
 
-            <!-- Cart -->
             <div class="relative">
                 <button class="hdr-icon w-9 h-9 flex items-center justify-center hover:scale-110 transition-transform focus:outline-none">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -313,38 +338,39 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                 <div class="absolute -top-1 -right-1 bg-[#d95f47] min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center text-white text-[10px] font-bold">1</div>
             </div>
 
-            <!-- Account -->
+            <?php if ( $bacera_customer ): ?>
             <div class="relative" id="acct-trigger">
                 <button id="acct-btn" class="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
                     <div class="hdr-avatar w-8 h-8 rounded-full overflow-hidden">
-                        <img src="https://ui-avatars.com/api/?name=Tran+Mai&background=3d2f26&color=E67258&bold=true"
-                             class="w-full h-full object-cover" alt="Avatar">
+                        <img src="<?php echo esc_url($avatar_url); ?>"
+                             class="w-full h-full object-cover" alt="<?php echo esc_attr($cust_name); ?>">
                     </div>
-                    <span class="hidden xl:block hdr-icon text-[13px] font-medium font-sans leading-none">Trần Mai</span>
+                    <span class="hidden xl:block hdr-icon text-[13px] font-medium font-sans leading-none truncate max-w-[120px]"><?php echo esc_html($cust_name); ?></span>
                     <svg class="hdr-chevron hdr-icon w-3 h-3 hidden xl:block" id="acct-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
 
-                <!-- Account panel (JS toggled) -->
                 <div class="acct-panel" id="acct-panel">
                     <div class="px-4 py-3 border-b border-stone-100">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full overflow-hidden">
-                                <img src="https://ui-avatars.com/api/?name=Tran+Mai&background=3d2f26&color=E67258&bold=true" class="w-full h-full" alt="">
+                            <div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
+                                <img src="<?php echo esc_url($avatar_url); ?>" class="w-full h-full" alt="">
                             </div>
-                            <div>
-                                <p class="text-stone-800 text-[14px] font-semibold truncate">Trần Mai</p>
-                                <p class="text-stone-400 text-[12px] truncate">tran.mai@email.com</p>
+                            <div class="min-w-0">
+                                <p class="text-stone-800 text-[14px] font-semibold truncate"><?php echo esc_html($cust_name); ?></p>
+                                <?php if ($cust_sub): ?>
+                                <p class="text-stone-400 text-[12px] truncate"><?php echo esc_html($cust_sub); ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                     <?php
                     $acct_menu = [
-                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'Tài khoản của tôi',  'url'=>'#'],
-                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Điểm tích lũy',      'url'=>'#'],
-                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'Đơn hàng của tôi', 'url'=>'#'],
-                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Workshop đã đăng ký','url'=>'#'],
+                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'Tài khoản của tôi',   'url'=>$auth_page],
+                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Điểm tích lũy',       'url'=>'#'],
+                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'Đơn hàng của tôi',  'url'=>'#'],
+                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Workshop đã đăng ký', 'url'=>'#'],
                     ];
                     foreach ($acct_menu as $am): ?>
                     <a href="<?php echo esc_url($am['url']); ?>"
@@ -358,8 +384,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                     </a>
                     <?php endforeach; ?>
                     <div class="h-px bg-stone-100 mx-4 my-1.5"></div>
-                    <a href="<?php echo esc_url(wp_logout_url(home_url())); ?>"
-                       class="flex items-center gap-3 px-4 py-2.5 text-stone-500 text-[14px] font-medium font-sans hover:bg-red-50 hover:text-red-500 transition-colors mb-1 group/lo">
+                    <a href="<?php echo esc_url( add_query_arg( 'bacera_logout', '1', home_url( '/' ) ) ); ?>"
+                       class="w-full flex items-center gap-3 px-4 py-2.5 text-stone-500 text-[14px] font-medium font-sans hover:bg-red-50 hover:text-red-500 transition-colors mb-1 group/lo">
                         <div class="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center shrink-0 group-hover/lo:bg-red-50 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -368,15 +394,21 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                         Đăng xuất
                     </a>
                 </div>
-            </div><!-- /account -->
+            </div>
+            <?php else: ?>
+            <a id="bacera-login-btn" href="<?php echo esc_url($auth_page); ?>"
+               class="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 hdr-link text-[13px] font-medium font-sans hover:border-[#d95f47] hover:text-[#d95f47] transition-all">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                </svg>
+                Đăng nhập
+            </a>
+            <?php endif; ?>
 
-        </div><!-- /actions -->
+        </div>
 
-    </div><!-- /desktop grid -->
+    </div>
 
-    <!-- ════════ MEGA PANELS (CSS transition, JS toggled) ════════ -->
-
-    <!-- SHOP -->
     <div class="mega-panel" id="panel-shop">
         <?php
         // ── Fetch real product categories ─────────────────────────────────────
@@ -425,11 +457,10 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                     $img_url   = $img_id ? wp_get_attachment_image_url($img_id, 'thumbnail') : '';
                     $icon_path = $fallback_icons[$i % count($fallback_icons)];
                 ?>
-                <!-- ── Tile: icon box + label (identical layout for image & svg) ── -->
+
                 <a href="<?php echo esc_url($cat_url); ?>"
                    class="group/sc flex flex-col items-center justify-center gap-2.5 py-3 px-2 rounded-xl border border-stone-200 bg-white hover:border-[#d95f47] hover:bg-[#fef8f7] transition-all duration-200 h-[100px]">
 
-                    <!-- Icon box — 48×48, rounded-xl, padded -->
                     <div class="w-12 h-12 rounded-xl bg-stone-100 group-hover/sc:bg-[#fff0ec] border border-stone-200 group-hover/sc:border-[#f5c8be] flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                         <?php if ($img_url): ?>
                         <img src="<?php echo esc_url($img_url); ?>"
@@ -443,7 +474,6 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                         <?php endif; ?>
                     </div>
 
-                    <!-- Label -->
                     <div class="text-center leading-none">
                         <span class="block text-stone-700 text-[11.5px] font-semibold font-sans group-hover/sc:text-[#d95f47] transition-colors leading-tight line-clamp-2">
                             <?php echo esc_html($cat->name); ?>
@@ -456,9 +486,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
                 <?php endforeach; ?>
             </div>
 
-
             <?php else: ?>
-            <!-- Fallback: no categories yet -->
+
             <div class="flex-1 flex items-center justify-center">
                 <div class="text-center text-stone-400">
                     <svg class="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
@@ -473,7 +502,6 @@ $homepage_js = $is_homepage ? 'true' : 'false';
         </div>
     </div>
 
-    <!-- WORKSHOP -->
     <div class="mega-panel" id="panel-workshop">
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
@@ -510,7 +538,6 @@ $homepage_js = $is_homepage ? 'true' : 'false';
         </div>
     </div>
 
-    <!-- ABOUT -->
     <div class="mega-panel" id="panel-about">
         <div class="max-w-[1232px] mx-auto px-6 py-6 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
@@ -541,8 +568,6 @@ $homepage_js = $is_homepage ? 'true' : 'false';
         </div>
     </div>
 
-
-    <!-- ════════ MOBILE ════════ -->
     <div class="flex lg:hidden items-center justify-between h-[64px] px-4" id="mobile-hdr">
         <a href="<?php echo esc_url(home_url('/')); ?>">
             <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>"
@@ -580,9 +605,8 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
 </header>
 
-<!-- ════════ SEARCH OVERLAY ════════ -->
 <div class="search-overlay" id="search-overlay" role="search" aria-label="Tìm kiếm">
-    <!-- Logo inside overlay for context -->
+
     <a href="<?php echo esc_url(home_url('/')); ?>" class="shrink-0 flex items-center pr-4">
         <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>" class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
     </a>
@@ -709,13 +733,17 @@ $homepage_js = $is_homepage ? 'true' : 'false';
         if (typeof window.mstTranslatePage === 'function') window.mstTranslatePage(lang);
     };
 })();
+
+// Global logout — defined outside IIFE so onclick="baceraLogout()" always works
+window.baceraLogout = function() {
+    // Clear cookie on all common path variants
+    const expires = 'expires=Thu, 01 Jan 1970 00:00:00 UTC';
+    const domain  = location.hostname;
+    document.cookie = 'bacera_customer_auth=; ' + expires + '; path=/;';
+    document.cookie = 'bacera_customer_auth=; ' + expires + '; path=/; domain=' + domain + ';';
+    document.cookie = 'bacera_customer_auth=; ' + expires + '; path=/; domain=.' + domain + ';';
+    window.location.href = '<?php echo esc_js(home_url('/')); ?>';
+};
 </script>
 
-<!-- Spacer for non-homepage only -->
-<?php if (!$is_homepage): ?>
-<div class="hidden lg:block h-[76px]"></div>
-<div class="block lg:hidden h-[64px]"></div>
-<?php endif; ?>
-
-<!-- Main Content Area -->
 <?php

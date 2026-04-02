@@ -3,25 +3,22 @@
  * Footer
  */
 ?>
-    </main> <!-- End #primary .site-main -->
+    </main>
 
-    <!-- Footer matching Figma Specifications -->
-    <footer id="colophon" class="site-footer bg-stone-600 text-stone-200 font-sans mt-24">
+    <footer id="colophon" class="site-footer bg-stone-600 text-stone-200 font-sans">
         <div class="max-w-[1280px] mx-auto px-4 lg:px-8 pt-16 pb-12">
             
             <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-10 lg:gap-12 mb-16">
                 
-                <!-- Brand / Logo Area -->
                 <div class="col-span-1 md:col-span-2 lg:col-span-3">
                     <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block hover:opacity-80 transition-opacity mb-6">
-                        <!-- Logo representing Bacera -->
+
                         <div class="w-32 h-14 relative overflow-hidden flex items-center">
                             <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo-1.png'); ?>" class="w-full h-full object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Footer Logo">
                         </div>
                     </a>
                 </div>
 
-                <!-- Sitemap Links -->
                 <div class="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col gap-2.5">
                     <h3 class="text-xs font-medium font-display leading-4 tracking-tight opacity-70 mb-1 uppercase">Sitemap</h3>
                     <a href="#" class="text-[16px] font-normal leading-4 hover:text-white hover:translate-x-1 transition-all">Shop</a>
@@ -31,7 +28,6 @@
                     <a href="#" class="text-[16px] font-normal leading-4 hover:text-white hover:translate-x-1 transition-all">Contact us</a>
                 </div>
 
-                <!-- Workshop Links -->
                 <div class="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col gap-2.5">
                     <h3 class="text-xs font-medium font-display leading-4 tracking-tight opacity-70 mb-1 uppercase">Workshop</h3>
                     <a href="#" class="text-[16px] font-normal leading-4 hover:text-white hover:translate-x-1 transition-all">Pottery Wheel Throwing Class</a>
@@ -40,7 +36,6 @@
                     <a href="#" class="text-[16px] font-normal leading-4 hover:text-white hover:translate-x-1 transition-all">Team-building Pottery Class</a>
                 </div>
 
-                <!-- Company Addresses & Contacts -->
                 <div class="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col gap-6">
                     <div class="flex flex-col gap-1.5">
                         <h3 class="text-xs font-medium font-display leading-4 tracking-tight opacity-70 uppercase">Address</h3>
@@ -74,41 +69,38 @@
                 </div>
             </div>
 
-            <!-- Divider -->
             <div class="h-px bg-stone-200 opacity-20 w-full mb-8"></div>
 
-            <!-- Copyright & Extras -->
             <div class="flex flex-col md:flex-row justify-between items-center gap-6 pb-4">
                 <div class="text-[14px] text-stone-200 font-display font-normal">
                     <span class="notranslate">Copyright &copy; <?php echo date('Y'); ?> Bacera Pottery class</span>
                 </div>
                 
                 <div class="flex flex-wrap items-center justify-center md:justify-end gap-6">
-                    <!-- Currency Dropdown -->
+
                     <div class="flex items-center gap-2 cursor-pointer group">
                         <span class="text-[14px] text-stone-200 font-display font-normal notranslate">United States (USD $)</span>
                         <svg class="w-3.5 h-3.5 text-stone-200 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </div>
 
-                    <!-- Payment Methods (Simulated CSS blocks from Figma) -->
                     <div class="flex gap-1.5 opacity-90 grayscale hover:grayscale-0 transition-all duration-300">
                         <div class="w-8 h-5 rounded overflow-hidden flex bg-white justify-center items-center shadow-sm">
-                            <!-- Visa roughly -->
+
                             <div class="text-[8px] font-bold text-blue-900 italic">VISA</div>
                         </div>
                         <div class="w-8 h-5 rounded overflow-hidden flex bg-white justify-center items-center shadow-sm">
-                            <!-- Mastercard roughly -->
+
                             <div class="flex">
                                 <div class="w-2.5 h-2.5 rounded-full bg-red-600 mix-blend-multiply opacity-90 -mr-1"></div>
                                 <div class="w-2.5 h-2.5 rounded-full bg-amber-500 mix-blend-multiply opacity-90"></div>
                             </div>
                         </div>
                         <div class="w-8 h-5 rounded overflow-hidden flex bg-white justify-center items-center shadow-sm">
-                            <!-- Paypal roughly -->
+
                             <div class="text-[8px] font-bold text-sky-700 italic">Pay</div>
                         </div>
                         <div class="w-8 h-5 rounded bg-black flex justify-center items-center shadow-sm">
-                            <!-- Apple Pay roughly -->
+
                             <svg class="w-3 h-3 text-white" viewBox="0 0 384 512" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
                         </div>
                     </div>
@@ -116,7 +108,7 @@
             </div>
         </div>
     </footer>
-</div><!-- #page -->
+</div>
 
 <?php wp_footer(); ?>
 </body>

@@ -23,18 +23,15 @@ $href_attr = $href ? 'href="' . esc_url($href) . '"' : '';
 <<?php echo $tag; ?> <?php echo $href_attr; ?> 
     class="flex flex-col items-start justify-end gap-2 p-8 relative rounded-lg overflow-hidden w-full group cursor-pointer hover:-translate-y-1 transition-transform duration-300 shadow-sm hover:shadow-xl bg-stone-100 <?php echo esc_attr($ratio_class); ?> <?php echo esc_attr($class); ?>"
 >
-    <!-- Background Image -->
-    <!-- Removed negative z-index to fix stacking context bug. Using normal DOM flow z-0 -> z-10 -->
+    
     <img 
         src="<?php echo esc_url($image); ?>" 
         alt="<?php echo esc_attr($title); ?>" 
         class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 z-0"
     >
 
-    <!-- Overlay Gradient (Matches newest JSX: bg-gradient-to-bl from-black/0 to-black/30) -->
     <div class="absolute inset-0 bg-gradient-to-bl from-black/0 to-black/30 pointer-events-none z-10 transition-opacity duration-300 group-hover:from-black/10 group-hover:to-black/40"></div>
 
-    <!-- Content Block -->
     <div class="flex flex-col justify-start items-start gap-2 relative z-20 w-full hover:pointer-events-auto">
         <h2 class="self-stretch justify-start text-stone-200 text-2xl md:text-[32px] font-serif font-normal leading-8 drop-shadow-sm group-hover:text-white transition-colors">
             <?php echo esc_html($title); ?>
