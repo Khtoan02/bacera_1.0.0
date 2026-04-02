@@ -115,42 +115,6 @@ $shop_url      = hp_shop_url();
 </section>
 
 <!-- ═══════════════════════════════════════════════════════
-     2. CATEGORY BAR — 8 danh mục
-════════════════════════════════════════════════════════ -->
-<?php
-$cats_nav = [
-    ['slug'=>'shop-all',    'label'=>'Shop All',     'path'=>'M4 6h16M4 12h16M4 18h16'],
-    ['slug'=>'teapots',     'label'=>'Teapots',      'path'=>'M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z'],
-    ['slug'=>'drinkware',   'label'=>'Drinkware',    'path'=>'M9 17V7m0 0a3 3 0 106 0v10'],
-    ['slug'=>'bowls',       'label'=>'Bowls',        'path'=>'M3 10c0 5.523 4.477 10 10 10s10-4.477 10-10H3z'],
-    ['slug'=>'kitchen',     'label'=>'Kitchen',      'path'=>'M4 7h16M4 12h10M4 17h6'],
-    ['slug'=>'plates',      'label'=>'Plates',       'path'=>'M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a6 6 0 110 12A6 6 0 0112 6z'],
-    ['slug'=>'vases-decor', 'label'=>'Vases & Decor','path'=>'M8 21h8m-4-4v4m-4-4a4 4 0 118 0H8zM9 3h6a2 2 0 012 2v8H7V5a2 2 0 012-2z'],
-    ['slug'=>'storage',     'label'=>'Storage',      'path'=>'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
-];
-?>
-<section id="category-bar" class="w-full bg-white border-b border-stone-200">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-4">
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-2">
-            <?php foreach ($cats_nav as $c):
-                $term = $has_woo ? get_term_by('slug', $c['slug'], 'product_cat') : null;
-                $url  = ($term && !is_wp_error($term)) ? get_term_link($term) : '#';
-            ?>
-            <a href="<?php echo esc_url($url); ?>"
-               class="group flex flex-col items-center gap-2 px-2 py-3.5 rounded-xl border border-stone-200 hover:border-accent-400 hover:bg-neutral-100 transition-all duration-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600 group-hover:bg-accent-500 group-hover:text-white transition-all duration-200">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $c['path']; ?>"/>
-                    </svg>
-                </div>
-                <span class="text-stone-600 text-[12px] font-medium font-sans text-center leading-tight group-hover:text-accent-500 transition-colors"><?php echo esc_html($c['label']); ?></span>
-            </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════
      3. NEW ARRIVALS — Grid 5 sản phẩm
 ════════════════════════════════════════════════════════ -->
 <section id="new-arrivals" class="py-20 bg-neutral-100">

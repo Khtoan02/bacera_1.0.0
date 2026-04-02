@@ -378,36 +378,98 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 
     <!-- SHOP -->
     <div class="mega-panel" id="panel-shop">
+        <?php
+        // ── Fetch real product categories ─────────────────────────────────────
+        $mega_parent_cats = get_terms([
+            'taxonomy'   => 'bcm_product_cat',
+            'hide_empty' => false,
+            'parent'     => 0,
+            'orderby'    => 'name',
+            'number'     => 8,
+        ]);
+
+        // Default SVG paths as fallback icons (cycles through)
+        $fallback_icons = [
+            'M4 6h16M4 10h16M4 14h16M4 18h16',
+            'M3 3h18l-3 18H6L3 3z',
+            'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
+            'M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z',
+            'M3 10c0 5.523 4.477 10 10 10s10-4.477 10-10H3z',
+            'M4 7h16M4 12h8m-8 5h16',
+            'M9 17V7m0 0a3 3 0 106 0v10',
+            'M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10A5 5 0 0112 7z',
+        ];
+
+        // Archive URL for "Xem tất cả"
+        $shop_archive_url = get_post_type_archive_link('bcm_product') ?: '#';
+        ?>
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
                 <div>
                     <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Mua hàng theo công năng</h3>
                     <p class="text-stone-500 text-[13px] font-sans leading-relaxed">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng hơn.</p>
                 </div>
-                <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả</a>
+                <a href="<?php echo esc_url($shop_archive_url); ?>"
+                   class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">
+                    Xem tất cả
+                </a>
             </div>
             <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+
+            <?php if (!is_wp_error($mega_parent_cats) && $mega_parent_cats): ?>
             <div class="flex-1 grid grid-cols-4 gap-3">
-                <?php
-                $shop_cats = [
-                    ['name'=>'Kitchen',   'path'=>'M4 6h16M4 10h16M4 14h16M4 18h16'],
-                    ['name'=>'Plates',    'path'=>'M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10A5 5 0 0112 7z'],
-                    ['name'=>'Vases',     'path'=>'M3 3h18l-3 18H6L3 3z'],
-                    ['name'=>'Storage',   'path'=>'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
-                    ['name'=>'Teapots',   'path'=>'M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z'],
-                    ['name'=>'Drinkware', 'path'=>'M9 17V7m0 0a3 3 0 106 0v10'],
-                    ['name'=>'Bowls',     'path'=>'M3 10c0 5.523 4.477 10 10 10s10-4.477 10-10H3z'],
-                    ['name'=>'Serveware', 'path'=>'M4 7h16M4 12h8m-8 5h16'],
-                ];
-                foreach ($shop_cats as $sc): ?>
-                <a href="#" class="group/sc flex flex-col items-center justify-center py-4 px-3 h-[96px] rounded-xl border border-stone-200 hover:border-[#d95f47] hover:bg-neutral-50 transition-all">
-                    <div class="w-9 h-9 mb-2 bg-stone-100 rounded-lg flex items-center justify-center text-stone-600 group-hover/sc:bg-[#d95f47] group-hover/sc:text-white transition-all">
-                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $sc['path']; ?>"/></svg>
+                <?php foreach ($mega_parent_cats as $i => $cat):
+                    $cat_url   = get_term_link($cat);
+                    $cat_url   = is_wp_error($cat_url) ? '#' : $cat_url;
+                    $img_id    = function_exists('bcm_get_cat_image_id') ? bcm_get_cat_image_id($cat->term_id) : 0;
+                    $img_url   = $img_id ? wp_get_attachment_image_url($img_id, 'thumbnail') : '';
+                    $icon_path = $fallback_icons[$i % count($fallback_icons)];
+                ?>
+                <!-- ── Tile: icon box + label (identical layout for image & svg) ── -->
+                <a href="<?php echo esc_url($cat_url); ?>"
+                   class="group/sc flex flex-col items-center justify-center gap-2.5 py-3 px-2 rounded-xl border border-stone-200 bg-white hover:border-[#d95f47] hover:bg-[#fef8f7] transition-all duration-200 h-[100px]">
+
+                    <!-- Icon box — 48×48, rounded-xl, padded -->
+                    <div class="w-12 h-12 rounded-xl bg-stone-100 group-hover/sc:bg-[#fff0ec] border border-stone-200 group-hover/sc:border-[#f5c8be] flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                        <?php if ($img_url): ?>
+                        <img src="<?php echo esc_url($img_url); ?>"
+                             class="w-9 h-9 object-contain transition-transform duration-300 group-hover/sc:scale-110"
+                             alt="<?php echo esc_attr($cat->name); ?>" loading="lazy">
+                        <?php else: ?>
+                        <svg class="w-[22px] h-[22px] text-stone-500 group-hover/sc:text-[#d95f47] transition-colors"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $icon_path; ?>"/>
+                        </svg>
+                        <?php endif; ?>
                     </div>
-                    <span class="text-stone-600 text-[12px] font-medium font-sans group-hover/sc:text-[#d95f47] transition-colors text-center leading-tight"><?php echo $sc['name']; ?></span>
+
+                    <!-- Label -->
+                    <div class="text-center leading-none">
+                        <span class="block text-stone-700 text-[11.5px] font-semibold font-sans group-hover/sc:text-[#d95f47] transition-colors leading-tight line-clamp-2">
+                            <?php echo esc_html($cat->name); ?>
+                        </span>
+                        <?php if ($cat->count > 0): ?>
+                        <span class="block text-stone-400 text-[10px] font-sans mt-0.5"><?php echo $cat->count; ?> sản phẩm</span>
+                        <?php endif; ?>
+                    </div>
                 </a>
                 <?php endforeach; ?>
             </div>
+
+
+            <?php else: ?>
+            <!-- Fallback: no categories yet -->
+            <div class="flex-1 flex items-center justify-center">
+                <div class="text-center text-stone-400">
+                    <svg class="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <p class="text-[13px] font-sans">Chưa có danh mục sản phẩm.<br>
+                    <a href="<?php echo admin_url('admin.php?page=bacera-product-cats'); ?>" class="text-[#d95f47] underline text-[12px]">Thêm danh mục</a></p>
+                </div>
+            </div>
+            <?php endif; ?>
+
         </div>
     </div>
 
