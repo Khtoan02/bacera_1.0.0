@@ -38,6 +38,7 @@ switch ($state) {
         placeholder="<?php echo esc_attr($placeholder); ?>" 
         value="<?php echo esc_attr($value); ?>"
         <?php echo $state === 'disabled' ? 'disabled' : ''; ?>
+        <?php echo isset($args['attrs']) ? $args['attrs'] : ''; ?>
         class="<?php echo esc_attr($base_classes . ' ' . $input_classes); ?>"
     >
 </div>

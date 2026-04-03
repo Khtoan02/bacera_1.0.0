@@ -8,7 +8,7 @@ $is_preview = isset($args['is_preview']) ? $args['is_preview'] : false;
 
 $position_class = $is_preview ? 'absolute inset-0' : 'fixed inset-0 z-[100]';
 ?>
-<!-- Modal Container with Alpine transition -->
+
 <div class="<?php echo $position_class; ?>" 
      x-show="modalOpen" 
      x-transition:enter="transition ease-out duration-300"
@@ -23,7 +23,7 @@ $position_class = $is_preview ? 'absolute inset-0' : 'fixed inset-0 z-[100]';
     
     <div class="absolute inset-0 z-10 w-full h-full overflow-y-auto pointer-events-none">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            <!-- Modal panel -->
+            
             <div @click.stop 
                  x-show="modalOpen"
                  x-transition:enter="transition ease-out duration-300 transform"
@@ -60,7 +60,7 @@ $position_class = $is_preview ? 'absolute inset-0' : 'fixed inset-0 z-[100]';
                 </div>
                 <div class="mt-8 flex flex-col gap-3">
                     <?php get_template_part('app/Views/components/button', null, ['text' => $confirm, 'variant' => 'primary', 'class' => 'w-full']); ?>
-                    <!-- Added @click to cancel button wrapper using alpine inline JS handling -->
+                    
                     <div @click="modalOpen = false" class="w-full">
                         <?php get_template_part('app/Views/components/button', null, ['text' => $cancel, 'variant' => 'outline', 'class' => 'w-full']); ?>
                     </div>
