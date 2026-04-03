@@ -41,6 +41,5 @@ switch ($state) {
         class="<?php echo esc_attr($base_classes . ' ' . $textarea_classes); ?>"
     ><?php echo esc_textarea($value); ?></textarea>
     
-    <!-- Custom Resize Handle Decoration (Figma Detail) -->
     <div class="pointer-events-none absolute bottom-3 right-3 w-3 h-3 border-r-2 border-b-2 <?php echo ($state === 'error') ? 'border-red-600 opacity-50' : 'border-stone-800 opacity-20'; ?>"></div>
 </div>

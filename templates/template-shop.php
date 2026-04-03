@@ -9,7 +9,6 @@ get_header(); ?>
 <main class="shop-page bg-[#f8f4f0] py-10">
     <div class="container mx-auto px-6 max-w-7xl">
 
-        <!-- Breadcrumb -->
         <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
             <a href="<?php echo home_url(); ?>" class="hover:text-gray-700">Homepage</a>
             <span>/</span>
@@ -18,7 +17,6 @@ get_header(); ?>
 
         <h1 class="text-4xl font-semibold mb-8">Shop by</h1>
 
-        <!-- Shop by Tabs -->
         <div class="flex gap-3 overflow-x-auto pb-6 scrollbar-hide">
             <?php
             $categories = [
@@ -43,7 +41,6 @@ get_header(); ?>
 
         <div class="flex flex-col lg:flex-row gap-8">
 
-            <!-- Sidebar Filter -->
             <div class="w-full lg:w-72 bg-white rounded-3xl p-6 shadow-sm h-fit">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="font-semibold text-lg">Filter</h2>
@@ -51,7 +48,7 @@ get_header(); ?>
                 </div>
 
                 <form id="shop-filter" method="GET" class="space-y-8">
-                    <!-- Collection -->
+                    
                     <div>
                         <h3 class="font-medium mb-3">Collection</h3>
                         <div class="space-y-2 text-sm">
@@ -61,7 +58,6 @@ get_header(); ?>
                         </div>
                     </div>
 
-                    <!-- Capacity -->
                     <div>
                         <h3 class="font-medium mb-3">Capacity</h3>
                         <div class="space-y-2 text-sm">
@@ -72,7 +68,6 @@ get_header(); ?>
                 </form>
             </div>
 
-            <!-- Product Area -->
             <div class="flex-1">
                 <?php
                 $api = new Pancake_API();
@@ -89,7 +84,6 @@ get_header(); ?>
                             : [];
                 ?>
 
-                <!-- Sort & Result count -->
                 <div class="flex justify-between items-center mb-6">
                     <p class="text-gray-600">
                         Showing <span class="font-semibold"><?php echo count($products); ?></span> 
@@ -105,7 +99,6 @@ get_header(); ?>
                     </div>
                 </div>
 
-                <!-- Product Grid -->
                 <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 gap-6">
                     <?php if (!empty($products)) : ?>
                         <?php foreach ($products as $p) : 

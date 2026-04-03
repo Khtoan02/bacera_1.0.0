@@ -77,9 +77,6 @@ $shop_url      = hp_shop_url();
 
 <main id="primary" class="site-main bg-neutral-100">
 
-<!-- ═══════════════════════════════════════════════════════
-     1. HERO — Full-screen banner
-════════════════════════════════════════════════════════ -->
 <section id="hero" class="relative w-full min-h-[90vh] flex items-center overflow-hidden bg-primary-900">
     <div class="absolute inset-0">
         <img src="https://toan.host/wp-content/uploads/2026/03/BG.jpg"
@@ -114,45 +111,6 @@ $shop_url      = hp_shop_url();
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     2. CATEGORY BAR — 8 danh mục
-════════════════════════════════════════════════════════ -->
-<?php
-$cats_nav = [
-    ['slug'=>'shop-all',    'label'=>'Shop All',     'path'=>'M4 6h16M4 12h16M4 18h16'],
-    ['slug'=>'teapots',     'label'=>'Teapots',      'path'=>'M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z'],
-    ['slug'=>'drinkware',   'label'=>'Drinkware',    'path'=>'M9 17V7m0 0a3 3 0 106 0v10'],
-    ['slug'=>'bowls',       'label'=>'Bowls',        'path'=>'M3 10c0 5.523 4.477 10 10 10s10-4.477 10-10H3z'],
-    ['slug'=>'kitchen',     'label'=>'Kitchen',      'path'=>'M4 7h16M4 12h10M4 17h6'],
-    ['slug'=>'plates',      'label'=>'Plates',       'path'=>'M12 2a10 10 0 100 20 10 10 0 000-20zm0 4a6 6 0 110 12A6 6 0 0112 6z'],
-    ['slug'=>'vases-decor', 'label'=>'Vases & Decor','path'=>'M8 21h8m-4-4v4m-4-4a4 4 0 118 0H8zM9 3h6a2 2 0 012 2v8H7V5a2 2 0 012-2z'],
-    ['slug'=>'storage',     'label'=>'Storage',      'path'=>'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'],
-];
-?>
-<section id="category-bar" class="w-full bg-white border-b border-stone-200">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-4">
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-2">
-            <?php foreach ($cats_nav as $c):
-                $term = $has_woo ? get_term_by('slug', $c['slug'], 'product_cat') : null;
-                $url  = ($term && !is_wp_error($term)) ? get_term_link($term) : '#';
-            ?>
-            <a href="<?php echo esc_url($url); ?>"
-               class="group flex flex-col items-center gap-2 px-2 py-3.5 rounded-xl border border-stone-200 hover:border-accent-400 hover:bg-neutral-100 transition-all duration-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center text-primary-600 group-hover:bg-accent-500 group-hover:text-white transition-all duration-200">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $c['path']; ?>"/>
-                    </svg>
-                </div>
-                <span class="text-stone-600 text-[12px] font-medium font-sans text-center leading-tight group-hover:text-accent-500 transition-colors"><?php echo esc_html($c['label']); ?></span>
-            </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════
-     3. NEW ARRIVALS — Grid 5 sản phẩm
-════════════════════════════════════════════════════════ -->
 <section id="new-arrivals" class="py-20 bg-neutral-100">
     <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-10">
@@ -177,9 +135,6 @@ $cats_nav = [
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     4. NEW COLLECTION — 1 lớn + 3 nhỏ
-════════════════════════════════════════════════════════ -->
 <section id="new-collection" class="py-20 bg-white border-t border-stone-200">
     <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
         <div class="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-10">
@@ -194,7 +149,7 @@ $cats_nav = [
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <!-- Large card -->
+            
             <?php if (isset($featured[0])):
                 $f0 = $featured[0];
                 if (is_object($f0) && method_exists($f0,'get_id')) {
@@ -222,7 +177,6 @@ $cats_nav = [
             </div>
             <?php endif; ?>
 
-            <!-- 3 small cards -->
             <div class="md:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <?php for ($i=1; $i<=3; $i++):
                     if (!isset($featured[$i])) continue;
@@ -255,9 +209,6 @@ $cats_nav = [
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     5. BEST SELLER — Tab filter + 3 cards
-════════════════════════════════════════════════════════ -->
 <?php
 $bs_tabs = ['Begin Slowly', 'Sip and Pause', 'Tables That Linger', 'Hold a Quiet Space', 'Gift a Moment'];
 ?>
@@ -271,7 +222,6 @@ $bs_tabs = ['Begin Slowly', 'Sip and Pause', 'Tables That Linger', 'Hold a Quiet
             </a>
         </div>
 
-        <!-- Tabs -->
         <div class="flex gap-6 border-b border-stone-300 mb-8 overflow-x-auto scrollbar-hide">
             <?php foreach ($bs_tabs as $ti => $tl): ?>
             <button @click="activeTab = <?php echo $ti; ?>"
@@ -282,7 +232,6 @@ $bs_tabs = ['Begin Slowly', 'Sip and Pause', 'Tables That Linger', 'Hold a Quiet
             <?php endforeach; ?>
         </div>
 
-        <!-- Products -->
         <?php foreach ($bs_tabs as $ti => $tl): ?>
         <div x-show="activeTab === <?php echo $ti; ?>" x-transition:enter="transition-opacity duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
@@ -295,9 +244,6 @@ $bs_tabs = ['Begin Slowly', 'Sip and Pause', 'Tables That Linger', 'Hold a Quiet
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     6. VIDEO BANNER — Cinematic dark section
-════════════════════════════════════════════════════════ -->
 <section id="video-banner" class="relative w-full min-h-[75vh] flex items-end bg-primary-900 overflow-hidden"
          x-data="{ open: false }">
     <div class="absolute inset-0">
@@ -331,7 +277,6 @@ $bs_tabs = ['Begin Slowly', 'Sip and Pause', 'Tables That Linger', 'Hold a Quiet
         </div>
     </div>
 
-    <!-- Modal -->
     <div x-show="open" x-transition.opacity
          class="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center" style="display:none">
         <button @click="open = false" class="absolute top-6 right-6 text-white/70 hover:text-white">
@@ -343,9 +288,6 @@ $bs_tabs = ['Begin Slowly', 'Sip and Pause', 'Tables That Linger', 'Hold a Quiet
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     7. SHOP BY COLLECTION — 2×2 asymmetric grid
-════════════════════════════════════════════════════════ -->
 <?php
 $cols = [
     ['title'=>'Whispers of Clay',    'sub'=>'Soft forms. Gentle hues. Pieces shaped by quiet hands.',         'img'=>'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&q=80&w=900', 'url'=>'#', 'span'=>'md:col-span-7'],
@@ -398,9 +340,6 @@ $cols = [
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     8. WORKSHOP — 4 cards trên nền tối
-════════════════════════════════════════════════════════ -->
 <?php
 $workshops = [
     ['name'=>'Pottery Wheel Throwing','desc'=>'A peaceful, hands-on journey for beginners and curious minds.','price'=>'From 950,000 VND/Person','date'=>'Day: 13/16 · Noon: 1/16','img'=>'https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=600'],
@@ -451,9 +390,6 @@ $workshops = [
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     9. ABOUT SNIPPET — Split image + text
-════════════════════════════════════════════════════════ -->
 <section id="about" class="py-20 bg-white border-t border-stone-200">
     <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -498,9 +434,6 @@ $workshops = [
     </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════
-     10. BLOG — 3 bài viết mới nhất
-════════════════════════════════════════════════════════ -->
 <?php
 $blog_posts = get_posts(['numberposts'=>3, 'post_status'=>'publish']);
 ?>
@@ -544,9 +477,6 @@ $blog_posts = get_posts(['numberposts'=>3, 'post_status'=>'publish']);
 </section>
 <?php endif; ?>
 
-<!-- ═══════════════════════════════════════════════════════
-     11. TESTIMONIALS — Swiper carousel
-════════════════════════════════════════════════════════ -->
 <?php
 $reviews = [
     ['text'=>'My girlfriend and I signed up for fun. We didn\'t expect the wheel to make us so quiet, so present. She shaped a bowl. I shaped something odd — but it felt like we made something real together.','name'=>'James & Laura','role'=>'Workshop Participants','stars'=>5,'img'=>'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&q=80&w=700'],
@@ -599,9 +529,6 @@ $reviews = [
 
 </main>
 
-<!-- ═══════════════════════════════════════════════════════
-     JS — Swiper init (runs after Swiper CDN loaded in footer)
-════════════════════════════════════════════════════════ -->
 <script>
 document.addEventListener( 'DOMContentLoaded', function() {
     if ( typeof Swiper !== 'undefined' ) {

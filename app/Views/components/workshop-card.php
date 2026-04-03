@@ -17,20 +17,18 @@ $class = isset($args['class']) ? $args['class'] : '';
 ?>
 <div class="w-full inline-flex flex-col justify-center items-start group cursor-pointer hover:shadow-[8px_4px_24px_0px_rgba(0,0,0,0.20)] hover:-translate-y-1 transition-all duration-300 rounded-lg <?php echo esc_attr($class); ?>">
     
-    <!-- Image block Formatted strictly per Figma snippet -->
     <div class="self-stretch h-56 relative rounded-tl-lg rounded-tr-lg overflow-hidden flex flex-col justify-start items-center bg-neutral-100 w-full">
-        <!-- Image itself -->
+        
         <img 
             className="self-stretch flex-1"
             src="<?php echo esc_url($image); ?>" 
             alt="<?php echo esc_attr($title); ?>" 
             class="self-stretch flex-1 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 z-0"
         >
-        <!-- Optional subtle hover dimming (no cart buttons here) -->
+        
         <div class="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/10 pointer-events-none transition-colors duration-300 z-10"></div>
     </div>
 
-    <!-- Content Block Formatted strictly per Figma snippet -->
     <div class="self-stretch flex flex-col justify-start items-start gap-2 w-full">
         <div class="self-stretch p-4 bg-stone-200 rounded-b-lg md:rounded-lg outline outline-1 outline-offset-[-1px] outline-stone-300 flex flex-col justify-between items-start gap-6 h-[192px] group-hover:bg-stone-50 transition-colors w-full">
             
@@ -61,7 +59,6 @@ $class = isset($args['class']) ? $args['class'] : '';
                     </div>
                 </div>
                 
-                <!-- Action Icon mapped properly to SVG arrow -->
                 <div class="w-10 h-10 md:w-12 md:h-12 relative inline-flex flex-col justify-center items-center rounded-full transition-colors text-stone-600 group-hover:text-accent-500">
                     <svg class="w-5 h-5 ml-2 md:w-6 md:h-6 fill-none" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>

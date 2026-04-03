@@ -23,19 +23,17 @@ switch ($state) {
         break;
 }
 ?>
-<!-- Alpine Component context -->
+
 <div class="relative w-full <?php echo esc_attr($class); ?>" 
      x-data="{ open: false, selectedIndex: <?php echo esc_js($selected_index); ?>, selectedText: '<?php echo esc_js($value); ?>' }"
      @click.outside="open = false">
     
-    <!-- Simulated native select hidden for form submission -->
     <select name="<?php echo esc_attr($name); ?>" class="hidden" x-model="selectedText">
         <?php foreach($options as $opt): ?>
             <option value="<?php echo esc_attr($opt); ?>"><?php echo esc_html($opt); ?></option>
         <?php endforeach; ?>
     </select>
     
-    <!-- Visual Select Trigger -->
     <div @click="open = !open" 
          class="<?php echo esc_attr($base_classes . ' ' . $box_classes); ?>"
          :class="open ? 'ring-2 ring-inset ring-stone-700' : ''">
@@ -48,7 +46,6 @@ switch ($state) {
         </div>
     </div>
 
-    <!-- Dropdown Options List -->
     <div x-show="open" 
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 translate-y-2"
@@ -67,7 +64,7 @@ switch ($state) {
                 <span class="flex-1 text-left opacity-80 text-stone-700 text-[16px] font-normal leading-none">
                     <?php echo esc_html($opt); ?>
                 </span>
-                <!-- Checkmark indicating selection via Alpine conditionally -->
+                
                 <template x-if="selectedIndex === <?php echo $index; ?>">
                     <svg class="w-4 h-4 text-stone-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 </template>

@@ -50,7 +50,7 @@ $variants = [
 $final_class = $base_classes . ($variants[$variant] ?? $variants['primary']) . ' ' . $class . ($disabled ? ' cursor-not-allowed pointer-events-none' : '');
 ?>
 <<?php echo $tag; ?> <?php echo $href_attr; ?> <?php echo $disabled_attr; ?> class="<?php echo esc_attr($final_class); ?>">
-    <!-- Ghost Wrap -->
+    
     <?php if (str_starts_with($variant, 'ghost')): ?>
         <span class="block transition-colors"><?php echo esc_html($text); ?></span>
         <?php if (!$disabled): ?>
@@ -63,7 +63,7 @@ $final_class = $base_classes . ($variants[$variant] ?? $variants['primary']) . '
             </div>
         <?php endif; ?>
     <?php else: ?>
-        <!-- Solid / Outline Content -->
+        
         <?php echo esc_html($text); ?>
         <?php if (isset($args['icon'])): ?>
             <?php echo $args['icon']; ?>
