@@ -18,20 +18,20 @@ define( 'BACERA_THEME_VERSION', '1.0.0' );
 
 add_action( 'init', function() {
     // 1. Đăng ký biến query để WordPress nhận diện slug ảnh 
-    add_rewrite_tag( '%pancake_img_slug%', '([^&]+)' );
+    add_rewrite_tag( '%bacera_img_slug%', '([^&]+)' );
 
     // 2. Tạo quy tắc đường dẫn sạch: /pancake-img/ten-san-pham-123
     // Điều hướng về index.php với biến pancake_img_slug để xử lý streaming
     add_rewrite_rule(
-        '^pancake-img/([^/]+)/?',
-        'index.php?pancake_img_slug=$matches[1]',
+        '^bacera-img/([^/]+)/?',
+        'index.php?bacera_img_slug=$matches[1]',
         'top'
     );
 });
 
 // 3. Kích hoạt trạm trung chuyển ảnh khi bắt được đường dẫn ảo
 add_action( 'template_redirect', function() {
-    if ( get_query_var( 'pancake_img_slug' ) ) {
+    if ( get_query_var( 'bacera_img_slug' ) ) {
         // Gọi hàm xử lý từ Utils để đẩy dữ liệu ảnh về trình duyệt 
         Bacera_Utils::handle_image_streaming();
     }
