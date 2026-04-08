@@ -1,27 +1,30 @@
 <?php
 /**
  * Product Card Component
- * @param string $image URL ảnh sản phẩm
- * @param string $brand Thương hiệu
- * @param string $name Tên sản phẩm
- * @param string $price Giá khuyến mãi
- * @param string $originalPrice Giá gốc
- * @param string $discount Phần trăm giảm giá
- * @param string $class Thêm Class
+ * @param string $image URL ảnh sản phẩm (Sử dụng đường dẫn ảo SEO từ Controller) 
+ * @param string $brand Thương hiệu Bacera [cite: 1]
+ * @param string $name Tên sản phẩm [cite: 68]
+ * @param string $price Giá khuyến mãi/Giá hiện tại [cite: 69, 87]
+ * @param string $originalPrice Giá gốc (nếu có) [cite: 65]
+ * @param string $discount Phần trăm giảm giá [cite: 28]
+ * @param string $class Thêm Class tùy chỉnh
  */
 $image = isset($args['image']) ? $args['image'] : 'https://placehold.co/400x533/f0ece3/8d6a54?text=Product';
-$brand = isset($args['brand']) ? $args['brand'] : 'Whispers of Clay';
+$brand = isset($args['brand']) ? $args['brand'] : 'Bacera';
 $name = isset($args['name']) ? $args['name'] : 'Whisper Cup';
-$price = isset($args['price']) ? $args['price'] : '$28';
-$originalPrice = isset($args['originalPrice']) ? $args['originalPrice'] : '$40';
-$discount = isset($args['discount']) ? $args['discount'] : '-30%';
+$price = isset($args['price']) ? $args['price'] : '0 VND';
+$originalPrice = isset($args['originalPrice']) ? $args['originalPrice'] : '';
+$discount = isset($args['discount']) ? $args['discount'] : '';
 $class = isset($args['class']) ? $args['class'] : '';
 ?>
 <div class="w-full inline-flex flex-col justify-start items-start gap-2 group cursor-pointer <?php echo esc_attr($class); ?>">
     
     <div class="self-stretch relative rounded-lg flex flex-col justify-start items-start overflow-hidden bg-neutral-100 aspect-[3/4]">
         
-        <img src="<?php echo esc_url($image); ?>" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="<?php echo esc_attr($name); ?>"/>
+        <img src="<?php echo esc_url($image); ?>" 
+             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+             alt="<?php echo esc_attr($name); ?>"
+             loading="lazy" />
 
         <div class="absolute inset-0 flex flex-col justify-start items-center gap-2 pointer-events-none">
             <div class="w-full flex-1 bg-gradient-to-b from-black/0 to-black/20"></div>
@@ -60,5 +63,4 @@ $class = isset($args['class']) ? $args['class'] : '';
             </div>
         </div>
     </div>
-
 </div>

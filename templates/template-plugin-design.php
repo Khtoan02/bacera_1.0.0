@@ -24,16 +24,23 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
         switch ( $action_tested ) {
             // ================= SETUP & CATEGORIES =================
             case 'test_connection':
-                $api_response = $api->request( '/shops/{SHOP_ID}/warehouses', 'GET' );
+                $api_response = $api->request( '/shops/{SHOP_ID}/warehouses', 'GET' ); 
                 break;
 
             case 'get_categories':
-                $api_response = $api->request( '/shops/{SHOP_ID}/categories', 'GET' );
+                $api_response = $api->request( '/shops/{SHOP_ID}/categories', 'GET' ); 
                 break;
 
             // ================= PRODUCTS & INVENTORY =================
             case 'get_products':
-                $api_response = $api->request( '/shops/{SHOP_ID}/products/variations?page_size=6', 'GET' );
+                $api_response = $api->request( '/shops/{SHOP_ID}/products/variations?page_size=6', 'GET' ); 
+                
+                // ĐỒNG BỘ: Lưu dữ liệu vào WordPress Database để fix lỗi link ảnh gốc
+                if ( isset( $api_response['success'] ) && $api_response['success'] && ! empty( $api_response['data'] ) ) {
+                    foreach ( $api_response['data'] as $item ) {
+                        Bacera_Utils::upsert_external_product( $item );
+                    }
+                }
                 break;
 
             case 'create_mock_product':
@@ -51,7 +58,12 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
                         ]
                     ]
                 ];
-                $api_response = $api->request( '/shops/{SHOP_ID}/products', 'POST', $mock_product );
+                $api_response = $api->request( '/shops/{SHOP_ID}/products', 'POST', $mock_product ); 
+
+                // ĐỒNG BỘ: Lưu sản phẩm vừa tạo vào WordPress Database ngay lập tức
+                if ( isset( $api_response['success'] ) && $api_response['success'] && ! empty( $api_response['data'] ) ) {
+                    Bacera_Utils::upsert_external_product( $api_response['data'] );
+                }
                 break;
 
             case 'update_inventory':
@@ -59,12 +71,12 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
                     'is_actual_remain_quantity' => true,
                     'variations_warehouses' => [] 
                 ];
-                $api_response = $api->request( '/shops/{SHOP_ID}/variations/update_quantity', 'POST', $mock_inventory );
+                $api_response = $api->request( '/shops/{SHOP_ID}/variations/update_quantity', 'POST', $mock_inventory ); 
                 break;
 
             // ================= ORDERS =================
             case 'get_orders':
-                $api_response = $api->request( '/shops/{SHOP_ID}/orders?page_size=6', 'GET' );
+                $api_response = $api->request( '/shops/{SHOP_ID}/orders?page_size=6', 'GET' ); 
                 break;
 
             case 'create_mock_order':
@@ -74,7 +86,7 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
                     'total_amount' => 350000,
                     'note' => 'Đơn hàng test từ API Dashboard. Vui lòng huỷ.'
                 ];
-                $api_response = $api->request( '/shops/{SHOP_ID}/orders', 'POST', $mock_order );
+                $api_response = $api->request( '/shops/{SHOP_ID}/orders', 'POST', $mock_order ); 
                 break;
 
             // ================= CUSTOMERS =================
@@ -88,7 +100,7 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
                     'phone_number' => '09' . wp_rand( 10000000, 99999999 ),
                     'email' => 'test' . wp_rand( 100, 999 ) . '@bacera.vn'
                 ];
-                $api_response = $api->request( '/shops/{SHOP_ID}/customers', 'POST', $mock_customer );
+                $api_response = $api->request( '/shops/{SHOP_ID}/customers', 'POST', $mock_customer ); 
                 break;
 
             default:
@@ -150,15 +162,15 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
                             <div class="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-[32px]">
                                 <?php foreach ( $items_to_render as $p ) : 
                                     $name = $p['product']['name'] ?? $p['name'] ?? 'Sản phẩm chưa có tên';
+                                    
+                                    // LOGIC MỚI: Không dùng link gốc, chuyển sang dùng Proxy URL của Bacera
+                                    $image_url = Bacera_Utils::get_proxy_url($p); 
+
                                     $price_at_counter = isset($p['price_at_counter']) ? (float)$p['price_at_counter'] : (isset($p['variations'][0]['price_at_counter']) ? (float)$p['variations'][0]['price_at_counter'] : 0);
                                     $retail_price     = isset($p['retail_price']) ? (float)$p['retail_price'] : (isset($p['variations'][0]['retail_price']) ? (float)$p['variations'][0]['retail_price'] : 0);
                                     
                                     $price = $price_at_counter > 0 ? $price_at_counter : $retail_price;
                                     $original_price = ($retail_price > $price) ? $retail_price : 0; 
-
-                                    $image_url = '';
-                                    if (!empty($p['images']) && is_array($p['images'])) { $image_url = $p['images'][0]; } 
-                                    elseif (!empty($p['product']['image'])) { $image_url = $p['product']['image']; }
 
                                     $discount_percent = false;
                                     if ($original_price > 0 && $price < $original_price) {
@@ -169,7 +181,7 @@ if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['pancake_test_nonce'
                                         'title'    => $name,
                                         'price'    => number_format($price, 0, ',', '.') . ' ₫',
                                         'old_price'=> $original_price > 0 ? number_format($original_price, 0, ',', '.') . ' ₫' : '',
-                                        'image'    => $image_url,
+                                        'image'    => $image_url, // Bây giờ là link: bacera.vn/pancake-img/...
                                         'discount' => $discount_percent
                                     ]);
                                 endforeach; ?>
