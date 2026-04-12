@@ -19,7 +19,7 @@ $position_class = $is_preview ? 'absolute inset-0' : 'fixed inset-0 z-[100]';
      x-transition:leave-end="opacity-0"
      style="display: none;">
      
-    <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm shadow-2xl" @click="modalOpen = false"></div>
+    <div class="absolute inset-0 bg-primary-900/60 backdrop-blur-sm shadow-2xl" @click="modalOpen = false"></div>
     
     <div class="absolute inset-0 z-10 w-full h-full overflow-y-auto pointer-events-none">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
@@ -32,10 +32,10 @@ $position_class = $is_preview ? 'absolute inset-0' : 'fixed inset-0 z-[100]';
                  x-transition:leave="transition ease-in duration-200 transform"
                  x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                  x-transition:leave-end="opacity-0 translate-y-8 scale-95"
-                 class="relative transform overflow-hidden rounded-[2rem] bg-white p-6 md:p-8 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-md border border-stone-200 pointer-events-auto">
+                 class="relative transform overflow-hidden rounded-[2rem] bg-white p-6 md:p-8 text-left shadow-2xl transition-all sm:my-8 w-full sm:max-w-md border border-neutral-300 pointer-events-auto">
                 
                 <div class="absolute top-4 right-4">
-                    <button type="button" @click="modalOpen = false" class="bg-stone-50 rounded-full p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition-colors focus:outline-none">
+                    <button type="button" @click="modalOpen = false" class="bg-neutral-100 rounded-full p-2 text-primary-400 hover:text-primary-900 hover:bg-neutral-100 transition-colors focus:outline-none">
                         <span class="sr-only">Close</span>
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
                     </button>
@@ -48,11 +48,11 @@ $position_class = $is_preview ? 'absolute inset-0' : 'fixed inset-0 z-[100]';
                         </svg>
                     </div>
                     <div class="mt-6 text-center">
-                        <h3 class="text-[24px] font-bold leading-tight text-stone-900 font-display" id="modal-title">
+                        <h3 class="text-[24px] font-bold leading-tight text-primary-900 font-display" id="modal-title">
                             <?php echo esc_html($title); ?>
                         </h3>
                         <div class="mt-3">
-                            <p class="text-[16px] text-stone-500 font-normal leading-relaxed">
+                            <p class="text-[16px] text-primary-600 font-normal leading-relaxed">
                                 <?php echo esc_html($desc); ?>
                             </p>
                         </div>

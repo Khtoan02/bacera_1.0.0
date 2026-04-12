@@ -79,9 +79,9 @@ $shop_url      = hp_shop_url();
 
 <section id="hero" class="relative w-full min-h-[90vh] flex items-center overflow-hidden bg-primary-900">
     <div class="absolute inset-0">
-        <img src="https://toan.host/wp-content/uploads/2026/03/BG.jpg"
+        <img src="https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=1920"
              alt="Bacera Hero" class="w-full h-full object-cover opacity-60" loading="eager">
-        <div class="absolute inset-0 bg-gradient-to-r from-primary-900/85 via-primary-900/40 to-transparent"></div>
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgba(61,47,38,0.85) 0%, rgba(61,47,38,0.4) 60%, transparent 100%);"></div>
     </div>
 
     <div class="relative z-10 w-full max-w-[1232px] mx-auto px-6 lg:px-0 py-32">

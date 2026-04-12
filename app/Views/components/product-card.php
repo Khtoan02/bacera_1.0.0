@@ -35,7 +35,7 @@ $class = isset($args['class']) ? $args['class'] : '';
 
         <?php if ($discount): ?>
         <div class="w-full p-3 absolute left-0 top-0 flex flex-col justify-start items-start gap-2 z-10">
-            <div class="p-1 opacity-70 bg-stone-800 rounded inline-flex justify-center items-center gap-2">
+            <div class="p-1 opacity-70 bg-primary-800 rounded inline-flex justify-center items-center gap-2">
                 <div class="justify-start text-stone-200 text-xs font-medium leading-4 tracking-tight">
                     <?php echo esc_html($discount); ?>
                 </div>
@@ -47,15 +47,15 @@ $class = isset($args['class']) ? $args['class'] : '';
     <div class="self-stretch inline-flex justify-start items-start mt-0.5">
         <div class="w-full inline-flex flex-col justify-start items-start gap-1">
             <div class="self-stretch flex flex-col justify-start items-start">
-                <div class="opacity-90 justify-start text-stone-700 text-xs font-normal leading-4"><?php echo esc_html($brand); ?></div>
-                <h3 class="self-stretch justify-start text-stone-700 text-base font-medium leading-5 group-hover:text-accent-500 transition-colors">
+                <div class="opacity-90 justify-start text-primary-700 text-xs font-normal leading-4"><?php echo esc_html($brand); ?></div>
+                <h3 class="self-stretch justify-start text-primary-700 text-base font-medium leading-5 group-hover:text-accent-500 transition-colors">
                     <?php echo esc_html($name); ?>
                 </h3>
             </div>
             <div class="self-stretch inline-flex justify-start items-center gap-1 mt-0.5">
-                <div class="justify-start text-stone-700 text-base font-medium leading-4"><?php echo esc_html($price); ?></div>
+                <div class="justify-start text-primary-700 text-base font-medium leading-4"><?php echo esc_html($price); ?></div>
                 <?php if ($originalPrice): ?>
-                <div class="opacity-30 justify-start text-stone-800 text-xs font-normal line-through leading-4"><?php echo esc_html($originalPrice); ?></div>
+                <div class="opacity-30 justify-start text-primary-800 text-xs font-normal line-through leading-4"><?php echo esc_html($originalPrice); ?></div>
                 <?php endif; ?>
             </div>
         </div>

@@ -9,15 +9,15 @@ $active = isset($args['active']) ? $args['active'] : 0;
             <a href="#" @click.prevent="activeTab = <?php echo $index; ?>" class="cursor-pointer inline-flex flex-col justify-center items-center gap-2 group transition-opacity font-sans pb-[2px]">
                 
                 <span class="text-[16px] leading-[1.2] transition-all"
-                      :class="activeTab === <?php echo $index; ?> ? 'text-stone-700 font-medium' : 'text-stone-700 opacity-50 font-normal group-hover:opacity-80'">
+                      :class="activeTab === <?php echo $index; ?> ? 'text-primary-700 font-medium' : 'text-primary-700 opacity-50 font-normal group-hover:opacity-80'">
                     <?php echo esc_html($tab); ?>
                 </span>
                 
                 <div class="w-full h-[2px] transition-colors"
-                     :class="activeTab === <?php echo $index; ?> ? 'bg-stone-700' : 'bg-transparent group-hover:bg-stone-400'"></div>
+                     :class="activeTab === <?php echo $index; ?> ? 'bg-stone-700' : 'bg-transparent group-hover:bg-neutral-400'"></div>
             </a>
         <?php endforeach; ?>
     </nav>
     
-    <div class="w-full h-[2px] bg-stone-300 -mt-[4px] z-0"></div>
+    <div class="w-full h-[2px] bg-neutral-300 -mt-[4px] z-0"></div>
 </div>

@@ -13,13 +13,13 @@ $base_classes = "w-full h-16 px-4 py-6 rounded-lg flex justify-between items-cen
 // State overrides
 switch ($state) {
     case 'focus':
-        $box_classes = "ring-2 ring-inset ring-stone-700";
+        $box_classes = "ring-2 ring-inset ring-neutral-700";
         break;
     case 'filled':
-        $box_classes = "ring-1 ring-inset ring-stone-700";
+        $box_classes = "ring-1 ring-inset ring-neutral-700";
         break;
     default:
-        $box_classes = "ring-1 ring-inset ring-stone-300 hover:ring-stone-400";
+        $box_classes = "ring-1 ring-inset ring-neutral-300 hover:ring-neutral-400";
         break;
 }
 ?>
@@ -36,12 +36,12 @@ switch ($state) {
     
     <div @click="open = !open" 
          class="<?php echo esc_attr($base_classes . ' ' . $box_classes); ?>"
-         :class="open ? 'ring-2 ring-inset ring-stone-700' : ''">
+         :class="open ? 'ring-2 ring-inset ring-neutral-700' : ''">
         <div class="flex-1 flex flex-col justify-center items-start gap-0.5 pointer-events-none">
-            <span class="opacity-70 text-stone-800 text-[12px] font-normal leading-none tracking-tight"><?php echo esc_html($label); ?></span>
-            <span class="text-stone-800 text-[16px] font-medium leading-[1.2] mt-0.5" x-text="selectedText"></span>
+            <span class="opacity-70 text-primary-800 text-[12px] font-normal leading-none tracking-tight"><?php echo esc_html($label); ?></span>
+            <span class="text-primary-800 text-[16px] font-medium leading-[1.2] mt-0.5" x-text="selectedText"></span>
         </div>
-        <div class="w-6 h-6 flex items-center justify-center text-stone-600 transition-transform duration-300 transform" :class="open ? 'rotate-180' : ''">
+        <div class="w-6 h-6 flex items-center justify-center text-primary-600 transition-transform duration-300 transform" :class="open ? 'rotate-180' : ''">
             <svg class="w-5 h-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
     </div>
@@ -54,19 +54,19 @@ switch ($state) {
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-2"
          style="display: none;"
-         class="absolute top-[72px] left-0 w-full py-1 bg-stone-50 rounded-lg shadow-[0px_0px_16px_0px_rgba(0,0,0,0.08)] flex flex-col z-[60]">
+         class="absolute top-[72px] left-0 w-full py-1 bg-neutral-100 rounded-lg shadow-[0px_0px_16px_0px_rgba(0,0,0,0.08)] flex flex-col z-[60]">
         <?php foreach($options as $index => $opt): ?>
         <div class="w-full px-2 py-1">
             <button type="button" 
                     @click.stop="selectedIndex = <?php echo $index; ?>; selectedText = '<?php echo esc_js($opt); ?>'; open = false;"
                     class="w-full px-3 py-2.5 rounded-md flex justify-between items-center transition-colors"
-                    :class="selectedIndex === <?php echo $index; ?> ? 'bg-stone-200' : 'bg-transparent hover:bg-stone-200'">
-                <span class="flex-1 text-left opacity-80 text-stone-700 text-[16px] font-normal leading-none">
+                    :class="selectedIndex === <?php echo $index; ?> ? 'bg-neutral-200' : 'bg-transparent hover:bg-neutral-200'">
+                <span class="flex-1 text-left opacity-80 text-primary-700 text-[16px] font-normal leading-none">
                     <?php echo esc_html($opt); ?>
                 </span>
                 
                 <template x-if="selectedIndex === <?php echo $index; ?>">
-                    <svg class="w-4 h-4 text-stone-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 text-primary-800 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 </template>
             </button>
         </div>

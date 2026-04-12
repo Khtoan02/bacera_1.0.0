@@ -18,17 +18,17 @@ switch ($state) {
         $textarea_classes = "bg-red-50 ring-1 ring-inset ring-red-600 text-red-600 placeholder:text-red-600 focus:ring-1 focus:ring-inset focus:ring-red-600";
         break;
     case 'disabled':
-        $textarea_classes = "bg-stone-200 ring-1 ring-inset ring-stone-200 text-stone-400 placeholder:text-stone-400 cursor-not-allowed opacity-50";
+        $textarea_classes = "bg-neutral-200 ring-1 ring-inset ring-neutral-200 text-primary-400 placeholder:text-primary-400 cursor-not-allowed opacity-50";
         break;
     case 'typing':
-        $textarea_classes = "bg-white ring-2 ring-inset ring-stone-700 text-stone-800 placeholder:text-stone-800";
+        $textarea_classes = "bg-white ring-2 ring-inset ring-neutral-700 text-primary-800 placeholder:text-primary-800";
         break;
     case 'filled':
-        $textarea_classes = "bg-white ring-1 ring-inset ring-stone-700 text-stone-800";
+        $textarea_classes = "bg-white ring-1 ring-inset ring-neutral-700 text-primary-800";
         break;
     default:
         // Default interactive state
-        $textarea_classes = "bg-white ring-1 ring-inset ring-stone-300 text-stone-800 placeholder:text-stone-800/50 hover:ring-stone-400 focus:ring-2 focus:ring-inset focus:ring-stone-700";
+        $textarea_classes = "bg-white ring-1 ring-inset ring-neutral-300 text-primary-800 placeholder:text-primary-800/50 hover:ring-neutral-400 focus:ring-2 focus:ring-inset focus:ring-neutral-700";
         break;
 }
 ?>

@@ -21,7 +21,7 @@ $tag = $href ? 'a' : 'div';
 $href_attr = $href ? 'href="' . esc_url($href) . '"' : '';
 ?>
 <<?php echo $tag; ?> <?php echo $href_attr; ?> 
-    class="flex flex-col items-start justify-end gap-2 p-8 relative rounded-lg overflow-hidden w-full group cursor-pointer hover:-translate-y-1 transition-transform duration-300 shadow-sm hover:shadow-xl bg-stone-100 <?php echo esc_attr($ratio_class); ?> <?php echo esc_attr($class); ?>"
+    class="flex flex-col items-start justify-end gap-2 p-8 relative rounded-lg overflow-hidden w-full group cursor-pointer hover:-translate-y-1 transition-transform duration-300 shadow-sm hover:shadow-xl bg-neutral-100 <?php echo esc_attr($ratio_class); ?> <?php echo esc_attr($class); ?>"
 >
     
     <img 

@@ -49,8 +49,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Gowun+Batang:wght@400;700&family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
-
+    <script defer src="<?php echo esc_url(get_template_directory_uri()); ?>/assets/js/alpine.min.js"></script>
     <style>
     /* ═══════════════════════════════════════════════════════
        HEADER — CSS-NATIVE SYSTEM
@@ -246,7 +245,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
 
     <?php wp_head(); ?>
 </head>
-<body <?php body_class('bg-stone-50 font-sans antialiased overflow-x-hidden'); ?>>
+<body <?php body_class('bg-neutral-100 font-sans antialiased overflow-x-hidden'); ?>>
 <?php wp_body_open(); ?>
 
 <div id="page" class="flex flex-col min-h-screen">
@@ -311,11 +310,11 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                 </div>
 
                 <div class="lang-dropdown" id="lang-panel">
-                    <button onclick="mstSwitchLang('en','English')"  class="w-full flex items-center gap-2.5 px-4 py-3 text-[#d95f47] text-[13px] font-medium font-sans hover:bg-stone-50 transition-colors">🇺🇸 <span>English</span></button>
-                    <div class="h-px bg-stone-100 mx-3"></div>
-                    <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="w-full flex items-center gap-2.5 px-4 py-3 text-stone-600 text-[13px] font-sans hover:bg-stone-50 hover:text-[#d95f47] transition-colors">🇻🇳 <span>Tiếng Việt</span></button>
-                    <div class="h-px bg-stone-100 mx-3"></div>
-                    <button onclick="mstSwitchLang('fr','Français')"   class="w-full flex items-center gap-2.5 px-4 py-3 text-stone-600 text-[13px] font-sans hover:bg-stone-50 hover:text-[#d95f47] transition-colors">🇫🇷 <span>Français</span></button>
+                    <button onclick="mstSwitchLang('en','English')"  class="w-full flex items-center gap-2.5 px-4 py-3 text-[#d95f47] text-[13px] font-medium font-sans hover:bg-neutral-100 transition-colors">🇺🇸 <span>English</span></button>
+                    <div class="h-px bg-neutral-100 mx-3"></div>
+                    <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="w-full flex items-center gap-2.5 px-4 py-3 text-primary-600 text-[13px] font-sans hover:bg-neutral-100 hover:text-[#d95f47] transition-colors">🇻🇳 <span>Tiếng Việt</span></button>
+                    <div class="h-px bg-neutral-100 mx-3"></div>
+                    <button onclick="mstSwitchLang('fr','Français')"   class="w-full flex items-center gap-2.5 px-4 py-3 text-primary-600 text-[13px] font-sans hover:bg-neutral-100 hover:text-[#d95f47] transition-colors">🇫🇷 <span>Français</span></button>
                 </div>
             </div>
 
@@ -352,15 +351,15 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                 </button>
 
                 <div class="acct-panel" id="acct-panel">
-                    <div class="px-4 py-3 border-b border-stone-100">
+                    <div class="px-4 py-3 border-b border-neutral-200">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-full overflow-hidden shrink-0">
                                 <img src="<?php echo esc_url($avatar_url); ?>" class="w-full h-full" alt="">
                             </div>
                             <div class="min-w-0">
-                                <p class="text-stone-800 text-[14px] font-semibold truncate"><?php echo esc_html($cust_name); ?></p>
+                                <p class="text-primary-800 text-[14px] font-semibold truncate"><?php echo esc_html($cust_name); ?></p>
                                 <?php if ($cust_sub): ?>
-                                <p class="text-stone-400 text-[12px] truncate"><?php echo esc_html($cust_sub); ?></p>
+                                <p class="text-primary-400 text-[12px] truncate"><?php echo esc_html($cust_sub); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -374,8 +373,8 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                     ];
                     foreach ($acct_menu as $am): ?>
                     <a href="<?php echo esc_url($am['url']); ?>"
-                       class="flex items-center gap-3 px-4 py-2.5 text-stone-600 text-[14px] font-medium font-sans hover:bg-stone-50 hover:text-[#d95f47] transition-colors group/ai">
-                        <div class="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center shrink-0 group-hover/ai:bg-orange-50 transition-colors">
+                       class="flex items-center gap-3 px-4 py-2.5 text-primary-600 text-[14px] font-medium font-sans hover:bg-neutral-100 hover:text-[#d95f47] transition-colors group/ai">
+                        <div class="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0 group-hover/ai:bg-orange-50 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $am['icon']; ?>"/>
                             </svg>
@@ -383,10 +382,10 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                         <?php echo esc_html($am['label']); ?>
                     </a>
                     <?php endforeach; ?>
-                    <div class="h-px bg-stone-100 mx-4 my-1.5"></div>
+                    <div class="h-px bg-neutral-100 mx-4 my-1.5"></div>
                     <a href="<?php echo esc_url( add_query_arg( 'bacera_logout', '1', home_url( '/' ) ) ); ?>"
-                       class="w-full flex items-center gap-3 px-4 py-2.5 text-stone-500 text-[14px] font-medium font-sans hover:bg-red-50 hover:text-red-500 transition-colors mb-1 group/lo">
-                        <div class="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center shrink-0 group-hover/lo:bg-red-50 transition-colors">
+                       class="w-full flex items-center gap-3 px-4 py-2.5 text-primary-600 text-[14px] font-medium font-sans hover:bg-red-50 hover:text-red-500 transition-colors mb-1 group/lo">
+                        <div class="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0 group-hover/lo:bg-red-50 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
@@ -397,7 +396,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
             </div>
             <?php else: ?>
             <a id="bacera-login-btn" href="<?php echo esc_url($auth_page); ?>"
-               class="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 hdr-link text-[13px] font-medium font-sans hover:border-[#d95f47] hover:text-[#d95f47] transition-all">
+               class="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-300 hdr-link text-[13px] font-medium font-sans hover:border-[#d95f47] hover:text-[#d95f47] transition-all">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                 </svg>
@@ -438,15 +437,15 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
                 <div>
-                    <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Mua hàng theo công năng</h3>
-                    <p class="text-stone-500 text-[13px] font-sans leading-relaxed">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng hơn.</p>
+                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Mua hàng theo công năng</h3>
+                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng hơn.</p>
                 </div>
                 <a href="<?php echo esc_url($shop_archive_url); ?>"
                    class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">
                     Xem tất cả
                 </a>
             </div>
-            <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+            <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
 
             <?php if (!is_wp_error($mega_parent_cats) && $mega_parent_cats): ?>
             <div class="flex-1 grid grid-cols-4 gap-3">
@@ -459,15 +458,15 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                 ?>
 
                 <a href="<?php echo esc_url($cat_url); ?>"
-                   class="group/sc flex flex-col items-center justify-center gap-2.5 py-3 px-2 rounded-xl border border-stone-200 bg-white hover:border-[#d95f47] hover:bg-[#fef8f7] transition-all duration-200 h-[100px]">
+                   class="group/sc flex flex-col items-center justify-center gap-2.5 py-3 px-2 rounded-xl border border-neutral-300 bg-white hover:border-[#d95f47] hover:bg-[#fef8f7] transition-all duration-200 h-[100px]">
 
-                    <div class="w-12 h-12 rounded-xl bg-stone-100 group-hover/sc:bg-[#fff0ec] border border-stone-200 group-hover/sc:border-[#f5c8be] flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                    <div class="w-12 h-12 rounded-xl bg-neutral-100 group-hover/sc:bg-[#fff0ec] border border-neutral-300 group-hover/sc:border-[#f5c8be] flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                         <?php if ($img_url): ?>
                         <img src="<?php echo esc_url($img_url); ?>"
                              class="w-9 h-9 object-contain transition-transform duration-300 group-hover/sc:scale-110"
                              alt="<?php echo esc_attr($cat->name); ?>" loading="lazy">
                         <?php else: ?>
-                        <svg class="w-[22px] h-[22px] text-stone-500 group-hover/sc:text-[#d95f47] transition-colors"
+                        <svg class="w-[22px] h-[22px] text-primary-600 group-hover/sc:text-[#d95f47] transition-colors"
                              fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $icon_path; ?>"/>
                         </svg>
@@ -475,11 +474,11 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                     </div>
 
                     <div class="text-center leading-none">
-                        <span class="block text-stone-700 text-[11.5px] font-semibold font-sans group-hover/sc:text-[#d95f47] transition-colors leading-tight line-clamp-2">
+                        <span class="block text-primary-700 text-[11.5px] font-semibold font-sans group-hover/sc:text-[#d95f47] transition-colors leading-tight line-clamp-2">
                             <?php echo esc_html($cat->name); ?>
                         </span>
                         <?php if ($cat->count > 0): ?>
-                        <span class="block text-stone-400 text-[10px] font-sans mt-0.5"><?php echo $cat->count; ?> sản phẩm</span>
+                        <span class="block text-primary-400 text-[10px] font-sans mt-0.5"><?php echo $cat->count; ?> sản phẩm</span>
                         <?php endif; ?>
                     </div>
                 </a>
@@ -489,7 +488,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
             <?php else: ?>
 
             <div class="flex-1 flex items-center justify-center">
-                <div class="text-center text-stone-400">
+                <div class="text-center text-primary-400">
                     <svg class="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
@@ -506,12 +505,12 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
                 <div>
-                    <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Khám phá workshop</h3>
-                    <p class="text-stone-500 text-[13px] font-sans leading-relaxed">Trải nghiệm nghệ thuật làm gốm thủ công đầy cảm hứng cùng chúng tôi.</p>
+                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Khám phá workshop</h3>
+                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Trải nghiệm nghệ thuật làm gốm thủ công đầy cảm hứng cùng chúng tôi.</p>
                 </div>
                 <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả lịch</a>
             </div>
-            <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+            <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <div class="flex-1 grid grid-cols-2 gap-4">
                 <?php
                 $mega_workshops = [
@@ -521,16 +520,16 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                     ['title'=>'Team-building Pottery', 'desc'=>'A unique bonding experience for your team to create together.','price'=>'Contact us',       'detail'=>'Organise a Group Event'],
                 ];
                 foreach ($mega_workshops as $mw): ?>
-                <a href="#" class="group/mw flex items-center gap-4 p-3 rounded-xl hover:bg-stone-50 transition-colors">
-                    <div class="w-[88px] h-[88px] overflow-hidden rounded-xl shrink-0 bg-stone-200">
+                <a href="#" class="group/mw flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-100 transition-colors">
+                    <div class="w-[88px] h-[88px] overflow-hidden rounded-xl shrink-0 bg-neutral-200">
                         <img src="https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=120"
                              class="w-full h-full object-cover group-hover/mw:scale-105 transition-transform duration-500" alt="">
                     </div>
                     <div class="flex flex-col min-w-0">
-                        <h4 class="text-stone-800 text-[14px] font-semibold font-sans mb-1 group-hover/mw:text-[#d95f47] transition-colors leading-snug"><?php echo $mw['title']; ?></h4>
-                        <p class="text-stone-500 text-[12px] font-sans leading-snug mb-2 line-clamp-2"><?php echo $mw['desc']; ?></p>
-                        <p class="text-stone-800 text-[13px] font-medium font-sans"><?php echo $mw['price']; ?></p>
-                        <p class="text-stone-400 text-[11px] font-sans mt-0.5"><?php echo $mw['detail']; ?></p>
+                        <h4 class="text-primary-800 text-[14px] font-semibold font-sans mb-1 group-hover/mw:text-[#d95f47] transition-colors leading-snug"><?php echo $mw['title']; ?></h4>
+                        <p class="text-primary-600 text-[12px] font-sans leading-snug mb-2 line-clamp-2"><?php echo $mw['desc']; ?></p>
+                        <p class="text-primary-800 text-[13px] font-medium font-sans"><?php echo $mw['price']; ?></p>
+                        <p class="text-primary-400 text-[11px] font-sans mt-0.5"><?php echo $mw['detail']; ?></p>
                     </div>
                 </a>
                 <?php endforeach; ?>
@@ -542,12 +541,12 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
         <div class="max-w-[1232px] mx-auto px-6 py-6 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
                 <div>
-                    <h3 class="text-stone-800 text-[17px] font-semibold font-sans mb-2">Về chúng tôi</h3>
-                    <p class="text-stone-500 text-[13px] font-sans leading-relaxed">Xưởng gốm Bacera — nơi nghệ thuật thủ công gặp gỡ tâm hồn.</p>
+                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Về chúng tôi</h3>
+                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Xưởng gốm Bacera — nơi nghệ thuật thủ công gặp gỡ tâm hồn.</p>
                 </div>
                 <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Đọc thêm</a>
             </div>
-            <div class="w-px bg-stone-200 self-stretch shrink-0"></div>
+            <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <nav class="flex-1 grid grid-cols-3 gap-x-8 gap-y-1 content-start py-1">
                 <?php
                 $about_links = [
@@ -559,9 +558,9 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                 ];
                 foreach ($about_links as $al): ?>
                 <a href="<?php echo esc_url($al['url']); ?>"
-                   class="flex flex-col gap-0.5 px-3 py-3 rounded-xl hover:bg-stone-50 transition-colors group/al">
-                    <span class="text-stone-800 text-[14px] font-medium font-sans group-hover/al:text-[#d95f47] transition-colors"><?php echo esc_html($al['label']); ?></span>
-                    <span class="text-stone-400 text-[12px] font-sans"><?php echo esc_html($al['desc']); ?></span>
+                   class="flex flex-col gap-0.5 px-3 py-3 rounded-xl hover:bg-neutral-100 transition-colors group/al">
+                    <span class="text-primary-800 text-[14px] font-medium font-sans group-hover/al:text-[#d95f47] transition-colors"><?php echo esc_html($al['label']); ?></span>
+                    <span class="text-primary-400 text-[12px] font-sans"><?php echo esc_html($al['desc']); ?></span>
                 </a>
                 <?php endforeach; ?>
             </nav>
@@ -592,12 +591,12 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
              class="hidden absolute top-[64px] left-0 right-0 bg-white shadow-xl z-[60] py-3">
             <nav class="flex flex-col">
                 <?php foreach (['Shop','Workshop','About us','Blog','Contact'] as $ml): ?>
-                <a href="#" class="px-5 py-3 text-stone-700 text-[15px] font-medium border-b border-stone-100 last:border-0 hover:text-[#d95f47] transition-colors"><?php echo $ml; ?></a>
+                <a href="#" class="px-5 py-3 text-primary-700 text-[15px] font-medium border-b border-neutral-200 last:border-0 hover:text-[#d95f47] transition-colors"><?php echo $ml; ?></a>
                 <?php endforeach; ?>
             </nav>
-            <div class="flex items-center gap-4 px-5 mt-3 pt-3 border-t border-stone-100">
-                <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="text-stone-600 text-sm">🇻🇳 Tiếng Việt</button>
-                <span class="text-stone-300">·</span>
+            <div class="flex items-center gap-4 px-5 mt-3 pt-3 border-t border-neutral-200">
+                <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="text-primary-600 text-sm">🇻🇳 Tiếng Việt</button>
+                <span class="text-primary-300">·</span>
                 <button onclick="mstSwitchLang('en','English')" class="text-[#d95f47] text-sm font-semibold">🇺🇸 English</button>
             </div>
         </div>
@@ -625,7 +624,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
     </form>
 
     <button id="search-close"
-            class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-stone-100 text-stone-500 hover:text-stone-800 transition-colors"
+            class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-neutral-100 text-primary-600 hover:text-primary-800 transition-colors"
             aria-label="Đóng tìm kiếm">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>

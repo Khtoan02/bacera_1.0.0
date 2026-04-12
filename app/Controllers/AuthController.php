@@ -25,6 +25,8 @@ class AuthController {
 
         add_action( 'wp_ajax_nopriv_bacera_send_pw_otp',      [ $this, 'handle_send_pw_otp' ] );
         add_action( 'wp_ajax_bacera_send_pw_otp',             [ $this, 'handle_send_pw_otp' ] );
+
+        add_action( 'wp_ajax_bacera_admin_get_otp', [ $this, 'handle_admin_get_otp' ] );
     }
 
     /**
@@ -81,7 +83,7 @@ class AuthController {
         // We use transient to store temporary OTP data for 15 mins.
         // In a real scenario, use session id. Here we use IP + identifier as key just for demo.
         $transient_key = 'otp_' . md5($_SERVER['REMOTE_ADDR'] . $identifier);
-        $mock_otp = '1234'; // Simulated OTP for testing
+        $real_otp = str_pad( (string) wp_rand( 0, 999999 ), 6, '0', STR_PAD_LEFT );
 
         if ($state === 'register') {
             $name = sanitize_text_field($_POST['name'] ?? '');
@@ -100,10 +102,25 @@ class AuthController {
                 'name' => $name,
                 'identifier' => $identifier,
                 'password' => wp_hash_password($password),
-                'otp' => $mock_otp
+                'otp' => $real_otp
             ], 15 * MINUTE_IN_SECONDS);
 
-            wp_send_json_success(['message' => 'Mã OTP (1234) đã được gửi.', 'otp_demo' => $mock_otp]);
+            // Send OTP via email if identifier is an email address
+            $otp_sent = false;
+            if ( filter_var( $identifier, FILTER_VALIDATE_EMAIL ) ) {
+                $otp_sent = ConfigController::send_otp_email( $identifier, $real_otp, 'register' );
+            }
+
+            $message = $otp_sent
+                ? 'Mã OTP đã được gửi đến email của bạn.'
+                : 'Mã OTP đã được tạo. Vui lòng kiểm tra email (hoặc liên hệ admin nếu không nhận được).';
+
+            $response_data = ['message' => $message];
+            // Dev helper: include OTP in response when email not sent (no SMTP)
+            if ( ! $otp_sent ) {
+                $response_data['dev_otp'] = $real_otp;
+            }
+            wp_send_json_success( $response_data );
 
         } elseif ($state === 'login') {
             // Find user
@@ -134,10 +151,25 @@ class AuthController {
                 'type' => 'login',
                 'user_id' => $user->id,
                 'identifier' => $identifier,
-                'otp' => $mock_otp
+                'otp' => $real_otp
             ], 15 * MINUTE_IN_SECONDS);
 
-            wp_send_json_success(['message' => 'Mã OTP (1234) đã được gửi.', 'otp_demo' => $mock_otp]);
+            // Send OTP via email if identifier is an email address
+            $otp_sent = false;
+            if ( filter_var( $identifier, FILTER_VALIDATE_EMAIL ) ) {
+                $otp_sent = ConfigController::send_otp_email( $identifier, $real_otp, 'login' );
+            }
+
+            $message = $otp_sent
+                ? 'Mã OTP đã được gửi đến email của bạn.'
+                : 'Mã OTP đã được tạo. Vui lòng kiểm tra email.';
+
+            $response_data = ['message' => $message];
+            // Dev helper: include OTP in response when email not sent (no SMTP)
+            if ( ! $otp_sent ) {
+                $response_data['dev_otp'] = $real_otp;
+            }
+            wp_send_json_success( $response_data );
         }
 
         wp_send_json_error(['message' => 'Trạng thái không hợp lệ.']);
@@ -292,11 +324,18 @@ class AuthController {
             wp_send_json_error( [ 'message' => 'Email không hợp lệ.' ] );
         }
 
+        $update_otp = str_pad( (string) wp_rand( 0, 999999 ), 6, '0', STR_PAD_LEFT );
         $otp_key = 'bacera_update_' . md5( $customer['id'] . $field . $value );
-        set_transient( $otp_key, [ 'otp' => '1234', 'field' => $field, 'value' => $value ], 10 * MINUTE_IN_SECONDS );
+        set_transient( $otp_key, [ 'otp' => $update_otp, 'field' => $field, 'value' => $value ], 10 * MINUTE_IN_SECONDS );
 
-        // In production: send real OTP via SMS/email gateway
-        wp_send_json_success( [ 'message' => 'Mã OTP (1234) đã được gửi.' ] );
+        // Send OTP via email
+        $otp_sent = false;
+        $email_target = ( $field === 'email' ) ? $value : ( $customer['email'] ?? '' );
+        if ( $email_target && filter_var( $email_target, FILTER_VALIDATE_EMAIL ) ) {
+            $otp_sent = ConfigController::send_otp_email( $email_target, $update_otp, 'update' );
+        }
+        $msg = $otp_sent ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được tạo.';
+        wp_send_json_success( [ 'message' => $msg ] );
     }
 
     /** Verify OTP and save new phone/email. */
@@ -342,10 +381,17 @@ class AuthController {
             wp_send_json_error( [ 'message' => 'Email hoặc SĐT không khớp với thông tin tài khoản.' ] );
         }
 
+        $pw_otp = str_pad( (string) wp_rand( 0, 999999 ), 6, '0', STR_PAD_LEFT );
         $otp_key = 'bacera_pw_update_' . md5( $customer['id'] );
-        set_transient( $otp_key, [ 'otp' => '1234', 'contact' => $contact ], 10 * MINUTE_IN_SECONDS );
+        set_transient( $otp_key, [ 'otp' => $pw_otp, 'contact' => $contact ], 10 * MINUTE_IN_SECONDS );
 
-        wp_send_json_success( [ 'message' => "Mã OTP (1234) đã được gửi." ] );
+        // Send to email if contact looks like an email
+        $otp_sent = false;
+        if ( filter_var( $contact, FILTER_VALIDATE_EMAIL ) ) {
+            $otp_sent = ConfigController::send_otp_email( $contact, $pw_otp, 'update' );
+        }
+        $msg = $otp_sent ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được tạo.';
+        wp_send_json_success( [ 'message' => $msg ] );
     }
 
     /** Change password (requires old password verification and OTP). */
@@ -391,5 +437,51 @@ class AuthController {
         );
         delete_transient( $otp_key );
         wp_send_json_success( [ 'message' => 'Đổi mật khẩu thành công.' ] );
+    }
+
+    /**
+     * Admin-only: look up the active OTP for a given identifier.
+     * Only accessible to WordPress administrators.
+     */
+    public function handle_admin_get_otp() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Không có quyền.' ] );
+        }
+
+        $identifier = sanitize_text_field( $_POST['identifier'] ?? '' );
+        if ( ! $identifier ) {
+            wp_send_json_error( [ 'message' => 'Thiếu identifier.' ] );
+        }
+
+        $transient_key = 'otp_' . md5( $_POST['ip'] . $identifier );
+
+        // Try all common IPs since we don't know which IP the user used
+        global $wpdb;
+        $rows = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT option_name, option_value FROM {$wpdb->options}
+                 WHERE option_name LIKE %s",
+                '_transient_otp_%'
+            )
+        );
+
+        $found = null;
+        foreach ( $rows as $row ) {
+            $data = maybe_unserialize( $row->option_value );
+            if ( is_array( $data ) && isset( $data['identifier'] ) && $data['identifier'] === $identifier ) {
+                $found = $data;
+                break;
+            }
+        }
+
+        if ( ! $found ) {
+            wp_send_json_error( [ 'message' => 'Không tìm thấy OTP nào cho identifier này.' ] );
+        }
+
+        wp_send_json_success( [
+            'otp'        => $found['otp'],
+            'type'       => $found['type'],
+            'identifier' => $found['identifier'],
+        ] );
     }
 }

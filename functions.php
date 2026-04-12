@@ -88,7 +88,28 @@ function bacera_enqueue_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'bacera_enqueue_scripts' );
 
+
+
 // Boot the main controller
 add_action('init', function() {
     new MainController();
 });
+
+// Flush rewrite rules khi theme được kích hoạt (để đăng ký route /workshop/{slug})
+add_action('after_switch_theme', function() {
+    // Trigger rewrite rule registration first
+    ( new \Bacera\Controllers\MainController() );
+    flush_rewrite_rules();
+});
+
+// Flush rewrite rules tự động nếu rule của workshop chưa tồn tại trong DB
+add_action('init', function() {
+    $rules = get_option('rewrite_rules');
+    // Kiểm tra xem rule workshop có tồn tại chưa
+    if ( empty($rules) || ! isset($rules['^workshop/([^/]+)/?$']) ) {
+        // Flush vào cuối request này (an toàn và được lưu vào DB ngay)
+        add_action('shutdown', function() {
+            flush_rewrite_rules(true);
+        });
+    }
+}, 999);
