@@ -284,8 +284,9 @@ class AdminWorkshopController {
 .wks-slot-cap-num{font-weight:600;color:var(--text)}
 .wks-slot-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
 .wks-slot-fill{height:100%;border-radius:3px;transition:width .3s}
-.wks-slot-card-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:6px}
-.wks-slot-card-foot .wks-btn{flex:1;justify-content:center}
+.wks-slot-card-foot{padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:6px}
+.wks-slot-card-link:hover{border-color:var(--accent);box-shadow:0 6px 24px rgba(239,68,68,.10);transform:translateY(-2px)}
+.wks-del-btn{gap:5px !important}
 
 /* \u2500\u2500 INLINE ROSTER \u2500\u2500 */
 .wks-roster{border-top:1px solid var(--border)}
@@ -306,7 +307,9 @@ class AdminWorkshopController {
 .wks-roster-row:hover{background:var(--bg)}
 .wks-roster-info{flex:1;min-width:0}
 .wks-roster-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wks-roster-phone{font-size:11px;color:var(--text-3)}
+.wks-roster-phone{font-size:11px;color:var(--text-3);display:flex;align-items:center;flex-wrap:wrap;gap:3px}
+.wks-seat-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:5px;background:var(--surface-2);border:1px solid var(--border);font-size:10px;font-weight:700;color:var(--text-2);line-height:1}
+
 .wks-roster-badges{display:flex;gap:4px;flex-shrink:0}
 /* Check-in button */
 .wks-ci-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
@@ -1824,7 +1827,7 @@ window.wksCheckin = function(bookingId, nonce, btn) {
             $edit_url = admin_url("admin.php?page=bacera-workshops&id={$wid}&tab=sessions&session_action=edit&session_id={$s_id}");
             $del_url  = wp_nonce_url(admin_url("admin.php?page=bacera-workshops&id={$wid}&tab=sessions&action=delete_session&session_id={$s_id}"), 'delete_session_' . $s_id);
         ?>
-        <div class="wks-slot-card">
+        <div class="wks-slot-card wks-slot-card-link" onclick="window.location='<?= esc_url($edit_url) ?>'" role="link" tabindex="0" style="cursor:pointer" onkeydown="if(event.key==='Enter')window.location='<?= esc_url($edit_url) ?>'">
             <!-- Accent bar -->
             <div class="wks-slot-card-accent" style="background:<?= $accent_color ?>"></div>
 
@@ -1920,7 +1923,15 @@ window.wksCheckin = function(bookingId, nonce, btn) {
                         <span class="wks-av" style="background:<?= $c[0] ?>;color:<?= $c[1] ?>"><?= $init ?></span>
                         <div class="wks-roster-info">
                             <div class="wks-roster-name"><?= esc_html($dn_c) ?></div>
-                            <div class="wks-roster-phone"><?= esc_html($bk['display_phone'] ?? $bk['phone'] ?? '') ?></div>
+                            <div class="wks-roster-phone">
+                                <?= esc_html($bk['display_phone'] ?? $bk['phone'] ?? '') ?>
+                                <?php
+                                $seat_nums = array_filter(array_map('intval', explode(',', $bk['seats_selected'] ?? '')));
+                                if (!empty($seat_nums)):
+                                ?>
+                                · Ghế: <?php foreach($seat_nums as $sn): ?><span class="wks-seat-badge"><?= $sn ?></span><?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="wks-roster-badges">
                             <?php if ($paid): ?>
@@ -1943,12 +1954,15 @@ window.wksCheckin = function(bookingId, nonce, btn) {
             </div>
             <?php endif; ?>
 
-            <!-- Footer actions -->
+            <!-- Footer actions: only delete (card itself is clickable) -->
             <div class="wks-slot-card-foot">
-                <a href="<?= esc_url($edit_url) ?>" class="wks-btn wks-btn-outline wks-btn-sm">Sửa</a>
-                <a href="?page=bacera-workshops&id=<?= $wid ?>&tab=bookings&slot_id=<?= $s_id ?>"                   class="wks-btn wks-btn-outline wks-btn-sm">Tất cả HV</a>
-                <a href="<?= esc_url($del_url) ?>" class="wks-btn wks-btn-danger wks-btn-sm"
-                   onclick="return confirm('Xóa ca học này?')">Xóa</a>
+                <a href="<?= esc_url($del_url) ?>"
+                   class="wks-btn wks-btn-danger wks-btn-sm wks-del-btn"
+                   onclick="event.stopPropagation();return confirm('Xóa ca học #<?= $s_id ?>?')"
+                   title="Xóa ca học">
+                    <svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M2 4h10M5 4V2h4v2M6 7v4M8 7v4M3 4l1 8h6l1-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Xóa
+                </a>
             </div>
         </div>
         <?php endforeach; ?>
@@ -2024,7 +2038,7 @@ window.wksCheckin = function(bookingId, nonce, btn) {
                             <th>Khách hàng</th>
                             <th>Mã booking</th>
                             <th>Ca học</th>
-                            <th>Số chỗ</th>
+                            <th>Ghế đặt</th>
                             <th>Thanh toán</th>
                             <th>Check-in</th>
                             <th>Đặt lúc</th>
@@ -2056,7 +2070,18 @@ window.wksCheckin = function(bookingId, nonce, btn) {
                         </td>
                         <td><span class="wks-mono">#BK-<?= str_pad($b['id'], 4, '0', STR_PAD_LEFT) ?></span></td>
                         <td style="font-size:12px;color:var(--text-2)"><?= $b['slot_date'] ? date('d/m/Y', strtotime($b['slot_date'])) : '—' ?><?php if ($b['time_start']): ?><br><?= $b['time_start'] ?><?php endif; ?></td>
-                        <td style="font-weight:600"><?= intval($b['num_seats'] ?? 1) ?></td>
+                        <td>
+                            <?php
+                            $seat_list = array_filter(array_map('intval', explode(',', $b['seats_selected'] ?? '')));
+                            if (!empty($seat_list)):
+                                foreach ($seat_list as $sn):
+                            ?><span class="wks-seat-badge"><?= $sn ?></span><?php
+                                endforeach;
+                            else:
+                                echo '<span style="font-weight:600">' . intval($b['num_seats'] ?? 1) . ' ghế</span>';
+                            endif;
+                            ?>
+                        </td>
                         <td>
                             <select class="wks-sel" style="height:28px;font-size:12px" onchange="wksUpdatePayment(<?= $b['id'] ?>, this.value, '<?= $nonce_pay ?>')">
                                 <option value="unpaid" <?= selected($b['payment_status'], 'unpaid', false) ?>>Chưa TT</option>

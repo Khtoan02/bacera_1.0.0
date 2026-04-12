@@ -272,7 +272,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                     ['key'=>'shop',     'label'=>'Shop',     'has_sub'=>true],
                     ['key'=>'workshop', 'label'=>'Workshop', 'has_sub'=>true],
                     ['key'=>'about',    'label'=>'About us', 'has_sub'=>true],
-                    ['key'=>'blog',     'label'=>'Blog',     'has_sub'=>false, 'url'=>'#'],
+                    ['key'=>'blog',     'label'=>'Blog',     'has_sub'=>false, 'url'=> get_post_type_archive_link('post') ?: '#'],
                     ['key'=>'contact',  'label'=>'Contact',  'has_sub'=>false, 'url'=>'#'],
                 ];
                 foreach ($nav_items as $item):
@@ -365,11 +365,12 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                         </div>
                     </div>
                     <?php
+                    $my_account_url = home_url('/tai-khoan-cua-toi/');
                     $acct_menu = [
-                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'Tài khoản của tôi',   'url'=>$auth_page],
-                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Điểm tích lũy',       'url'=>'#'],
-                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'Đơn hàng của tôi',  'url'=>'#'],
-                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Workshop đã đăng ký', 'url'=>'#'],
+                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'Tài khoản của tôi',   'url'=>$my_account_url],
+                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Điểm tích lũy',       'url'=> $my_account_url . '#loyalty'],
+                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'Đơn hàng của tôi',  'url'=>$my_account_url . '#orders'],
+                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Workshop đã đăng ký', 'url'=>$my_account_url . '#workshops'],
                     ];
                     foreach ($acct_menu as $am): ?>
                     <a href="<?php echo esc_url($am['url']); ?>"
@@ -508,31 +509,47 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                     <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Khám phá workshop</h3>
                     <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Trải nghiệm nghệ thuật làm gốm thủ công đầy cảm hứng cùng chúng tôi.</p>
                 </div>
-                <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả lịch</a>
+                <?php
+                $workshop_archive = get_post_type_archive_link('workshop') ?: home_url('/workshop/');
+                ?>
+                <a href="<?= esc_url($workshop_archive) ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả lịch</a>
             </div>
             <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <div class="flex-1 grid grid-cols-2 gap-4">
                 <?php
-                $mega_workshops = [
-                    ['title'=>'Pottery Wheel Throwing','desc'=>'A peaceful, hands-on journey for beginners and curious minds.','price'=>'From 950,000 VND','detail'=>'Day:13/16 – Noon: 1/16'],
-                    ['title'=>'Hand-building Pottery', 'desc'=>'Shape, carve, and create your own ceramic piece by hand.',     'price'=>'From 950,000 VND','detail'=>'Day:13/16 – Noon: 1/16'],
-                    ['title'=>'Hanoi School Class',    'desc'=>'Special courses for students wanting deeper techniques.',       'price'=>'Contact us',       'detail'=>'Book Your School Visit'],
-                    ['title'=>'Team-building Pottery', 'desc'=>'A unique bonding experience for your team to create together.','price'=>'Contact us',       'detail'=>'Organise a Group Event'],
-                ];
-                foreach ($mega_workshops as $mw): ?>
-                <a href="#" class="group/mw flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-100 transition-colors">
+                // Fetch real published workshops from DB
+                $mega_wks = get_posts([
+                    'post_type'      => 'workshop',
+                    'post_status'    => 'publish',
+                    'posts_per_page' => 4,
+                    'orderby'        => 'date',
+                    'order'          => 'DESC',
+                ]);
+                foreach ($mega_wks as $mw_post):
+                    $mw_url   = get_permalink($mw_post);
+                    $mw_price = get_post_meta($mw_post->ID, '_price', true) ?: 'Liên hệ';
+                    $mw_price_fmt = is_numeric(str_replace([',','.'], '', $mw_price))
+                        ? number_format((float)preg_replace('/[^0-9.]/', '', $mw_price), 0, ',', '.') . 'đ'
+                        : $mw_price;
+                    $mw_thumb = get_post_meta($mw_post->ID, '_thumbnail_url', true)
+                                ?: 'https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=120';
+                    $mw_tagline = get_post_meta($mw_post->ID, '_tagline', true) ?: wp_trim_words($mw_post->post_excerpt ?: strip_tags($mw_post->post_content), 10, '…');
+                ?>
+                <a href="<?= esc_url($mw_url) ?>" class="group/mw flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-100 transition-colors">
                     <div class="w-[88px] h-[88px] overflow-hidden rounded-xl shrink-0 bg-neutral-200">
-                        <img src="https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=120"
-                             class="w-full h-full object-cover group-hover/mw:scale-105 transition-transform duration-500" alt="">
+                        <img src="<?= esc_url($mw_thumb) ?>"
+                             class="w-full h-full object-cover group-hover/mw:scale-105 transition-transform duration-500" alt="<?= esc_attr($mw_post->post_title) ?>">
                     </div>
                     <div class="flex flex-col min-w-0">
-                        <h4 class="text-primary-800 text-[14px] font-semibold font-sans mb-1 group-hover/mw:text-[#d95f47] transition-colors leading-snug"><?php echo $mw['title']; ?></h4>
-                        <p class="text-primary-600 text-[12px] font-sans leading-snug mb-2 line-clamp-2"><?php echo $mw['desc']; ?></p>
-                        <p class="text-primary-800 text-[13px] font-medium font-sans"><?php echo $mw['price']; ?></p>
-                        <p class="text-primary-400 text-[11px] font-sans mt-0.5"><?php echo $mw['detail']; ?></p>
+                        <h4 class="text-primary-800 text-[14px] font-semibold font-sans mb-1 group-hover/mw:text-[#d95f47] transition-colors leading-snug"><?= esc_html($mw_post->post_title) ?></h4>
+                        <p class="text-primary-600 text-[12px] font-sans leading-snug mb-2 line-clamp-2"><?= esc_html($mw_tagline) ?></p>
+                        <p class="text-primary-800 text-[13px] font-medium font-sans"><?= esc_html($mw_price_fmt) ?></p>
                     </div>
                 </a>
-                <?php endforeach; ?>
+                <?php endforeach;
+                if (empty($mega_wks)): ?>
+                <div class="col-span-2 flex items-center justify-center text-primary-400 text-[13px] font-sans">Chưa có workshop nào. <a href="<?= admin_url('post-new.php?post_type=workshop') ?>" class="ml-1 text-[#d95f47] underline">Thêm ngay</a></div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -590,8 +607,16 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
         <div id="mobile-menu"
              class="hidden absolute top-[64px] left-0 right-0 bg-white shadow-xl z-[60] py-3">
             <nav class="flex flex-col">
-                <?php foreach (['Shop','Workshop','About us','Blog','Contact'] as $ml): ?>
-                <a href="#" class="px-5 py-3 text-primary-700 text-[15px] font-medium border-b border-neutral-200 last:border-0 hover:text-[#d95f47] transition-colors"><?php echo $ml; ?></a>
+                <?php
+                $mobile_links = [
+                    'Shop'     => home_url('/shop-demo/'),
+                    'Workshop' => get_post_type_archive_link('workshop') ?: home_url('/workshop/'),
+                    'About us' => '#',
+                    'Blog'     => get_post_type_archive_link('post') ?: '#',
+                    'Contact'  => '#',
+                ];
+                foreach ($mobile_links as $ml => $ml_url): ?>
+                <a href="<?= esc_url($ml_url) ?>" class="px-5 py-3 text-primary-700 text-[15px] font-medium border-b border-neutral-200 last:border-0 hover:text-[#d95f47] transition-colors"><?php echo $ml; ?></a>
                 <?php endforeach; ?>
             </nav>
             <div class="flex items-center gap-4 px-5 mt-3 pt-3 border-t border-neutral-200">
