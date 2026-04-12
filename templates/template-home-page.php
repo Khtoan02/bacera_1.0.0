@@ -425,7 +425,18 @@ $workshops = [
                     <?php endforeach; ?>
                 </div>
 
-                <a href="/about"
+                <?php
+                $hp_about_id = $wpdb->get_var(
+                    "SELECT p.ID FROM {$wpdb->posts} p
+                     INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+                     WHERE p.post_type = 'page' AND p.post_status = 'publish'
+                       AND pm.meta_key = '_wp_page_template'
+                       AND pm.meta_value IN ('templates/template-about.php','template-about.php')
+                     LIMIT 1"
+                );
+                $hp_about_url = $hp_about_id ? get_permalink((int)$hp_about_id) : home_url('/about-us/');
+                ?>
+                <a href="<?php echo esc_url($hp_about_url); ?>"
                    class="self-start px-6 py-4 bg-primary-700 hover:bg-primary-800 text-neutral-100 text-[15px] font-medium font-sans rounded-xl transition-colors">
                     About us
                 </a>

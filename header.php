@@ -39,6 +39,18 @@ $auth_page_id = $wpdb->get_var(
      LIMIT 1"
 );
 $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/auth/' );
+
+// Find About Us page by template
+$about_page_id = $wpdb->get_var(
+    "SELECT p.ID FROM {$wpdb->posts} p
+     INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+     WHERE p.post_type = 'page'
+       AND p.post_status = 'publish'
+       AND pm.meta_key = '_wp_page_template'
+       AND pm.meta_value IN ('templates/template-about.php','template-about.php')
+     LIMIT 1"
+);
+$about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url( '/about-us/' );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -561,17 +573,17 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                     <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Về chúng tôi</h3>
                     <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Xưởng gốm Bacera — nơi nghệ thuật thủ công gặp gỡ tâm hồn.</p>
                 </div>
-                <a href="#" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Đọc thêm</a>
+                <a href="<?php echo esc_url($about_page); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Đọc thêm</a>
             </div>
             <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <nav class="flex-1 grid grid-cols-3 gap-x-8 gap-y-1 content-start py-1">
                 <?php
                 $about_links = [
-                    ['label'=>'About us',      'desc'=>'Our story & values',    'url'=>'#'],
-                    ['label'=>'Our team',      'desc'=>'Meet the craftspeople',  'url'=>'#'],
+                    ['label'=>'About us',      'desc'=>'Our story & values',    'url'=>$about_page],
+                    ['label'=>'Our team',      'desc'=>'Meet the craftspeople',  'url'=>$about_page . '#au-story'],
                     ['label'=>'Our video',     'desc'=>'Behind the wheel',       'url'=>'#'],
-                    ['label'=>'Our process',   'desc'=>'From clay to ceramic',   'url'=>'#'],
-                    ['label'=>'Sustainability','desc'=>'Earth-conscious craft',   'url'=>'#'],
+                    ['label'=>'Our process',   'desc'=>'From clay to ceramic',   'url'=>$about_page . '#au-commits'],
+                    ['label'=>'Sustainability','desc'=>'Earth-conscious craft',   'url'=>$about_page . '#au-goals'],
                 ];
                 foreach ($about_links as $al): ?>
                 <a href="<?php echo esc_url($al['url']); ?>"
@@ -611,7 +623,7 @@ $auth_page = $auth_page_id ? get_permalink( (int) $auth_page_id ) : home_url( '/
                 $mobile_links = [
                     'Shop'     => home_url('/shop-demo/'),
                     'Workshop' => get_post_type_archive_link('workshop') ?: home_url('/workshop/'),
-                    'About us' => '#',
+                    'About us' => $about_page,
                     'Blog'     => get_post_type_archive_link('post') ?: '#',
                     'Contact'  => '#',
                 ];
