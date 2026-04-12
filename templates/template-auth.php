@@ -13,17 +13,24 @@ $home_url        = home_url('/');
 $logout_url      = add_query_arg('bacera_logout', '1', home_url('/'));
 $social_error    = sanitize_text_field($_GET['social_error'] ?? '');
 
+// Cloudflare Turnstile
+$turnstile_site_key = get_option('bacera_turnstile_site_key', '');
+$turnstile_enabled  = !empty($turnstile_site_key);
+
 $auth_config = [
-    'ajaxUrl'          => $ajax_url,
-    'homeUrl'          => $home_url,
-    'logoutUrl'        => $logout_url,
-    'initialState'     => $initial_state,
-    'socialError'      => $social_error,
-    'googleEnabled'    => (bool) get_option('bacera_google_enabled', '0'),
-    'googleAuthUrl'    => \Bacera\Controllers\SocialLoginController::google_auth_url(),
-    'facebookEnabled'  => (bool) get_option('bacera_facebook_enabled', '0'),
-    'facebookAuthUrl'  => \Bacera\Controllers\SocialLoginController::facebook_auth_url(),
+    'ajaxUrl'            => $ajax_url,
+    'homeUrl'            => $home_url,
+    'logoutUrl'          => $logout_url,
+    'initialState'       => $initial_state,
+    'socialError'        => $social_error,
+    'googleEnabled'      => (bool) get_option('bacera_google_enabled', '0'),
+    'googleAuthUrl'      => \Bacera\Controllers\SocialLoginController::google_auth_url(),
+    'facebookEnabled'    => (bool) get_option('bacera_facebook_enabled', '0'),
+    'facebookAuthUrl'    => \Bacera\Controllers\SocialLoginController::facebook_auth_url(),
+    'turnstileEnabled'   => $turnstile_enabled,
+    'turnstileSiteKey'   => $turnstile_site_key,
 ];
+
 ?>
 <style>
 .auth-wrap {
@@ -185,7 +192,13 @@ $auth_config = [
     animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.cf-turnstile-wrap { margin-top: 4px; }
 </style>
+
+<?php if ($turnstile_enabled): ?>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<?php endif; ?>
 
 <div class="auth-wrap">
 
@@ -234,6 +247,15 @@ $auth_config = [
                         </div>
                     </div>
 
+                    <?php if ($turnstile_enabled): ?>
+                    <div class="cf-turnstile-wrap">
+                        <div class="cf-turnstile" id="turnstile-login"
+                             data-sitekey="<?php echo esc_attr($turnstile_site_key); ?>"
+                             data-callback="baceraOnTurnstileLogin"
+                             data-theme="light"></div>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="auth-actions">
                         <button type="button" id="btn-login" class="auth-btn-primary" onclick="baceraDoLogin()">
                             Đăng nhập
@@ -280,8 +302,19 @@ $auth_config = [
                 <div class="auth-form-group">
                     <div class="auth-field-group">
                         <p class="auth-section-label">Thông tin tài khoản</p>
-                        <input id="reg-phone" type="text" placeholder="Số điện thoại" class="auth-input">
-                        <input id="reg-email" type="email" placeholder="Email" class="auth-input">
+                        <div>
+                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Họ và tên <span style="color:#E15D43;">*</span></label>
+                            <input id="reg-name" type="text" placeholder="Nhập họ và tên của bạn" class="auth-input">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Số điện thoại</label>
+                            <input id="reg-phone" type="tel" placeholder="Nhập số điện thoại" class="auth-input">
+                        </div>
+                        <div>
+                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Email</label>
+                            <input id="reg-email" type="email" placeholder="Nhập địa chỉ email" class="auth-input">
+                        </div>
+                        <p style="font-size:12px;color:#78716c;margin:0;">※ Vui lòng nhập ít nhất một trong hai: Số điện thoại hoặc Email.</p>
                     </div>
 
                     <div class="auth-field-group">
@@ -299,6 +332,15 @@ $auth_config = [
                             </button>
                         </div>
                     </div>
+
+                    <?php if ($turnstile_enabled): ?>
+                    <div class="cf-turnstile-wrap">
+                        <div class="cf-turnstile" id="turnstile-register"
+                             data-sitekey="<?php echo esc_attr($turnstile_site_key); ?>"
+                             data-callback="baceraOnTurnstileRegister"
+                             data-theme="light"></div>
+                    </div>
+                    <?php endif; ?>
 
                     <div class="auth-actions">
                         <button type="button" id="btn-register" class="auth-btn-primary" onclick="baceraDoRegister()">
@@ -398,12 +440,19 @@ $auth_config = [
 
 /* ── CONFIG ─────────────────────────────────────────── */
 var AJAX_URL = '<?php echo esc_js($ajax_url); ?>';
+var TURNSTILE_ENABLED = <?php echo $turnstile_enabled ? 'true' : 'false'; ?>;
 
 /* ── STATE ──────────────────────────────────────────── */
 window.baceraState = {
     identifier: '',
-    prevScreen: 'login'
+    prevScreen: 'login',
+    turnstileLoginToken:    '',
+    turnstileRegisterToken: ''
 };
+
+/* ── TURNSTILE CALLBACKS ─────────────────────────────── */
+window.baceraOnTurnstileLogin    = function(token) { baceraState.turnstileLoginToken    = token; };
+window.baceraOnTurnstileRegister = function(token) { baceraState.turnstileRegisterToken = token; };
 
 /* ── SCREEN SWITCHER ────────────────────────────────── */
 window.baceraShowScreen = function(name) {
@@ -474,11 +523,17 @@ window.baceraDoLogin = function() {
         return;
     }
 
+    if (TURNSTILE_ENABLED && !baceraState.turnstileLoginToken) {
+        showError('error-login', 'Vui lòng hoàn thành xác minh CAPTCHA.');
+        return;
+    }
+
     setLoading('btn-login', true);
     baceraPost('bacera_auth_submit', {
-        auth_state: 'login',
-        identifier: identifier,
-        password:   password
+        auth_state:            'login',
+        identifier:            identifier,
+        password:              password,
+        cf_turnstile_response: baceraState.turnstileLoginToken
     }).then(function(res) {
         setLoading('btn-login', false);
         if (!res || !res.success) {
@@ -517,11 +572,16 @@ window.baceraDoLogin = function() {
 /* ── DO REGISTER ─────────────────────────────────────── */
 window.baceraDoRegister = function() {
     clearError('error-register');
+    var name     = document.getElementById('reg-name').value.trim();
     var phone    = document.getElementById('reg-phone').value.trim();
     var email    = document.getElementById('reg-email').value.trim();
     var password = document.getElementById('reg-password').value;
     var confirm  = document.getElementById('reg-confirm').value;
 
+    if (!name) {
+        showError('error-register', 'Vui lòng nhập họ và tên.');
+        return;
+    }
     if (!phone && !email) {
         showError('error-register', 'Vui lòng nhập Số điện thoại hoặc Email.');
         return;
@@ -535,13 +595,19 @@ window.baceraDoRegister = function() {
         return;
     }
 
+    if (TURNSTILE_ENABLED && !baceraState.turnstileRegisterToken) {
+        showError('error-register', 'Vui lòng hoàn thành xác minh CAPTCHA.');
+        return;
+    }
+
     var identifier = email || phone;
     setLoading('btn-register', true);
     baceraPost('bacera_auth_submit', {
-        auth_state: 'register',
-        identifier: identifier,
-        password:   password,
-        name:       'Khách hàng'
+        auth_state:            'register',
+        identifier:            identifier,
+        password:              password,
+        name:                  name,
+        cf_turnstile_response: baceraState.turnstileRegisterToken
     }).then(function(res) {
         setLoading('btn-register', false);
         if (!res || !res.success) {
@@ -643,6 +709,9 @@ document.getElementById('login-password').addEventListener('keydown', function(e
 });
 document.getElementById('login-identifier').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') baceraDoLogin();
+});
+document.getElementById('reg-name').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') baceraDoRegister();
 });
 document.getElementById('reg-confirm').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') baceraDoRegister();
