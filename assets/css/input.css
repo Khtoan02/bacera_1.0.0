@@ -10,3 +10,16 @@
     @apply font-sans text-body-reg text-gray-800 antialiased;
   }
 }
+
+/* Shop PLP: split trái ~20% / phải ~80% — dùng CSS thuần vì class arbitrary grid có thể không được JIT ghi vào main.css khi build cũ. */
+@layer components {
+  .bacera-shop-split {
+    @apply grid grid-cols-1 gap-8 items-start lg:gap-10 xl:gap-12;
+  }
+
+  @media (min-width: 1024px) {
+    .bacera-shop-split {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
+    }
+  }
+}

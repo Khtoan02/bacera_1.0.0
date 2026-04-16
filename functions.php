@@ -42,7 +42,7 @@ add_action( 'init', function() {
         'labels'      => [ 'name' => 'Pancake Products' ],
         'public'      => true, // Quan trọng để get_page_by_path hoạt động
         'has_archive' => false,
-        'supports'    => [ 'title', 'editor', 'custom-fields' ],
+        'supports'    => [ 'title', 'editor', 'custom-fields', 'comments' ],
     ]);
 });
 /* ==========================================================================
@@ -124,3 +124,63 @@ add_action('init', function() {
         });
     }
 }, 999);
+
+/**
+ * Lưu metadata cho review sản phẩm Pancake.
+ */
+add_action(
+    'comment_post',
+    function( $comment_id, $comment_approved, $commentdata ) {
+        if ( empty( $commentdata['comment_post_ID'] ) ) {
+            return;
+        }
+        $post_id = (int) $commentdata['comment_post_ID'];
+        if ( get_post_type( $post_id ) !== 'pancake_product' ) {
+            return;
+        }
+
+        $rating = isset( $_POST['rating'] ) ? (int) $_POST['rating'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if ( $rating >= 1 && $rating <= 5 ) {
+            update_comment_meta( $comment_id, 'rating', $rating );
+        }
+
+        $review_title = isset( $_POST['review_title'] ) ? sanitize_text_field( wp_unslash( $_POST['review_title'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        if ( $review_title !== '' ) {
+            update_comment_meta( $comment_id, 'review_title', $review_title );
+        }
+    },
+    10,
+    3
+);
+
+/**
+ * Cho phép đánh giá trên CPT pancake_product (kể cả bài cũ đang tắt comment).
+ */
+add_filter(
+    'comments_open',
+    function( $open, $post_id ) {
+        if ( get_post_type( (int) $post_id ) === 'pancake_product' ) {
+            return true;
+        }
+        return $open;
+    },
+    10,
+    2
+);
+
+/**
+ * Sau khi gửi review, quay lại tab đánh giá (?tab=reviews#...).
+ * Core mặc định dùng referer, không đọc field redirect_to từ form.
+ */
+add_filter(
+    'comment_post_redirect',
+    function( $location, $comment ) {
+        if ( empty( $_POST['bacera_review_redirect'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+            return $location;
+        }
+        $url = esc_url_raw( wp_unslash( $_POST['bacera_review_redirect'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        return wp_validate_redirect( $url, $location );
+    },
+    10,
+    2
+);
