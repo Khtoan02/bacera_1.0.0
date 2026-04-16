@@ -184,8 +184,54 @@ if ( have_posts() ) :
 			$current_vi        = 0;
 		}
 
+		$bacera_pdp_product_name_for_proxy = $api_product['name'] ?? get_the_title();
+		$bacera_pdp_variation_proxy_url    = static function ( $variation ) use ( $bacera_pdp_product_name_for_proxy ) {
+			if ( ! class_exists( 'Bacera_Utils' ) || ! is_array( $variation ) || empty( $variation['id'] ) ) {
+				return '';
+			}
+			return Bacera_Utils::get_proxy_url(
+				[
+					'id'      => $variation['id'],
+					'product' => [
+						'name' => $bacera_pdp_product_name_for_proxy,
+					],
+				]
+			);
+		};
+		$bacera_pdp_post_proxy_url = static function () use ( $product_id, $bacera_pdp_product_name_for_proxy ) {
+			if ( ! class_exists( 'Bacera_Utils' ) ) {
+				return '';
+			}
+			$pid = (string) get_post_meta( $product_id, '_pancake_id', true );
+			if ( $pid === '' ) {
+				return '';
+			}
+			return Bacera_Utils::get_proxy_url(
+				[
+					'id'      => $pid,
+					'product' => [
+						'name' => $bacera_pdp_product_name_for_proxy,
+					],
+				]
+			);
+		};
+
 		$gallery_urls = [];
-		if ( $api_product ) {
+		if ( $api_product && class_exists( 'Bacera_Utils' ) ) {
+			foreach ( $variations as $v ) {
+				$proxy_u = $bacera_pdp_variation_proxy_url( $v );
+				if ( $proxy_u !== '' && ! in_array( $proxy_u, $gallery_urls, true ) ) {
+					$gallery_urls[] = esc_url_raw( $proxy_u );
+				}
+			}
+			if ( empty( $gallery_urls ) ) {
+				$single = $bacera_pdp_post_proxy_url();
+				if ( $single !== '' ) {
+					$gallery_urls[] = esc_url_raw( $single );
+				}
+			}
+		}
+		if ( empty( $gallery_urls ) && $api_product ) {
 			foreach ( $variations as $v ) {
 				if ( empty( $v['images'] ) || ! is_array( $v['images'] ) ) {
 					continue;
@@ -224,7 +270,13 @@ if ( have_posts() ) :
 		}
 
 		$main_image_url = '';
-		if ( $current_variation && ! empty( $current_variation['images'][0] ) ) {
+		if ( $current_variation ) {
+			$main_image_url = $bacera_pdp_variation_proxy_url( $current_variation );
+		}
+		if ( $main_image_url === '' ) {
+			$main_image_url = $bacera_pdp_post_proxy_url();
+		}
+		if ( $main_image_url === '' && $current_variation && ! empty( $current_variation['images'][0] ) ) {
 			$main_image_url = esc_url_raw( (string) $current_variation['images'][0] );
 		}
 		if ( $main_image_url === '' && ! empty( $gallery_urls[0] ) ) {
@@ -341,7 +393,10 @@ if ( have_posts() ) :
 			if ( $reg > 0 && $pr < $reg ) {
 				$dct = (int) round( ( ( $reg - $pr ) / $reg ) * 100 );
 			}
-			$img0 = ! empty( $v['images'][0] ) ? esc_url_raw( (string) $v['images'][0] ) : $main_image_url;
+			$img0 = $bacera_pdp_variation_proxy_url( $v );
+			if ( $img0 === '' ) {
+				$img0 = ! empty( $v['images'][0] ) ? esc_url_raw( (string) $v['images'][0] ) : $main_image_url;
+			}
 			$pdp_js_variants[] = [
 				'index'            => (int) $vi,
 				'variationId'      => isset( $v['id'] ) ? (string) $v['id'] : '',
