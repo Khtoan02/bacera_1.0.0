@@ -257,7 +257,12 @@ class SocialLoginController {
             'password_updated_at' => current_time( 'mysql' ),
         ] );
 
-        return (int) $wpdb->insert_id;
+        $new_id = (int) $wpdb->insert_id;
+        if ( $new_id && class_exists( '\\Bacera_Module_Customers', false ) ) {
+            \Bacera_Module_Customers::sync_bacera_customer_row_to_pancake( $new_id );
+        }
+
+        return $new_id;
     }
 
     private function login_and_redirect( int $user_id ) {

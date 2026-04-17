@@ -209,7 +209,10 @@ class AuthController {
                 wp_send_json_error(['message' => 'Lỗi hệ thống khi lưu tài khoản: ' . $wpdb->last_error]);
             }
             $user_id = $wpdb->insert_id;
-            
+
+            if ( class_exists( '\\Bacera_Module_Customers', false ) ) {
+                \Bacera_Module_Customers::sync_bacera_customer_row_to_pancake( (int) $user_id );
+            }
         } else {
             $user_id = $data['user_id'];
         }
@@ -306,6 +309,11 @@ class AuthController {
             [ 'name' => $value ],
             [ 'id'   => $customer['id'] ]
         );
+
+        if ( class_exists( '\\Bacera_Module_Customers', false ) ) {
+            \Bacera_Module_Customers::sync_bacera_customer_row_to_pancake( (int) $customer['id'] );
+        }
+
         wp_send_json_success( [ 'message' => 'Đã cập nhật tên.' ] );
     }
 
@@ -361,6 +369,11 @@ class AuthController {
             [ 'id'   => $customer['id'] ]
         );
         delete_transient( $otp_key );
+
+        if ( class_exists( '\\Bacera_Module_Customers', false ) ) {
+            \Bacera_Module_Customers::sync_bacera_customer_row_to_pancake( (int) $customer['id'] );
+        }
+
         wp_send_json_success( [ 'message' => 'Cập nhật thành công.' ] );
     }
 

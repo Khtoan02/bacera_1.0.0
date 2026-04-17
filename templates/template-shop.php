@@ -83,8 +83,8 @@ $shop_base_url = get_permalink( get_queried_object_id() );
 if ( ! $shop_base_url ) {
 	$shop_base_url = home_url( '/' );
 }
-$cart_page_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_cart_page_url() : ( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
-$checkout_page_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : $cart_page_url;
+$cart_page_url           = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_cart_page_url() : ( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+$checkout_shipping_url   = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_checkout_shipping_page_url() : ( function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : $cart_page_url );
 
 $url_shop_clear_cats = remove_query_arg( [ 'cat', 'filter_collection', 'shop_page' ], $shop_base_url );
 if ( $sort !== 'price_low' ) {
@@ -1167,8 +1167,8 @@ get_header();
 				<p id="bacera-cart-total" class="m-0 text-[2rem] leading-none tabular-nums text-stone-800">0đ</p>
 			</div>
 			<div class="grid grid-cols-2 gap-2">
-				<a href="<?php echo esc_url( $checkout_page_url ); ?>" class="rounded-xl bg-accent-500 px-4 py-3 text-center font-medium text-white no-underline hover:bg-accent-600"><?php esc_html_e( 'Thêm vào giỏ hàng', 'bacera' ); ?></a>
-				<a href="<?php echo esc_url( $cart_page_url ); ?>" class="rounded-xl border border-stone-300 px-4 py-3 text-center font-medium text-stone-700 no-underline hover:bg-stone-50"><?php esc_html_e( 'Xem giỏ hàng', 'bacera' ); ?></a>
+				<a id="bacera-cart-go-checkout" href="<?php echo esc_url( $checkout_shipping_url ); ?>" class="rounded-xl bg-accent-500 px-4 py-3 text-center font-medium text-white no-underline hover:bg-accent-600"><?php esc_html_e( 'Đến thanh toán', 'bacera' ); ?></a>
+				<a id="bacera-cart-go-cart" href="<?php echo esc_url( $cart_page_url ); ?>" class="rounded-xl border border-stone-300 px-4 py-3 text-center font-medium text-stone-700 no-underline hover:bg-stone-50"><?php esc_html_e( 'Xem giỏ hàng', 'bacera' ); ?></a>
 			</div>
 		</div>
 	</aside>
@@ -1184,6 +1184,9 @@ get_header();
 	if (!drawer || !overlay || !closeBtn || !listEl || !totalEl) return;
 
 	var STORAGE_KEY = 'bacera_shop_cart_v1';
+	var CHECKOUT_ITEMS_KEY = 'bacera_checkout_items';
+	/** Chỉ hiển thị trong panel dòng sản phẩm vừa thêm (theo id trong giỏ). */
+	var drawerPreviewItemId = null;
 
 	function loadCart() {
 		try {
@@ -1243,8 +1246,18 @@ get_header();
 		return label;
 	}
 
-	function renderCart() {
+	function getDrawerDisplayCart() {
 		var cart = loadCart();
+		if (!drawerPreviewItemId) {
+			return [];
+		}
+		return cart.filter(function (item) {
+			return String(item.id) === String(drawerPreviewItemId);
+		});
+	}
+
+	function renderCart() {
+		var cart = getDrawerDisplayCart();
 		if (!cart.length) {
 			listEl.innerHTML = '<p class="bacera-cart-empty"><?php echo esc_js( __( 'Giỏ hàng của bạn đang trống.', 'bacera' ) ); ?></p>';
 			totalEl.textContent = '0đ';
@@ -1295,6 +1308,9 @@ get_header();
 	}
 
 	function setDrawerOpen(opened) {
+		if (!opened) {
+			drawerPreviewItemId = null;
+		}
 		drawer.classList.toggle('is-open', opened);
 		overlay.classList.toggle('is-open', opened);
 		drawer.setAttribute('aria-hidden', opened ? 'false' : 'true');
@@ -1327,6 +1343,7 @@ get_header();
 			var payload = JSON.parse(payloadRaw);
 			if (!payload || !payload.id) return;
 			upsertItem(payload);
+			drawerPreviewItemId = String(payload.id);
 			renderCart();
 			setDrawerOpen(true);
 		} catch (e) {
@@ -1360,6 +1377,23 @@ get_header();
 		saveCart(cart);
 		renderCart();
 	});
+
+	var checkoutLink = document.getElementById('bacera-cart-go-checkout');
+	if (checkoutLink) {
+		checkoutLink.addEventListener('click', function (e) {
+			var full = loadCart();
+			var picked = drawerPreviewItemId
+				? full.filter(function (item) { return String(item.id) === String(drawerPreviewItemId); })
+				: [];
+			if (!picked.length) {
+				e.preventDefault();
+				return;
+			}
+			try {
+				sessionStorage.setItem(CHECKOUT_ITEMS_KEY, JSON.stringify(picked));
+			} catch (err) {}
+		});
+	}
 
 	closeBtn.addEventListener('click', function () { setDrawerOpen(false); });
 	overlay.addEventListener('click', function () { setDrawerOpen(false); });
