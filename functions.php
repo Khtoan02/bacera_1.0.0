@@ -44,6 +44,21 @@ add_action( 'init', function() {
         'has_archive' => false,
         'supports'    => [ 'title', 'editor', 'custom-fields', 'comments' ],
     ]);
+
+    register_post_type( 'bacera_partner', [
+        'labels'      => [ 
+            'name'          => 'Partners',
+            'singular_name' => 'Partner',
+            'menu_name'     => 'Partners',
+            'add_new'       => 'Add Partner',
+            'add_new_item'  => 'Add New Partner',
+        ],
+        'public'      => false,
+        'show_ui'     => true,
+        'show_in_menu'=> 'bacera-main',
+        'has_archive' => false,
+        'supports'    => [ 'title', 'thumbnail', 'page-attributes' ], // menu_order needed for ordering
+    ]);
 });
 /* ==========================================================================
    AUTHENTICATION & LOGOUT HANDLER

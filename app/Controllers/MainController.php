@@ -38,6 +38,7 @@ class MainController {
             new ConfigController();         // thêm submenu "bacera-config" sau
             new AdminWorkshopController();  // Workshop DB + 4 trang quản lý
             new AdminPaymentController();   // Payment methods + promo codes
+            new AdminTeamController();      // Our Team member management
         }
     }
 
