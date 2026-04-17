@@ -248,17 +248,20 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
 
                             if (!empty($pancake_prods)) {
                                 foreach ($pancake_prods as $p_item) {
-                                    $name = $p_item['product']['name'] ?? $p_item['name'] ?? 'Tác phẩm gốm';
+                                    $name  = $p_item['product']['name'] ?? $p_item['name'] ?? 'Tác phẩm gốm';
                                     $price = $p_item['retail_price'] ?? $p_item['price_at_counter'] ?? 0;
-                                    $formatted_price = $price > 0 ? number_format($price, 0, ',', '.') . ' ₫' : 'Liên hệ';
-                                    $img = Bacera_Utils::get_proxy_url($p_item);
+                                    $img   = Bacera_Utils::get_proxy_url($p_item);
+                                    $prod_url = Bacera_Utils::get_product_permalink($p_item) ?: $url_shop;
                                     ?>
-                                    <div class="swiper-slide group cursor-pointer" onclick="window.location='<?php echo esc_url($url_shop); ?>'">
-                                        <div class="aspect-[4/5] overflow-hidden rounded-md mb-4 bg-[#EBE7DF]">
-                                            <img src="<?php echo esc_url($img); ?>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1578308691517-8e68e43425f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
-                                        </div>
-                                        <h3 class="font-serif text-lg text-textmain truncate border-b border-transparent group-hover:border-accentdark inline-block transition-all"><?php echo esc_html($name); ?></h3>
-                                        <p class="text-xs font-sans text-textmuted mt-1 tracking-wider"><?php echo esc_html($formatted_price); ?></p>
+                                    <div class="swiper-slide h-auto">
+                                        <?php
+                                        get_template_part('app/Views/components/product-card', null, [
+                                            'name'  => $name,
+                                            'price' => $price > 0 ? number_format($price, 0, ',', '.') . ' ₫' : 'Liên hệ',
+                                            'image' => $img,
+                                            'url'   => $prod_url,
+                                        ]);
+                                        ?>
                                     </div>
                                     <?php
                                 }

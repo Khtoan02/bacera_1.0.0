@@ -13,15 +13,18 @@ $partners_query = new WP_Query([
 
 $has_partners = $partners_query->have_posts();
 ?>
-<div class="bacera-partners-wrapper relative w-full overflow-hidden rounded-[2rem] pb-8 pt-12 md:py-16">
+<div class="bacera-partners-wrapper relative w-full overflow-hidden py-12 md:py-20 border-t border-accent/20">
     <!-- Ambient Ceramic Orbs - Bounded tightly to the wrapper -->
-    <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
         <div class="absolute top-[10%] right-[-5%] w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-accent/30 blur-[80px] md:blur-[100px] rounded-full mix-blend-multiply"></div>
         <div class="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] md:w-[500px] md:h-[500px] bg-terracotta/15 blur-[100px] md:blur-[120px] rounded-full mix-blend-multiply"></div>
     </div>
 
+    <!-- Inner Container – matches other sections (max-w-7xl) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
     <!-- Text Header -->
-    <div class="relative z-10 text-center w-full px-4 mb-10 md:mb-16">
+    <div class="text-center w-full mb-10 md:mb-16">
         <p class="text-[10px] md:text-sm uppercase tracking-[0.3em] text-accentdark mb-4 md:mb-6 font-medium">Bacera's Presence</p>
         <h2 class="font-serif text-2xl md:text-3xl lg:text-4xl text-textmain font-light leading-snug">
             Our creations accompany the most luxurious <br class="hidden sm:block">and culturally rich spaces.
@@ -29,7 +32,7 @@ $has_partners = $partners_query->have_posts();
     </div>
     
     <!-- Swiper Slider with Glass Cards -->
-    <div class="relative z-10 swiper partner-swiper w-full !overflow-visible px-2 sm:px-4 py-8">
+    <div class="swiper partner-swiper w-full overflow-hidden py-8">
         <div class="swiper-wrapper items-stretch">
             <?php if ( $has_partners ) : ?>
                 <?php 
@@ -44,7 +47,7 @@ $has_partners = $partners_query->have_posts();
                             if ( has_post_thumbnail() ) {
                                 $img_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
                                 $alt = get_post_meta( get_post_thumbnail_id(), '_wp_attachment_image_alt', true ) ?: get_the_title();
-                                echo '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $alt ) . '" title="' . esc_attr( get_the_title() ) . '" class="h-16 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105">';
+                                echo '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $alt ) . '" class="h-16 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105">';
                             } else {
                                 echo '<span class="font-serif text-2xl md:text-3xl lg:text-4xl tracking-[0.2em] text-textmain text-center transition-transform duration-500 inline-block group-hover:scale-105">' . esc_html( get_the_title() ) . '</span>';
                             }
@@ -79,7 +82,8 @@ $has_partners = $partners_query->have_posts();
             <?php endif; ?>
         </div>
     </div>
-</div>
+    </div><!-- /.max-w-7xl inner container -->
+</div><!-- /.bacera-partners-wrapper -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
