@@ -83,6 +83,8 @@ $shop_base_url = get_permalink( get_queried_object_id() );
 if ( ! $shop_base_url ) {
 	$shop_base_url = home_url( '/' );
 }
+$cart_page_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_cart_page_url() : ( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/cart/' ) );
+$checkout_page_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : $cart_page_url;
 
 $url_shop_clear_cats = remove_query_arg( [ 'cat', 'filter_collection', 'shop_page' ], $shop_base_url );
 if ( $sort !== 'price_low' ) {
@@ -550,6 +552,129 @@ get_header();
 				grid-template-columns: repeat(8, minmax(0, 1fr));
 			}
 		}
+		.bacera-cart-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgb(0 0 0 / 0.28);
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.25s ease;
+			z-index: 60;
+		}
+		.bacera-cart-overlay.is-open {
+			opacity: 1;
+			pointer-events: auto;
+		}
+		.bacera-cart-drawer {
+			position: fixed;
+			top: 0;
+			right: 0;
+			height: 100vh;
+			width: min(560px, 92vw);
+			background: #fff;
+			box-shadow: -10px 0 28px rgb(41 37 36 / 0.18);
+			transform: translateX(100%);
+			transition: transform 0.28s ease;
+			display: flex;
+			flex-direction: column;
+			z-index: 70;
+		}
+		.bacera-cart-drawer.is-open {
+			transform: translateX(0);
+		}
+		.bacera-cart-drawer-head {
+			padding: 2.5rem 1.25rem 1.25rem;
+			border-bottom: 1px solid rgb(231 229 228);
+		}
+		.bacera-cart-items {
+			flex: 1;
+			overflow-y: auto;
+			padding: 1.75rem 1.25rem 2.5rem;
+		}
+		.bacera-cart-item {
+			display: grid;
+			grid-template-columns: 96px minmax(0, 1fr);
+			gap: 0.9rem;
+			padding: 1.25rem 0;
+			border-bottom: 1px solid rgb(231 229 228);
+		}
+		.bacera-cart-item img {
+			width: 96px;
+			height: 96px;
+			border-radius: 0.65rem;
+			object-fit: cover;
+			background: rgb(245 245 244);
+		}
+		.bacera-cart-item-main {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 0.5rem;
+			min-width: 0;
+		}
+		.bacera-cart-item-text {
+			min-width: 0;
+			flex: 1;
+		}
+		.bacera-cart-variant-line {
+			margin: 0.375rem 0 0;
+			font-size: 0.9375rem;
+			line-height: 1.45;
+			color: rgb(87 83 78);
+		}
+		.bacera-cart-qty {
+			display: inline-flex;
+			align-items: center;
+			border: 1px solid rgb(214 211 209);
+			border-radius: 0.5rem;
+			overflow: hidden;
+		}
+		.bacera-cart-qty button {
+			width: 2rem;
+			height: 2rem;
+			border: 0;
+			background: #fff;
+			color: rgb(87 83 78);
+			cursor: pointer;
+		}
+		.bacera-cart-qty span {
+			min-width: 2rem;
+			text-align: center;
+			font-variant-numeric: tabular-nums;
+			color: rgb(41 37 36);
+		}
+		.bacera-cart-remove {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			width: 2.25rem;
+			height: 2.25rem;
+			padding: 0;
+			border: 0;
+			border-radius: 0.5rem;
+			background: transparent;
+			color: rgb(168 162 158);
+			cursor: pointer;
+			transition: color 0.15s ease, background-color 0.15s ease;
+		}
+		.bacera-cart-remove:hover {
+			color: rgb(87 83 78);
+			background: rgb(245 245 244);
+		}
+		.bacera-cart-remove svg {
+			display: block;
+		}
+		.bacera-cart-footer {
+			border-top: 1px solid rgb(231 229 228);
+			padding: 1.75rem 1.25rem 2.5rem;
+			background: #fff;
+		}
+		.bacera-cart-empty {
+			padding: 2.5rem 1.25rem;
+			color: rgb(120 113 108);
+			font-size: 0.95rem;
+		}
 	</style>
 	<div class="max-w-[90rem] mx-auto px-0">
 
@@ -932,18 +1057,39 @@ get_header();
 								}
 
 								$product_detail_url = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_product_permalink( $p ) : '';
+								$variation_id       = isset( $p['id'] ) ? (string) $p['id'] : '';
+								$product_id         = isset( $p['product']['id'] ) ? (string) $p['product']['id'] : ( isset( $p['product_id'] ) ? (string) $p['product_id'] : '' );
+								$cart_item_uid      = $variation_id !== '' ? 'var_' . $variation_id : 'prd_' . $product_id . '_' . md5( $name . '|' . $price );
+								$cart_variant_label = $p['name'] ?? '';
+								$cart_color         = $p['color_name'] ?? $p['color'] ?? '';
+								$cart_size          = $p['size_name'] ?? $p['size'] ?? $p['capacity'] ?? '';
 
 								get_template_part(
 									'app/Views/components/product-card',
 									null,
 									[
-										'title'     => $name,
-										'brand'     => $brand,
-										'price'     => number_format( $price, 0, ',', '.' ) . ' ₫',
-										'old_price' => $original_price > 0 ? number_format( $original_price, 0, ',', '.' ) . ' ₫' : '',
-										'image'     => $image_url,
-										'discount'  => $discount_percent,
-										'url'       => $product_detail_url,
+										'title'       => $name,
+										'brand'       => $brand,
+										'price'       => number_format( $price, 0, ',', '.' ) . ' ₫',
+										'old_price'   => $original_price > 0 ? number_format( $original_price, 0, ',', '.' ) . ' ₫' : '',
+										'image'       => $image_url,
+										'discount'    => $discount_percent,
+										'url'         => $product_detail_url,
+										'add_to_cart' => true,
+										'cart_item'   => [
+											'id'             => $cart_item_uid,
+											'variation_id'   => $variation_id,
+											'product_id'     => $product_id,
+											'name'           => $name,
+											'brand'          => $brand,
+											'variant_label'  => is_string( $cart_variant_label ) ? $cart_variant_label : '',
+											'color'          => is_string( $cart_color ) ? $cart_color : '',
+											'size'           => is_string( $cart_size ) ? $cart_size : '',
+											'image'          => $image_url,
+											'price'          => (float) $price,
+											'original_price' => (float) $original_price,
+											'url'            => $product_detail_url,
+										],
 									]
 								);
 							endforeach;
@@ -1005,7 +1151,225 @@ get_header();
 
 		<?php endif; ?>
 	</div>
+	<div id="bacera-cart-overlay" class="bacera-cart-overlay" aria-hidden="true"></div>
+	<aside id="bacera-cart-drawer" class="bacera-cart-drawer" aria-hidden="true" aria-label="<?php esc_attr_e( 'Shopping cart', 'bacera' ); ?>">
+		<div class="bacera-cart-drawer-head flex items-center justify-between">
+			<h2 class="m-0 font-serif font-bold text-[2rem] leading-none text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></h2>
+			<button type="button" id="bacera-cart-close" class="h-9 w-9 rounded-full border border-stone-200 text-xl leading-none text-stone-600 hover:bg-stone-50" aria-label="<?php esc_attr_e( 'Close cart', 'bacera' ); ?>">×</button>
+		</div>
+		<div id="bacera-cart-items" class="bacera-cart-items"></div>
+		<div class="bacera-cart-footer">
+			<div class="flex items-end justify-between gap-4 mb-4">
+				<div>
+					<p class="m-0 text-[1.75rem] leading-none font-serif font-bold text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></p>
+					<p class="m-0 mt-1 text-base text-stone-600"><?php esc_html_e( 'Total (VAT included)', 'bacera' ); ?></p>
+				</div>
+				<p id="bacera-cart-total" class="m-0 text-[2rem] leading-none tabular-nums text-stone-800">0đ</p>
+			</div>
+			<div class="grid grid-cols-2 gap-2">
+				<a href="<?php echo esc_url( $checkout_page_url ); ?>" class="rounded-xl bg-accent-500 px-4 py-3 text-center font-medium text-white no-underline hover:bg-accent-600"><?php esc_html_e( 'Thêm vào giỏ hàng', 'bacera' ); ?></a>
+				<a href="<?php echo esc_url( $cart_page_url ); ?>" class="rounded-xl border border-stone-300 px-4 py-3 text-center font-medium text-stone-700 no-underline hover:bg-stone-50"><?php esc_html_e( 'Xem giỏ hàng', 'bacera' ); ?></a>
+			</div>
+		</div>
+	</aside>
 </main>
+
+<script>
+(function () {
+	var drawer = document.getElementById('bacera-cart-drawer');
+	var overlay = document.getElementById('bacera-cart-overlay');
+	var closeBtn = document.getElementById('bacera-cart-close');
+	var listEl = document.getElementById('bacera-cart-items');
+	var totalEl = document.getElementById('bacera-cart-total');
+	if (!drawer || !overlay || !closeBtn || !listEl || !totalEl) return;
+
+	var STORAGE_KEY = 'bacera_shop_cart_v1';
+
+	function loadCart() {
+		try {
+			var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+			return Array.isArray(parsed) ? parsed : [];
+		} catch (e) {
+			return [];
+		}
+	}
+
+	function saveCart(cart) {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+	}
+
+	function toCurrency(numberValue) {
+		var amount = Number(numberValue || 0);
+		return amount.toLocaleString('vi-VN') + 'đ';
+	}
+
+	function escapeHtml(value) {
+		return String(value || '')
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
+	function computeTotal(cart) {
+		return cart.reduce(function (sum, item) {
+			return sum + (Number(item.price || 0) * Number(item.qty || 0));
+		}, 0);
+	}
+
+	var trashIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+
+	function parseVariantDetails(item) {
+		var color = String(item.color || '').trim();
+		var size = String(item.size || '').trim();
+		var label = String(item.variant_label || '').trim();
+		if ((!color || !size) && label) {
+			var parts = label.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
+			if (!color && parts[0]) color = parts[0];
+			if (!size && parts[1]) size = parts[1];
+		}
+		return { color: color, size: size };
+	}
+
+	/** Một dòng dưới tên: "màu | kích thước" giống mockup. */
+	function formatColorSizeSubtitle(meta, item) {
+		var c = meta.color;
+		var s = meta.size;
+		if (c && s) return c + ' | ' + s;
+		if (c) return c;
+		if (s) return s;
+		var label = String(item.variant_label || '').trim();
+		return label;
+	}
+
+	function renderCart() {
+		var cart = loadCart();
+		if (!cart.length) {
+			listEl.innerHTML = '<p class="bacera-cart-empty"><?php echo esc_js( __( 'Giỏ hàng của bạn đang trống.', 'bacera' ) ); ?></p>';
+			totalEl.textContent = '0đ';
+			return;
+		}
+
+		listEl.innerHTML = cart.map(function (item) {
+			var title = escapeHtml(item.name || '<?php echo esc_js( __( 'Product', 'bacera' ) ); ?>');
+			var brand = escapeHtml(item.brand || '<?php echo esc_js( __( 'Bacera', 'bacera' ) ); ?>');
+			var variantMeta = parseVariantDetails(item);
+			var variantSubtitle = formatColorSizeSubtitle(variantMeta, item);
+			var variantLineHtml = variantSubtitle
+				? '<p class="bacera-cart-variant-line">' + escapeHtml(variantSubtitle) + '</p>'
+				: '';
+			var image = escapeHtml(item.image || 'https://placehold.co/120x120/f0ece3/8d6a54?text=Product');
+			var originalPrice = Number(item.original_price || 0);
+			var oldPriceHtml = originalPrice > Number(item.price || 0)
+				? '<span class="text-sm line-through text-stone-400 tabular-nums">' + toCurrency(originalPrice) + '</span>'
+				: '';
+			return ''
+				+ '<article class="bacera-cart-item" data-cart-id="' + escapeHtml(item.id) + '">'
+				+ '  <img src="' + image + '" alt="' + title + '" loading="lazy" />'
+				+ '  <div class="min-w-0">'
+				+ '    <div class="bacera-cart-item-main">'
+				+ '      <div class="bacera-cart-item-text">'
+				+ '        <p class="m-0 text-sm text-stone-500">' + brand + '</p>'
+				+ '        <p class="m-0 mt-1 text-xl leading-snug font-medium text-stone-800">' + title + '</p>'
+				+ variantLineHtml
+				+ '      </div>'
+				+ '      <button type="button" class="bacera-cart-remove" data-cart-action="remove" aria-label="<?php echo esc_js( __( 'Remove item', 'bacera' ) ); ?>">' + trashIconSvg + '</button>'
+				+ '    </div>'
+				+ '    <div class="mt-3 flex items-center justify-between gap-3">'
+				+ '      <div class="bacera-cart-qty" role="group" aria-label="<?php echo esc_attr( __( 'Quantity', 'bacera' ) ); ?>">'
+				+ '        <button type="button" data-cart-action="minus">−</button>'
+				+ '        <span>' + String(Number(item.qty || 1)).padStart(2, '0') + '</span>'
+				+ '        <button type="button" data-cart-action="plus">+</button>'
+				+ '      </div>'
+				+ '      <div class="text-right">'
+				+ oldPriceHtml
+				+ '        <p class="m-0 text-[1.75rem] leading-none tabular-nums text-stone-800">' + toCurrency(item.price) + '</p>'
+				+ '      </div>'
+				+ '    </div>'
+				+ '  </div>'
+				+ '</article>';
+		}).join('');
+
+		totalEl.textContent = toCurrency(computeTotal(cart));
+	}
+
+	function setDrawerOpen(opened) {
+		drawer.classList.toggle('is-open', opened);
+		overlay.classList.toggle('is-open', opened);
+		drawer.setAttribute('aria-hidden', opened ? 'false' : 'true');
+		overlay.setAttribute('aria-hidden', opened ? 'false' : 'true');
+		document.body.classList.toggle('overflow-hidden', opened);
+	}
+
+	function upsertItem(nextItem) {
+		var cart = loadCart();
+		var index = cart.findIndex(function (item) {
+			return String(item.id) === String(nextItem.id);
+		});
+		if (index >= 0) {
+			cart[index].qty = Number(cart[index].qty || 1) + 1;
+		} else {
+			nextItem.qty = 1;
+			cart.push(nextItem);
+		}
+		saveCart(cart);
+	}
+
+	document.addEventListener('click', function (event) {
+		var addBtn = event.target.closest('.bacera-shop-add-cart-btn');
+		if (!addBtn) return;
+		event.preventDefault();
+		event.stopPropagation();
+		var payloadRaw = addBtn.getAttribute('data-cart-item') || '';
+		if (!payloadRaw) return;
+		try {
+			var payload = JSON.parse(payloadRaw);
+			if (!payload || !payload.id) return;
+			upsertItem(payload);
+			renderCart();
+			setDrawerOpen(true);
+		} catch (e) {
+			return;
+		}
+	});
+
+	listEl.addEventListener('click', function (event) {
+		var actionBtn = event.target.closest('button[data-cart-action]');
+		if (!actionBtn) return;
+		var row = actionBtn.closest('.bacera-cart-item');
+		if (!row) return;
+		var itemId = row.getAttribute('data-cart-id');
+		if (!itemId) return;
+		var action = actionBtn.getAttribute('data-cart-action');
+		var cart = loadCart();
+		var idx = cart.findIndex(function (item) {
+			return String(item.id) === String(itemId);
+		});
+		if (idx < 0) return;
+		if (action === 'remove') {
+			cart.splice(idx, 1);
+		} else if (action === 'minus') {
+			cart[idx].qty = Number(cart[idx].qty || 1) - 1;
+			if (cart[idx].qty <= 0) {
+				cart.splice(idx, 1);
+			}
+		} else if (action === 'plus') {
+			cart[idx].qty = Number(cart[idx].qty || 1) + 1;
+		}
+		saveCart(cart);
+		renderCart();
+	});
+
+	closeBtn.addEventListener('click', function () { setDrawerOpen(false); });
+	overlay.addEventListener('click', function () { setDrawerOpen(false); });
+	document.addEventListener('keydown', function (event) {
+		if (event.key === 'Escape') setDrawerOpen(false);
+	});
+
+	renderCart();
+})();
+</script>
 
 <?php
 get_footer();

@@ -216,68 +216,81 @@ if ( have_posts() ) :
 			);
 		};
 
+		// Gom mọi ảnh (API / WP / meta), bỏ trùng URL — hỗ trợ danh sách rất dài (thumbnail cuộn ngang).
+		$gallery_seen = [];
 		$gallery_urls = [];
-		if ( $api_product && class_exists( 'Bacera_Utils' ) ) {
+		$bacera_pdp_gallery_add = function ( $url ) use ( &$gallery_urls, &$gallery_seen ) {
+			$u = esc_url_raw( (string) $url );
+			if ( $u === '' ) {
+				return;
+			}
+			$key = md5( strtolower( $u ) );
+			if ( isset( $gallery_seen[ $key ] ) ) {
+				return;
+			}
+			$gallery_seen[ $key ] = true;
+			$gallery_urls[]       = $u;
+		};
+		if ( $api_product ) {
+			foreach ( $variations as $v ) {
+				if ( ! empty( $v['images'] ) && is_array( $v['images'] ) ) {
+					foreach ( $v['images'] as $img ) {
+						$bacera_pdp_gallery_add( $img );
+					}
+				}
+			}
+			if ( ! empty( $api_product['images'] ) && is_array( $api_product['images'] ) ) {
+				foreach ( $api_product['images'] as $img ) {
+					$bacera_pdp_gallery_add( $img );
+				}
+			}
+			if ( ! empty( $api_product['image'] ) ) {
+				$bacera_pdp_gallery_add( $api_product['image'] );
+			}
+		}
+		if ( has_post_thumbnail( $product_id ) ) {
+			$bacera_pdp_gallery_add( get_the_post_thumbnail_url( $product_id, 'full' ) );
+		}
+		if ( ! empty( $gallery_images ) && is_array( $gallery_images ) ) {
+			foreach ( $gallery_images as $image ) {
+				if ( is_array( $image ) && ! empty( $image['url'] ) ) {
+					$bacera_pdp_gallery_add( $image['url'] );
+				} elseif ( is_numeric( $image ) ) {
+					$att = wp_get_attachment_image_url( (int) $image, 'full' );
+					if ( $att ) {
+						$bacera_pdp_gallery_add( $att );
+					}
+				}
+			}
+		}
+		if ( empty( $gallery_urls ) && $api_product && class_exists( 'Bacera_Utils' ) ) {
 			foreach ( $variations as $v ) {
 				$proxy_u = $bacera_pdp_variation_proxy_url( $v );
-				if ( $proxy_u !== '' && ! in_array( $proxy_u, $gallery_urls, true ) ) {
-					$gallery_urls[] = esc_url_raw( $proxy_u );
+				if ( $proxy_u !== '' ) {
+					$bacera_pdp_gallery_add( $proxy_u );
 				}
 			}
 			if ( empty( $gallery_urls ) ) {
 				$single = $bacera_pdp_post_proxy_url();
 				if ( $single !== '' ) {
-					$gallery_urls[] = esc_url_raw( $single );
+					$bacera_pdp_gallery_add( $single );
 				}
 			}
 		}
-		if ( empty( $gallery_urls ) && $api_product ) {
-			foreach ( $variations as $v ) {
-				if ( empty( $v['images'] ) || ! is_array( $v['images'] ) ) {
-					continue;
-				}
-				foreach ( $v['images'] as $img ) {
-					$u = esc_url_raw( (string) $img );
-					if ( $u !== '' && ! in_array( $u, $gallery_urls, true ) ) {
-						$gallery_urls[] = $u;
-					}
-				}
-			}
-			if ( empty( $gallery_urls ) && ! empty( $api_product['image'] ) ) {
-				$gallery_urls[] = esc_url_raw( (string) $api_product['image'] );
-			}
-		}
-		if ( empty( $gallery_urls ) && has_post_thumbnail() ) {
-			$gallery_urls[] = get_the_post_thumbnail_url( $product_id, 'full' );
-		}
-		if ( empty( $gallery_urls ) && ! empty( $gallery_images ) && is_array( $gallery_images ) ) {
-			foreach ( $gallery_images as $image ) {
-				if ( is_array( $image ) && ! empty( $image['url'] ) ) {
-					$gallery_urls[] = esc_url_raw( $image['url'] );
-				} elseif ( is_numeric( $image ) ) {
-					$u = wp_get_attachment_image_url( (int) $image, 'full' );
-					if ( $u ) {
-						$gallery_urls[] = esc_url_raw( $u );
-					}
-				}
-			}
-		}
-		if ( empty( $gallery_urls ) ) {
-			$fallback_img = get_post_meta( $product_id, '_pancake_image_url', true );
-			if ( $fallback_img ) {
-				$gallery_urls[] = esc_url_raw( $fallback_img );
-			}
+		$pancake_fallback_img = get_post_meta( $product_id, '_pancake_image_url', true );
+		if ( $pancake_fallback_img ) {
+			$bacera_pdp_gallery_add( $pancake_fallback_img );
 		}
 
 		$main_image_url = '';
-		if ( $current_variation ) {
+		if ( $current_variation && ! empty( $current_variation['images'][0] ) ) {
+			$main_image_url = esc_url_raw( (string) $current_variation['images'][0] );
+		}
+		if ( $main_image_url === '' && $current_variation ) {
 			$main_image_url = $bacera_pdp_variation_proxy_url( $current_variation );
 		}
 		if ( $main_image_url === '' ) {
 			$main_image_url = $bacera_pdp_post_proxy_url();
-		}
-		if ( $main_image_url === '' && $current_variation && ! empty( $current_variation['images'][0] ) ) {
-			$main_image_url = esc_url_raw( (string) $current_variation['images'][0] );
 		}
 		if ( $main_image_url === '' && ! empty( $gallery_urls[0] ) ) {
 			$main_image_url = $gallery_urls[0];
@@ -393,14 +406,27 @@ if ( have_posts() ) :
 			if ( $reg > 0 && $pr < $reg ) {
 				$dct = (int) round( ( ( $reg - $pr ) / $reg ) * 100 );
 			}
-			$img0 = $bacera_pdp_variation_proxy_url( $v );
+			$img0 = ! empty( $v['images'][0] ) ? esc_url_raw( (string) $v['images'][0] ) : '';
 			if ( $img0 === '' ) {
-				$img0 = ! empty( $v['images'][0] ) ? esc_url_raw( (string) $v['images'][0] ) : $main_image_url;
+				$img0 = $bacera_pdp_variation_proxy_url( $v );
+			}
+			if ( $img0 === '' ) {
+				$img0 = $main_image_url;
+			}
+			$v_imgs = [];
+			if ( ! empty( $v['images'] ) && is_array( $v['images'] ) ) {
+				foreach ( $v['images'] as $vim ) {
+					$vu = esc_url_raw( (string) $vim );
+					if ( $vu !== '' ) {
+						$v_imgs[] = $vu;
+					}
+				}
 			}
 			$pdp_js_variants[] = [
 				'index'            => (int) $vi,
 				'variationId'      => isset( $v['id'] ) ? (string) $v['id'] : '',
 				'mainImage'        => $img0,
+				'images'           => $v_imgs,
 				'priceFormatted'   => number_format( $pr, 0, ',', '.' ) . '₫',
 				'regularFormatted' => $reg > 0 ? number_format( $reg, 0, ',', '.' ) . '₫' : '',
 				'discountPercent'  => $dct,
@@ -474,6 +500,22 @@ if ( have_posts() ) :
 				height: 8.25rem;
 			}
 		}
+		.bacera-pdp-main .bacera-pdp-thumbs-strip {
+			-webkit-overflow-scrolling: touch;
+			scroll-snap-type: x mandatory;
+			scrollbar-width: thin;
+			scrollbar-color: rgba(61, 47, 38, 0.25) transparent;
+		}
+		.bacera-pdp-main .bacera-pdp-thumbs-strip::-webkit-scrollbar {
+			height: 6px;
+		}
+		.bacera-pdp-main .bacera-pdp-thumbs-strip::-webkit-scrollbar-thumb {
+			border-radius: 9999px;
+			background: rgba(61, 47, 38, 0.22);
+		}
+		.bacera-pdp-main .bacera-pdp-thumbs-strip .bacera-pdp-thumb {
+			scroll-snap-align: start;
+		}
 		/* Nội dung phía dưới hero: căn trái thống nhất */
 		.bacera-pdp-main .bacera-product-story,
 		.bacera-pdp-main .bacera-related-products,
@@ -507,11 +549,18 @@ if ( have_posts() ) :
 					<div class="main-image mb-4 w-full overflow-hidden rounded-lg bg-neutral-100 aspect-[4/5]">
 						<img id="bacera-pdp-main-img" src="<?php echo esc_url( $main_image_url ); ?>" alt="<?php echo esc_attr( $product_title ); ?>" class="h-full w-full object-cover" />
 					</div>
-					<div id="bacera-pdp-thumbs" class="thumbnail-list flex w-full flex-wrap justify-start gap-3 md:gap-4">
+					<div id="bacera-pdp-thumbs" class="bacera-pdp-thumbs-strip thumbnail-list flex w-full max-w-full flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-1 md:gap-4" role="list" aria-label="<?php esc_attr_e( 'Ảnh sản phẩm', 'bacera' ); ?>">
 					<?php
+					$thumb_selected_index = 0;
+					if ( $main_image_url !== '' && ! empty( $gallery_urls ) ) {
+						$found_thumb = array_search( $main_image_url, $gallery_urls, true );
+						if ( $found_thumb !== false ) {
+							$thumb_selected_index = (int) $found_thumb;
+						}
+					}
 					$t = 0;
 					foreach ( $gallery_urls as $gurl ) :
-						$sel = ( $t === 0 );
+						$sel = ( (int) $t === $thumb_selected_index );
 						?>
 					<button type="button" data-src="<?php echo esc_url( $gurl ); ?>" class="bacera-pdp-thumb group relative overflow-hidden rounded border-2 transition <?php echo $sel ? 'border-primary-800' : 'border-transparent hover:border-primary-400'; ?>">
 						<img src="<?php echo esc_url( $gurl ); ?>" alt="" class="h-full w-full object-cover" loading="lazy" />
@@ -696,10 +745,28 @@ if ( have_posts() ) :
 			var colorLabel = document.getElementById('bacera-pdp-color-label');
 			var stockEl = document.getElementById('bacera-pdp-stock');
 			var swatches = document.querySelectorAll('.bacera-pdp-swatch');
+			function syncThumbsToMain(src) {
+				if (!src) return;
+				var thumbs = document.querySelectorAll('.bacera-pdp-thumb');
+				thumbs.forEach(function (x) {
+					var ds = x.getAttribute('data-src');
+					var on = (ds === src);
+					x.classList.toggle('border-primary-800', on);
+					x.classList.toggle('border-transparent', !on);
+					if (on) {
+						try {
+							x.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+						} catch (e) {
+							x.scrollIntoView(false);
+						}
+					}
+				});
+			}
 			function applyVariant(i) {
 				if (!variants[i] || !mainImg) return;
 				var v = variants[i];
 				mainImg.src = v.mainImage;
+				syncThumbsToMain(v.mainImage);
 				if (priceSale) priceSale.textContent = v.priceFormatted;
 				if (priceReg) {
 					if (v.regularFormatted) { priceReg.textContent = v.regularFormatted; priceReg.classList.remove('hidden'); }
@@ -730,10 +797,7 @@ if ( have_posts() ) :
 				t.addEventListener('click', function () {
 					var src = t.getAttribute('data-src');
 					if (src && mainImg) mainImg.src = src;
-					thumbs.forEach(function (x) {
-						x.classList.toggle('border-primary-800', x === t);
-						x.classList.toggle('border-transparent', x !== t);
-					});
+					syncThumbsToMain(src || '');
 				});
 			});
 			var q = document.getElementById('bacera-pdp-qty');

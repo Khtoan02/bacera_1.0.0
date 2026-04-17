@@ -31,6 +31,9 @@ $class         = isset( $args['class'] ) ? $args['class'] : '';
 $plp           = ! empty( $args['plp'] );
 $soldOut       = ! empty( $args['soldOut'] );
 $product_url   = isset( $args['url'] ) ? $args['url'] : '';
+$add_to_cart   = ! empty( $args['add_to_cart'] );
+$cart_item     = isset( $args['cart_item'] ) && is_array( $args['cart_item'] ) ? $args['cart_item'] : [];
+$cart_item_json = $add_to_cart ? wp_json_encode( $cart_item ) : '';
 
 $img_wrap_class = $plp
 	? 'self-stretch relative rounded-lg flex flex-col justify-start items-start overflow-hidden bg-neutral-100 aspect-[4/5]'
@@ -83,7 +86,15 @@ if ( $product_url ) {
 		</div>
 
 		<div class="w-full h-16 absolute bottom-0 left-0 overflow-hidden z-10">
-			<?php if ( $product_url ) : ?>
+			<?php if ( $add_to_cart ) : ?>
+			<button
+				type="button"
+				class="bacera-shop-add-cart-btn w-[calc(100%-24px)] p-4 absolute left-[12px] top-[60px] opacity-0 group-hover:top-0 group-hover:opacity-100 bg-accent-500 rounded-lg inline-flex justify-center items-center gap-2 transition-all duration-300"
+				data-cart-item="<?php echo esc_attr( $cart_item_json ); ?>"
+			>
+				<span class="text-stone-100 text-base font-medium leading-5"><?php esc_html_e( 'Add to cart', 'bacera' ); ?></span>
+			</button>
+			<?php elseif ( $product_url ) : ?>
 			<span class="w-[calc(100%-24px)] p-4 absolute left-[12px] top-[60px] opacity-0 group-hover:top-0 group-hover:opacity-100 bg-accent-500 rounded-lg inline-flex justify-center items-center gap-2 transition-all duration-300 pointer-events-none">
 				<span class="text-stone-100 text-base font-medium leading-5"><?php esc_html_e( 'Add to cart', 'bacera' ); ?></span>
 			</span>
