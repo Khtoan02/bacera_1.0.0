@@ -28,7 +28,8 @@ if ( ! empty( $auth_pages[0] ) ) {
 	$auth_url = get_permalink( $auth_pages[0]->ID );
 }
 
-$bacera_vn_areas_base = apply_filters( 'bacera_checkout_vn_areas_api_base', 'https://api.mysupership.vn/v1/partner/areas' );
+/** REST proxy địa chỉ Pancake (plugin bacera-pancake): /bacera-pancake/v1/geo/… */
+$bacera_rest_geo_url = class_exists( 'Bacera_Module_Geo' ) ? untrailingslashit( rest_url( 'bacera-pancake/v1/geo' ) ) : '';
 $bacera_site_name      = get_bloginfo( 'name' );
 
 get_header();
@@ -484,7 +485,7 @@ get_header();
 
 		<div id="bacera-chk-empty" class="hidden rounded-2xl border border-stone-200 bg-white p-10 text-center shadow-sm">
 			<p class="m-0 text-stone-600 mb-6"><?php esc_html_e( 'Không có sản phẩm để thanh toán. Vui lòng chọn sản phẩm trong giỏ hàng.', 'bacera' ); ?></p>
-			<a href="<?php echo esc_url( $cart_url ); ?>" class="inline-flex rounded-xl bg-accent-500 px-6 py-3 font-medium text-white no-underline hover:bg-accent-600"><?php esc_html_e( 'Quay lại giỏ hàng', 'bacera' ); ?></a>
+			<a href="<?php echo esc_url( $cart_url ); ?>" class="inline-flex w-fit max-w-full items-center justify-center whitespace-nowrap rounded-xl border border-stone-300 bg-white px-4 py-3 text-base font-medium text-stone-800 shadow-sm no-underline transition-colors hover:border-stone-400 hover:bg-stone-50"><?php esc_html_e( 'Quay lại giỏ hàng', 'bacera' ); ?></a>
 		</div>
 
 		<div id="bacera-chk-layout" class="hidden grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_min(26rem,100%)] xl:gap-14 xl:items-start">
@@ -563,7 +564,7 @@ get_header();
 						</div>
 
 						<div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-2">
-							<a href="<?php echo esc_url( $cart_url ); ?>" class="inline-flex items-center gap-1 text-base font-medium text-stone-700 hover:text-stone-900 no-underline">
+							<a href="<?php echo esc_url( $cart_url ); ?>" class="inline-flex w-fit max-w-full shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border border-stone-300 bg-white px-4 py-3.5 text-base font-medium text-stone-800 shadow-sm no-underline transition-colors hover:border-stone-400 hover:bg-stone-50">
 								<span aria-hidden="true">‹</span> <?php esc_html_e( 'Quay lại giỏ hàng', 'bacera' ); ?>
 							</a>
 							<button type="button" id="bacera-chk-next-1" class="inline-flex w-full sm:w-auto items-center justify-center rounded-xl bg-accent-500 px-8 py-3.5 text-base font-semibold text-white shadow-sm hover:bg-accent-600 transition-colors border-0 cursor-pointer">
@@ -846,7 +847,7 @@ get_header();
 
 <script>
 (function () {
-	var VN_API = <?php echo wp_json_encode( $bacera_vn_areas_base ); ?>;
+	var GEO_API_BASE = <?php echo wp_json_encode( $bacera_rest_geo_url ); ?>;
 	var STORAGE_ADDR = 'bacera_checkout_address';
 	var STORAGE_CONTACT = 'bacera_checkout_contact';
 	var STORAGE_STEP = 'bacera_checkout_step';
@@ -1087,14 +1088,22 @@ get_header();
 		hidePayErr();
 	}
 
-	function fetchAreas(path) {
-		return fetch(VN_API + path, { credentials: 'omit' })
+	function fetchGeo(path) {
+		if (!GEO_API_BASE) {
+			return Promise.reject(new Error('no_geo'));
+		}
+		var url = GEO_API_BASE + '/' + String(path || '').replace(/^\//, '');
+		return fetch(url, {
+			credentials: 'same-origin',
+			headers: { 'X-WP-Nonce': WP_REST_NONCE }
+		})
 			.then(function (r) {
 				if (!r.ok) throw new Error('http');
 				return r.json();
 			})
 			.then(function (j) {
-				if (j && j.status === 'Success' && Array.isArray(j.results)) return j.results;
+				if (j && j.code === 'rest_forbidden') throw new Error('forbidden');
+				if (j && Array.isArray(j.data)) return j.data;
 				throw new Error('data');
 			});
 	}
@@ -1145,12 +1154,12 @@ get_header();
 			selWard.innerHTML = '<option value="">' + txtPickDistrictFirst + '</option>';
 			selWard.disabled = true;
 		}
-		return fetchAreas('/district?province=' + encodeURIComponent(provinceCode)).then(function (list) {
+		return fetchGeo('districts?province_id=' + encodeURIComponent(provinceCode)).then(function (list) {
 			selDistrict.innerHTML = '<option value="">' + txtChooseDistrict + '</option>';
 			list.forEach(function (row) {
 				var opt = document.createElement('option');
-				opt.value = row.code;
-				opt.textContent = row.name;
+				opt.value = String(row.id != null ? row.id : '');
+				opt.textContent = String(row.name || '');
 				selDistrict.appendChild(opt);
 			});
 			selDistrict.disabled = false;
@@ -1166,12 +1175,18 @@ get_header();
 		}
 		selWard.disabled = true;
 		selWard.innerHTML = '<option value="">' + txtLoading + '</option>';
-		return fetchAreas('/commune?district=' + encodeURIComponent(districtCode)).then(function (list) {
+		var provinceId = selProvince ? selProvince.value : '';
+		if (!provinceId) {
+			selWard.innerHTML = '<option value="">' + txtPickProvinceFirst + '</option>';
+			selWard.disabled = true;
+			return Promise.resolve();
+		}
+		return fetchGeo('communes?district_id=' + encodeURIComponent(districtCode) + '&province_id=' + encodeURIComponent(provinceId)).then(function (list) {
 			selWard.innerHTML = '<option value="">' + txtChooseWard + '</option>';
 			list.forEach(function (row) {
 				var opt = document.createElement('option');
-				opt.value = row.code;
-				opt.textContent = row.name;
+				opt.value = String(row.id != null ? row.id : '');
+				opt.textContent = String(row.name || '');
 				selWard.appendChild(opt);
 			});
 			selWard.disabled = false;
@@ -1199,13 +1214,13 @@ get_header();
 	function initVnAddress() {
 		if (!selProvince) return;
 		selProvince.innerHTML = '<option value="">' + txtLoading + '</option>';
-		fetchAreas('/province')
+		fetchGeo('provinces')
 			.then(function (list) {
 				selProvince.innerHTML = '<option value="">' + txtChooseProvince + '</option>';
 				list.forEach(function (row) {
 					var opt = document.createElement('option');
-					opt.value = row.code;
-					opt.textContent = row.name;
+					opt.value = String(row.id != null ? row.id : '');
+					opt.textContent = String(row.name || '');
 					selProvince.appendChild(opt);
 				});
 				selProvince.disabled = false;
