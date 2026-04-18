@@ -114,7 +114,22 @@ function bacera_enqueue_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'bacera_enqueue_scripts' );
 
-
+/**
+ * Logo header/footer: URL proxy ảnh cửa hàng Pancake (GET /shops → avatar_url) nếu plugin đã đồng bộ, ngược lại dùng file upload tĩnh.
+ *
+ * @return string
+ */
+function bacera_get_brand_logo_url() {
+    if ( class_exists( 'Bacera_Utils' ) ) {
+        $u = Bacera_Utils::get_pancake_shop_logo_proxy_url();
+        if ( is_string( $u ) && $u !== '' ) {
+            return $u;
+        }
+    }
+    $upload = wp_upload_dir();
+    $base   = isset( $upload['baseurl'] ) ? $upload['baseurl'] : '';
+    return $base . '/2026/03/Logo.png';
+}
 
 // Boot the main controller
 add_action('init', function() {

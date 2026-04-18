@@ -51,6 +51,12 @@ $about_page_id = $wpdb->get_var(
      LIMIT 1"
 );
 $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url( '/about-us/' );
+
+$bacera_hdr_shop_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_shop_page_url() : home_url( '/' );
+$bacera_hdr_cart_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_cart_page_url() : home_url( '/cart/' );
+$bacera_hdr_workshop_url = get_post_type_archive_link( 'workshop' ) ?: home_url( '/workshop/' );
+$bacera_hdr_blog_url     = get_post_type_archive_link( 'post' ) ?: home_url( '/blog/' );
+$bacera_hdr_contact_url  = home_url( '/contact/' );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -270,7 +276,7 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
 
         <a href="<?php echo esc_url(home_url('/')); ?>"
            class="flex items-center justify-center pr-6 xl:pr-8">
-            <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>"
+            <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>"
                  class="hdr-logo h-9 w-auto object-contain"
                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
         </a>
@@ -281,11 +287,11 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
 
                 <?php
                 $nav_items = [
-                    ['key'=>'shop',     'label'=>'Shop',     'has_sub'=>true],
-                    ['key'=>'workshop', 'label'=>'Workshop', 'has_sub'=>true],
-                    ['key'=>'about',    'label'=>'About us', 'has_sub'=>true],
-                    ['key'=>'blog',     'label'=>'Blog',     'has_sub'=>false, 'url'=> get_post_type_archive_link('post') ?: '#'],
-                    ['key'=>'contact',  'label'=>'Contact',  'has_sub'=>false, 'url'=>'#'],
+                    ['key'=>'shop',     'label'=>'Shop',     'has_sub'=>true,  'url'=>$bacera_hdr_shop_url],
+                    ['key'=>'workshop', 'label'=>'Workshop', 'has_sub'=>true,  'url'=>$bacera_hdr_workshop_url],
+                    ['key'=>'about',    'label'=>'About us', 'has_sub'=>true,  'url'=>$about_page],
+                    ['key'=>'blog',     'label'=>'Blog',     'has_sub'=>false, 'url'=>$bacera_hdr_blog_url],
+                    ['key'=>'contact',  'label'=>'Contact',  'has_sub'=>false, 'url'=>$bacera_hdr_contact_url],
                 ];
                 foreach ($nav_items as $item):
                 ?>
@@ -298,12 +304,13 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
                         <?php echo esc_html($item['label']); ?>
                     </a>
                     <?php else: ?>
-                    <div class="hdr-link flex items-center gap-1 px-4 h-full text-[15px] font-medium font-sans cursor-pointer select-none">
+                    <a href="<?php echo esc_url( $item['url'] ); ?>"
+                       class="hdr-link flex items-center gap-1 px-4 h-full text-[15px] font-medium font-sans cursor-pointer select-none no-underline">
                         <span><?php echo esc_html($item['label']); ?></span>
                         <svg class="hdr-chevron w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-                    </div>
+                    </a>
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
@@ -340,14 +347,12 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
                 </svg>
             </button>
 
-            <div class="relative">
-                <button class="hdr-icon w-9 h-9 flex items-center justify-center hover:scale-110 transition-transform focus:outline-none">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
-                </button>
-                <div class="absolute -top-1 -right-1 bg-[#d95f47] min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center text-white text-[10px] font-bold">1</div>
-            </div>
+            <a href="<?php echo esc_url( $bacera_hdr_cart_url ); ?>" class="relative hdr-icon w-9 h-9 flex items-center justify-center hover:scale-110 transition-transform focus:outline-none no-underline" title="<?php esc_attr_e( 'Giỏ hàng', 'bacera' ); ?>">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <span class="absolute -top-1 -right-1 bg-[#d95f47] min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center text-white text-[10px] font-bold">1</span>
+            </a>
 
             <?php if ( $bacera_customer ): ?>
             <div class="relative" id="acct-trigger">
@@ -444,8 +449,6 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
             'M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10A5 5 0 0112 7z',
         ];
 
-        // Archive URL for "Xem tất cả"
-        $shop_archive_url = get_post_type_archive_link('bcm_product') ?: '#';
         ?>
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
@@ -453,7 +456,7 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
                     <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Mua hàng theo công năng</h3>
                     <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng hơn.</p>
                 </div>
-                <a href="<?php echo esc_url($shop_archive_url); ?>"
+                <a href="<?php echo esc_url( $bacera_hdr_shop_url ); ?>"
                    class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">
                     Xem tất cả
                 </a>
@@ -521,10 +524,7 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
                     <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Khám phá workshop</h3>
                     <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Trải nghiệm nghệ thuật làm gốm thủ công đầy cảm hứng cùng chúng tôi.</p>
                 </div>
-                <?php
-                $workshop_archive = get_post_type_archive_link('workshop') ?: home_url('/workshop/');
-                ?>
-                <a href="<?= esc_url($workshop_archive) ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Xem tất cả lịch</a>
+                <a href="<?php echo esc_url( $bacera_hdr_workshop_url ); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors no-underline">Xem tất cả lịch</a>
             </div>
             <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <div class="flex-1 grid grid-cols-2 gap-4">
@@ -598,17 +598,15 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
 
     <div class="flex lg:hidden items-center justify-between h-[64px] px-4" id="mobile-hdr">
         <a href="<?php echo esc_url(home_url('/')); ?>">
-            <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>"
+            <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>"
                  class="hdr-logo h-8 w-auto object-contain"
                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
         </a>
         <div class="flex items-center gap-3">
-            <div class="relative">
-                <button class="hdr-icon w-9 h-9 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                </button>
-                <div class="absolute -top-1 -right-1 bg-[#d95f47] w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold">1</div>
-            </div>
+            <a href="<?php echo esc_url( $bacera_hdr_cart_url ); ?>" class="relative hdr-icon w-9 h-9 flex items-center justify-center no-underline" title="<?php esc_attr_e( 'Giỏ hàng', 'bacera' ); ?>">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                <span class="absolute -top-1 -right-1 bg-[#d95f47] w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold">1</span>
+            </a>
             <button id="mobile-toggle" class="hdr-icon w-9 h-9 flex items-center justify-center focus:outline-none">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path id="icon-open"  stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
@@ -621,14 +619,14 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
             <nav class="flex flex-col">
                 <?php
                 $mobile_links = [
-                    'Shop'     => home_url('/shop-demo/'),
-                    'Workshop' => get_post_type_archive_link('workshop') ?: home_url('/workshop/'),
+                    'Shop'     => $bacera_hdr_shop_url,
+                    'Workshop' => $bacera_hdr_workshop_url,
                     'About us' => $about_page,
-                    'Blog'     => get_post_type_archive_link('post') ?: '#',
-                    'Contact'  => '#',
+                    'Blog'     => $bacera_hdr_blog_url,
+                    'Contact'  => $bacera_hdr_contact_url,
                 ];
                 foreach ($mobile_links as $ml => $ml_url): ?>
-                <a href="<?= esc_url($ml_url) ?>" class="px-5 py-3 text-primary-700 text-[15px] font-medium border-b border-neutral-200 last:border-0 hover:text-[#d95f47] transition-colors"><?php echo $ml; ?></a>
+                <a href="<?php echo esc_url( $ml_url ); ?>" class="px-5 py-3 text-primary-700 text-[15px] font-medium border-b border-neutral-200 last:border-0 hover:text-[#d95f47] transition-colors no-underline"><?php echo esc_html( $ml ); ?></a>
                 <?php endforeach; ?>
             </nav>
             <div class="flex items-center gap-4 px-5 mt-3 pt-3 border-t border-neutral-200">
@@ -644,7 +642,7 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
 <div class="search-overlay" id="search-overlay" role="search" aria-label="Tìm kiếm">
 
     <a href="<?php echo esc_url(home_url('/')); ?>" class="shrink-0 flex items-center pr-4">
-        <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo.png'); ?>" class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+        <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>" class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
     </a>
 
     <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" class="flex flex-1 items-center gap-3">
