@@ -6,14 +6,15 @@ $homepage_js = $is_homepage ? 'true' : 'false';
 global $wpdb;
 $bacera_customer    = null;
 $bacera_auth_cookie = $_COOKIE['bacera_customer_auth'] ?? '';
-if ( $bacera_auth_cookie ) {
+$bacera_cust_table  = $wpdb->prefix . 'bacera_customers';
+if ( $bacera_auth_cookie && $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $bacera_cust_table ) ) === $bacera_cust_table ) {
     $decoded = base64_decode( $bacera_auth_cookie, true );
     if ( $decoded && strpos( $decoded, '|' ) !== false ) {
         $customer_id = (int) explode( '|', $decoded )[0];
         if ( $customer_id > 0 ) {
             $bacera_customer = $wpdb->get_row(
                 $wpdb->prepare(
-                    "SELECT id, name, phone, email FROM {$wpdb->prefix}bacera_customers WHERE id = %d LIMIT 1",
+                    "SELECT id, name, phone, email FROM `{$bacera_cust_table}` WHERE id = %d LIMIT 1",
                     $customer_id
                 ),
                 ARRAY_A

@@ -20,6 +20,9 @@ class MainController {
         // Init DB tables (payment)
         \Bacera\Database\PaymentTables::init();
 
+        // Bảng bacera_customers — tạo ngay khi theme boot (không chỉ admin_init), tránh deploy chỉ frontend / WP Pusher không vào admin.
+        $this->ensureBaceraCustomerSchema();
+
         // Khởi tạo các Custom Post Type cho Workshop
         new WorkshopController();
 
@@ -75,6 +78,22 @@ class MainController {
 
     public function outputCustomMeta() {
         echo '';
+    }
+
+    /**
+     * Đảm bảo bảng khách + cột Pancake tồn tại (dbDelta an toàn gọi lại).
+     */
+    public function ensureBaceraCustomerSchema() {
+        if ( ! class_exists( '\\Bacera\\Database\\CustomerTable', false ) ) {
+            return;
+        }
+        $db_version = get_option( 'bacera_customers_db_version', '0' );
+        if ( version_compare( (string) $db_version, '1.3', '>=' ) ) {
+            return;
+        }
+        \Bacera\Database\CustomerTable::createTable();
+        \Bacera\Database\CustomerTable::migrate_to_1_3();
+        update_option( 'bacera_customers_db_version', '1.3' );
     }
 
     /* ── Workshop Routing (Removed) ────────────────────────────────── */
