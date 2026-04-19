@@ -1052,63 +1052,87 @@ document.getElementById('vdm-close').addEventListener('click',closeDrawer);
 document.getElementById('vdm-cancel').addEventListener('click',closeDrawer);
 document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
 
-/* ── Type toggle ── */
-var radiosType=document.querySelectorAll('[name="vd_type"]');
-var secUpload=document.getElementById('section-upload'), secYt=document.getElementById('section-youtube');
-var pillUp=document.getElementById('pill-upload'), pillYt=document.getElementById('pill-youtube');
-function updateTypeUI(val){
-    secUpload.style.display = val==='upload'?'':'none';
-    secYt.style.display     = val==='youtube'?'':'none';
-    pillUp.className='vdf-type-pill '+(val==='upload'?'sel-upload':'');
-    pillYt.className='vdf-type-pill '+(val==='youtube'?'sel-youtube':'');
-}
-radiosType.forEach(function(r){ r.addEventListener('change',function(){ updateTypeUI(r.value); }); });
-
 /* ── Status toggle ── */
 var radiosStatus=document.querySelectorAll('[name="vd_status"]');
 var spillShow=document.getElementById('spill-show'), spillHide=document.getElementById('spill-hide');
 function updateStatusUI(val){
     spillShow.className='vdf-status-pill '+(val==='1'?'on-show':'');
-    spillHide.className='vdf-status-pill '+(val==='0'?'on-hide':'on-hide'.replace('on-hide',''));
+    spillHide.className='vdf-status-pill '+(val==='0'?'on-hide':'');
 }
 radiosStatus.forEach(function(r){ r.addEventListener('change',function(){ updateStatusUI(r.value); }); });
 
-/* ── WP Media picker: video ── */
-document.getElementById('vd-pick-video').addEventListener('click',function(){
-    var frame=wp.media({ title:'Chọn file video', button:{text:'Chọn'}, library:{type:'video'}, multiple:false });
-    frame.on('select',function(){
-        var att=frame.state().get('selection').first().toJSON();
-        document.getElementById('vd-video-url').value=att.url;
-        document.getElementById('vd-video-name').textContent=att.filename||att.url;
-    });
-    frame.open();
-});
-
-/* ── WP Media picker: thumbnail ── */
-document.getElementById('vd-thumb-zone').addEventListener('click',function(){
-    var frame=wp.media({ title:'Chọn ảnh thumbnail', button:{text:'Chọn'}, library:{type:'image'}, multiple:false });
-    frame.on('select',function(){
-        var att=frame.state().get('selection').first().toJSON();
-        setThumb(att.url);
-    });
-    frame.open();
-});
-function setThumb(url){
-    var img=document.getElementById('vd-thumb-img');
-    var ph=document.getElementById('vd-thumb-placeholder');
-    document.getElementById('vd-thumb-url').value=url;
-    if(url){ img.src=url; img.style.display='block'; ph.style.display='none'; }
-    else   { img.style.display='none'; ph.style.display='flex'; }
+/* ── Helpers ── */
+function extractYtId(url){
+    var m=url.match(/(?:v=|\/embed\/|youtu\.be\/|shorts\/|\/v\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : '';
 }
 
-/* ── YouTube fetch ── */
-document.getElementById('vd-yt-fetch').addEventListener('click',function(){
-    var url=document.getElementById('vd-yt-url').value.trim();
-    if(!url) return;
-    var spinner=document.getElementById('vd-yt-spinner');
-    var errEl=document.getElementById('vd-yt-error');
-    spinner.style.display='block'; errEl.style.display='none';
+/* ── Source badge ── */
+var srcBadge=document.getElementById('vd-src-badge');
+var srcBadgeText=document.getElementById('vd-src-badge-text');
+function setSrcBadge(type,label){
+    srcBadge.className='vdf-src-badge '+type;
+    srcBadgeText.textContent=label;
+}
 
+/* ── Thumbnail ── */
+function setThumb(url,auto){
+    var img=document.getElementById('vd-thumb-img');
+    var ph=document.getElementById('vd-thumb-placeholder');
+    var hint=document.getElementById('vd-thumb-hint');
+    document.getElementById('vd-thumb-url').value=url||'';
+    if(url){ img.src=url; img.style.display='block'; ph.style.display='none'; hint.style.display=auto?'':'none'; }
+    else   { img.style.display='none'; ph.style.display='flex'; hint.style.display='none'; }
+}
+
+/* ── Thumb zone click: pick image ── */
+document.getElementById('vd-thumb-zone').addEventListener('click',function(){
+    var frame=wp.media({title:'Chọn ảnh thumbnail',button:{text:'Dùng ảnh này'},library:{type:'image'},multiple:false});
+    frame.on('select',function(){
+        var att=frame.state().get('selection').first().toJSON();
+        setThumb(att.url,false);
+    });
+    frame.open();
+});
+
+/* ── WP Media picker: video file ── */
+document.getElementById('vd-pick-video').addEventListener('click',function(){
+    var frame=wp.media({title:'Chọn file video',button:{text:'Chọn video này'},library:{type:'video'},multiple:false});
+    frame.on('select',function(){
+        var att=frame.state().get('selection').first().toJSON();
+        document.getElementById('vd-src-url').value=att.url;
+        document.getElementById('vd-yt-id').value='';
+        document.getElementById('vd-detected-type').value='upload';
+        setSrcBadge('up','Upload — '+(att.filename||att.url.split('/').pop()));
+        if(att.image&&att.image.src) setThumb(att.image.src,false);
+    });
+    frame.open();
+});
+
+/* ── Smart auto-detect on URL input (debounced 600ms) ── */
+var srcInput=document.getElementById('vd-src-url');
+var srcSpinner=document.getElementById('vd-src-spinner');
+var _ytTimer=null;
+
+srcInput.addEventListener('input',function(){
+    var url=this.value.trim();
+    clearTimeout(_ytTimer);
+    if(!url){ setSrcBadge('none','Chưa có nguồn video'); document.getElementById('vd-yt-id').value=''; document.getElementById('vd-detected-type').value=''; return; }
+    var ytId=extractYtId(url);
+    if(ytId){
+        document.getElementById('vd-yt-id').value=ytId;
+        document.getElementById('vd-detected-type').value='youtube';
+        setSrcBadge('yt','YouTube — đang tải thông tin...');
+        _ytTimer=setTimeout(function(){ fetchYtInfo(url,ytId); },600);
+    } else {
+        document.getElementById('vd-yt-id').value='';
+        document.getElementById('vd-detected-type').value='upload';
+        setSrcBadge('up','Upload — '+url.split('/').pop().split('?')[0]);
+    }
+});
+
+function fetchYtInfo(url,ytId){
+    srcSpinner.style.display='block';
     var fd=new FormData();
     fd.append('action','bacera_yt_info'); fd.append('_nonce',NONCE); fd.append('url',url);
     fetch(AJAX,{method:'POST',body:fd})
@@ -1117,11 +1141,8 @@ document.getElementById('vd-yt-fetch').addEventListener('click',function(){
         srcSpinner.style.display='none';
         if(!res.success){ setSrcBadge('yt','YouTube ID: '+ytId); return; }
         setSrcBadge('yt','YouTube — '+(res.data.title||'ID: '+res.data.yt_id));
-        var titleEl=document.getElementById('vd-title');
-        if(!titleEl.value && res.data.title) titleEl.value=res.data.title;
-        if(res.data.thumbnail && !document.getElementById('vd-thumb-url').value){
-            setThumb(res.data.thumbnail, true);
-        }
+        if(!document.getElementById('vd-title').value&&res.data.title) document.getElementById('vd-title').value=res.data.title;
+        if(res.data.thumbnail&&!document.getElementById('vd-thumb-url').value) setThumb(res.data.thumbnail,true);
     })
     .catch(function(){ srcSpinner.style.display='none'; setSrcBadge('yt','YouTube ID: '+ytId); });
 }
