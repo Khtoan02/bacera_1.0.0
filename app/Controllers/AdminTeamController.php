@@ -49,8 +49,12 @@ class AdminTeamController {
             x_twitter   VARCHAR(200) NOT NULL DEFAULT '',
             linkedin    VARCHAR(200) NOT NULL DEFAULT '',
             youtube     VARCHAR(200) NOT NULL DEFAULT '',
+            pinterest   VARCHAR(200) NOT NULL DEFAULT '',
+            messenger   VARCHAR(200) NOT NULL DEFAULT '',
+            telegram    VARCHAR(200) NOT NULL DEFAULT '',
             whatsapp    VARCHAR(120) NOT NULL DEFAULT '',
             zalo        VARCHAR(120) NOT NULL DEFAULT '',
+            viber       VARCHAR(120) NOT NULL DEFAULT '',
             skype       VARCHAR(120) NOT NULL DEFAULT '',
             line_app    VARCHAR(120) NOT NULL DEFAULT '',
             wechat      VARCHAR(120) NOT NULL DEFAULT '',
@@ -486,8 +490,12 @@ class AdminTeamController {
         $x_twitter  = esc_url_raw( $_POST['x_twitter'] ?? '' );
         $linkedin   = esc_url_raw( $_POST['linkedin'] ?? '' );
         $youtube    = esc_url_raw( $_POST['youtube'] ?? '' );
+        $pinterest  = esc_url_raw( $_POST['pinterest'] ?? '' );
+        $messenger  = esc_url_raw( $_POST['messenger'] ?? '' );
+        $telegram   = esc_url_raw( $_POST['telegram'] ?? '' );
         $whatsapp   = sanitize_text_field( $_POST['whatsapp'] ?? '' );
         $zalo       = sanitize_text_field( $_POST['zalo'] ?? '' );
+        $viber      = sanitize_text_field( $_POST['viber'] ?? '' );
         $skype      = sanitize_text_field( $_POST['skype'] ?? '' );
         $line_app   = sanitize_text_field( $_POST['line_app'] ?? '' );
         $wechat     = sanitize_text_field( $_POST['wechat'] ?? '' );
@@ -499,7 +507,7 @@ class AdminTeamController {
 
         $seo_slug = sanitize_title($role . '-' . $name);
 
-        $data = compact( 'name', 'role', 'seo_slug', 'department', 'bio', 'photo_url', 'is_active', 'phone', 'email', 'facebook', 'instagram', 'tiktok', 'x_twitter', 'linkedin', 'youtube', 'whatsapp', 'zalo', 'skype', 'line_app', 'wechat', 'gallery_urls' );
+        $data = compact( 'name', 'role', 'seo_slug', 'department', 'bio', 'photo_url', 'is_active', 'phone', 'email', 'facebook', 'instagram', 'tiktok', 'x_twitter', 'linkedin', 'youtube', 'pinterest', 'messenger', 'telegram', 'whatsapp', 'zalo', 'viber', 'skype', 'line_app', 'wechat', 'gallery_urls' );
 
         if ( $id > 0 ) {
             $wpdb->update( $table, $data, [ 'id' => $id ] );
@@ -879,21 +887,134 @@ class AdminTeamController {
                     </div>
 
                     <div class="tmf-section" style="padding:16px; background:var(--surface-2); border-radius:12px; border:1px solid var(--border);">
-                        <div style="font-size:12px; font-weight:700; color:var(--text); margin-bottom:12px;">Mạng xã hội &amp; Liên hệ (Tùy chọn)</div>
+                        <div style="font-size:12px; font-weight:700; color:var(--text); margin-bottom:12px;">Mạng xã hội &amp; Liên hệ</div>
                         <style>
-                            .drawer-social-icon { width:26px; height:26px; border-radius:6px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; pointer-events:none; border:1px solid var(--border); box-shadow:0 1px 3px rgba(0,0,0,0.05); font-size:10px; font-weight:700; }
-                            .drawer-social-icon svg { width:16px; height:16px; }
-                            .drawer-si-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+                            .dsi { width:24px; height:24px; border-radius:5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; pointer-events:none; overflow:hidden; }
+                            .dsi svg { width:24px; height:24px; display:block; }
+                            .dsi-text { font-size:9px; font-weight:900; color:#fff; letter-spacing:-.3px; }
+                            .drawer-si-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
                         </style>
-                        <div style="display:grid;grid-template-columns:1fr;gap:10px;">
-                            <!-- Phone & Email -->
+                        <div style="display:grid;grid-template-columns:1fr;gap:8px;">
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
-                                    <label class="tmf-label"><div class="drawer-social-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#6b5344" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 .84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>Điện thoại</label>
+                                    <label class="tmf-label"><div class="dsi" style="background:#3d2f26">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    </div>Điện thoại</label>
                                     <input type="text" id="tmm-phone" class="tmf-input" placeholder="090...">
                                 </div>
                                 <div class="tmf-field">
-                                    <label class="tmf-label"><div class="drawer-social-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#6b5344" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>Email</label>
+                                    <label class="tmf-label"><div class="dsi" style="background:#fff;border:1px solid #C4CFE3">
+                                        <svg viewBox="0 0 92 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="84" height="84" rx="12" fill="white"/><path d="M11 55.1236H19.4828V34.5227L7.36475 25.4341V51.4881C7.36475 53.4997 8.9947 55.1236 11 55.1236Z" fill="#4285F4"/><path d="M48.5664 55.1236H57.0492C59.0608 55.1236 60.6846 53.4937 60.6846 51.4881V25.4341L48.5664 34.5227" fill="#34A853"/><path d="M48.5664 18.7693V34.5229L60.6846 25.4343V20.587C60.6846 16.0912 55.5526 13.5282 51.9595 16.2245" fill="#FBBC04"/><path d="M19.4893 34.5227V18.769L34.0311 29.6754L48.5729 18.769V34.5227L34.0311 45.429" fill="#EA4335"/><path d="M7.36475 20.587V25.4343L19.4829 34.5229V18.7693L16.0898 16.2245C12.4907 13.5282 7.36475 16.0912 7.36475 20.587Z" fill="#C5221F"/></svg>
+                                    </div>Email</label>
+                                    <input type="email" id="tmm-email" class="tmf-input" placeholder="admin@domain.com">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 92" fill="none"><rect x="1" width="91.5618" height="91.5618" rx="15" fill="#337FFF"/><path d="M57.4233 48.6403L58.7279 40.3588H50.6917V34.9759C50.6917 32.7114 51.8137 30.4987 55.4013 30.4987H59.1063V23.4465C56.9486 23.1028 54.7685 22.9168 52.5834 22.8901C45.9692 22.8901 41.651 26.8626 41.651 34.0442V40.3588H34.3193V48.6403H41.651V68.671H50.6917V48.6403H57.4233Z" fill="white"/></svg>
+                                    </div>Facebook</label>
+                                    <input type="url" id="tmm-facebook" class="tmf-input" placeholder="https://facebook.com/...">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 92" fill="none"><rect x="1" width="91.5618" height="91.5618" rx="15" fill="url(#ig_d1)"/><path d="M34 46c0-6.6 5.4-12 12-12s12 5.4 12 12-5.4 12-12 12-12-5.4-12-12zm-5 0c0 9.4 7.6 17 17 17s17-7.6 17-17-7.6-17-17-17-17 7.6-17 17zm32-17.8c0 2.2 1.8 4 4 4s4-1.8 4-4-1.8-4-4-4-4 1.8-4 4zM22 64.4c-2.4-.1-3.8-.5-4.6-.8-1.2-.5-2-.9-2.9-1.8-.9-.9-1.4-1.7-1.8-2.9-.3-.9-.7-2.2-.8-4.6-.1-2.6-.2-3.4-.2-10.3s.1-7.7.2-10.3c.1-2.4.5-3.7.8-4.6.4-1.2.9-2 1.8-2.9.9-.9 1.7-1.4 2.9-1.8.9-.3 2.2-.7 4.6-.8 2.6-.1 3.4-.1 10.1-.1s7.5.1 10.1.1c2.4.1 3.7.5 4.6.8 1.2.4 2 .9 2.9 1.8.9.9 1.4 1.7 1.8 2.9.3.9.7 2.2.8 4.6.1 2.6.1 3.4.1 10.3s-.1 7.7-.1 10.3c-.1 2.4-.5 3.7-.8 4.6-.4 1.2-.9 2-1.8 2.9-.9.9-1.7 1.4-2.9 1.8-.9.3-2.2.7-4.6.8-2.6.1-3.4.1-10.1.1s-7.5.1-10.1-.1zm-.2-49.5c-2.7.1-4.5.5-6.1 1.1-1.6.6-3 1.5-4.4 2.9s-2.2 2.8-2.9 4.4c-.6 1.6-1 3.4-1.1 6.1-.1 2.7-.1 3.5-.1 10.1s.1 7.4.1 10.1c.1 2.7.5 4.5 1.1 6.1.6 1.6 1.5 3 2.9 4.4 1.4 1.4 2.8 2.2 4.4 2.9 1.6.6 3.4 1 6.1 1.1 2.7.1 3.5.1 10.2.1s7.5-.1 10.2-.1c2.7-.1 4.5-.5 6.1-1.1 1.6-.6 3-1.5 4.4-2.9 1.4-1.4 2.2-2.8 2.9-4.4.6-1.6 1-3.4 1.1-6.1.1-2.7.1-3.5.1-10.1s-.1-7.4-.1-10.1c-.1-2.7-.5-4.5-1.1-6.1-.6-1.6-1.5-3-2.9-4.4-1.4-1.4-2.8-2.2-4.4-2.9-1.6-.6-3.4-1-6.1-1.1-2.7-.1-3.5-.1-10.2-.1s-7.5 0-10.2.1z" fill="white"/><defs><linearGradient id="ig_d1" x1="91" y1="92" x2="-0.6" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#FBE18A"/><stop offset="0.21" stop-color="#FCBB45"/><stop offset="0.38" stop-color="#F75274"/><stop offset="0.52" stop-color="#D53692"/><stop offset="0.74" stop-color="#8F39CE"/><stop offset="1" stop-color="#5B4FE9"/></linearGradient></defs></svg>
+                                    </div>Instagram</label>
+                                    <input type="url" id="tmm-instagram" class="tmf-input" placeholder="https://instagram.com/...">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg viewBox="0 0 93 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" width="92" height="92" rx="15" fill="black"/><path d="M50.7568 42.1716L69.3704 21H64.9596L48.7974 39.383L35.8887 21H21L40.5205 48.7983L21 71H25.4111L42.4788 51.5869L56.1113 71H71L50.7557 42.1716H50.7568ZM44.7152 49.0433L42.7374 46.2752L27.0005 24.2492H33.7756L46.4755 42.0249L48.4533 44.7929L64.9617 67.8986H58.1865L44.7152 49.0443V49.0433Z" fill="white"/></svg>
+                                    </div>X / Twitter</label>
+                                    <input type="url" id="tmm-x_twitter" class="tmf-input" placeholder="https://x.com/...">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg viewBox="0 0 92 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="92" height="92" rx="15" fill="black"/><path fill-rule="evenodd" clip-rule="evenodd" d="M55.5 29.4C58.6 31.6 62.3 32.8 66.1 32.8V25.3c-.7 0-1.5-.1-2.2-.3v6c-3.8.1-7.5-1.1-10.5-3.3v15.3c-.1 2.5-.8 5-2.1 7.2-1.3 2.1-3.1 3.9-5.3 5.1-2.2 1.2-4.7 1.8-7.2 1.7-2.5-.1-4.9-.9-7-2.3 1.9 2 4.4 3.3 7.1 3.8 2.7.6 5.5.3 8.1-.7 2.5-1 4.7-2.8 6.3-5 1.5-2.3 2.3-4.9 2.3-7.7V29.4zm3.7-7.6c-1.5-1.7-2.5-3.9-2.7-6.1v-1h-2.1c.3 1.5.8 2.9 1.6 4.1 1 1.3 2.1 2.3 3.2 3zm-22.8 27.2c-.7-1-.9-2.1-.8-3.4.1-1.2.5-2.4 1.1-3.4.6-1.1 1.5-2 2.5-2.6 1-.6 2.2-.9 3.4-.9.7 0 1.3.1 2 .3v-7.7c-.7-.1-1.5-.1-2.2 0v6c-1.5-.5-3.2-.4-4.6.3-1.5.7-2.6 1.9-3.2 3.4-.6 1.5-.6 3.1 0 4.6.5 1.5 1.6 2.8 3 3.4z" fill="#EE1D52"/><path fill-rule="evenodd" clip-rule="evenodd" d="M53.3 37.6c3.1 2.2 6.8 3.4 10.5 3.3v-5c-2.1-.5-4.1-1.6-5.6-3.2C57 31.8 56 30.7 55.2 29.5c-.8-1.2-1.4-2.6-1.6-4.1H48.1v30c-.1 1.3-.5 2.6-1.3 3.7-.8 1.1-1.9 1.9-3.1 2.3-1.3.4-2.7.4-4-.1-1.3-.4-2.4-1.2-3.2-2.2-1.3-.7-2.3-1.7-2.9-3-.6-1.3-.8-2.8-.4-4.2.3-1.4 1.1-2.6 2.2-3.5 1.1-.9 2.5-1.4 4-1.4.7 0 1.3.1 2 .3V37c-2.7.1-5.4 1-7.6 2.5-2.2 1.5-4 3.7-4.9 6.2-1 2.5-1.3 5.3-.7 7.9.6 2.7 1.9 5.1 3.8 7 2.1 1.4 4.5 2.2 7 2.3 2.5.1 5-.5 7.3-1.7 2.2-1.2 4.1-3 5.4-5.1 1.3-2.2 2-4.7 2-7.2L53.3 37.6z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M63.8 35v-1.6c-2 0-3.9-.5-5.6-1.6 1.5 1.6 3.5 2.7 5.6 3.2zM53.5 24.7V23.8c-.8-.1-1.5-.2-2.3-.2V14h-7.5v30c-.1 1.7-.7 3.3-1.9 4.5-1.2 1.2-2.8 1.9-4.5 1.9-.99 0-1.97-.23-2.85-.65.8 1.1 2 1.9 3.2 2.2 1.3.4 2.7.4 4-.1 1.3-.4 2.4-1.2 3.1-2.3.8-1.1 1.2-2.4 1.3-3.7V24.7h5.5zM41.4 40.9V39.2c-3.1-.4-6.3.3-9 1.9-2.7 1.6-4.8 4-5.9 7-.9 2.9-1 6.2 0 9.2 1 3 2.9 5.6 5.5 7.3-1.9-2-3.1-4.4-3.6-7.1-.5-2.7-.2-5.4.8-7.9 1-2.5 2.7-4.6 4.9-6.1 2.3-1.5 4.9-2.4 7.3-2.6z" fill="#69C9D0"/></svg>
+                                    </div>TikTok</label>
+                                    <input type="url" id="tmm-tiktok" class="tmf-input" placeholder="https://tiktok.com/...">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 93" fill="none"><rect x="1" y="1" width="91.5618" height="91.5618" rx="15" fill="#006699"/><path d="M37.1339 63.4304V40.9068H29.6473V63.4304H37.1346H37.1339ZM33.3922 37.8321C36.0023 37.8321 37.6273 36.1025 37.6273 33.9411C37.5785 31.7304 36.0023 30.0491 33.4418 30.0491C30.8795 30.0491 29.2061 31.7304 29.2061 33.9409C29.2061 36.1023 30.8305 37.8319 33.3431 37.8319H33.3916L33.3922 37.8321ZM41.2777 63.4304H48.7637V50.8535C48.7637 50.1813 48.8125 49.5072 49.0103 49.0271C49.5513 47.6815 50.7831 46.2887 52.8517 46.2887C55.5599 46.2887 56.644 48.354 56.644 51.3822V63.4304H64.1297V50.516C64.1297 43.598 60.4369 40.3787 55.5115 40.3787C51.4733 40.3787 49.6998 42.6357 48.7144 44.173H48.7643V40.9075H41.2781C41.3759 43.0205 41.2775 63.4312 41.2775 63.4312L41.2777 63.4304Z" fill="white"/></svg>
+                                    </div>LinkedIn</label>
+                                    <input type="url" id="tmm-linkedin" class="tmf-input" placeholder="https://linkedin.com/...">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 93" fill="none"><rect x="1" y="1" width="91.5618" height="91.5618" rx="15" fill="#FF0000"/><path fill-rule="evenodd" clip-rule="evenodd" d="M67.5615 29.2428C69.8115 29.8504 71.58 31.6234 72.1778 33.8708C73.2654 37.9495 73.2654 46.4647 73.2654 46.4647C73.2654 46.4647 73.2654 54.98 72.1778 59.0586C71.5717 61.3144 69.8032 63.0873 67.5615 63.6866C63.4932 64.7771 47.1703 64.7771 47.1703 64.7771C47.1703 64.7771 30.8557 64.7771 26.7791 63.6866C24.5291 63.079 22.7606 61.306 22.1628 59.0586C21.0752 54.98 21.0752 46.4647 21.0752 46.4647C21.0752 46.4647 21.0752 37.9495 22.1628 33.8708C22.7689 31.615 24.5374 29.8421 26.7791 29.2428C30.8557 28.1523 47.1703 28.1523 47.1703 28.1523C47.1703 28.1523 63.4932 28.1523 67.5615 29.2428ZM55.5142 46.4647L41.9561 54.314V38.6154L55.5142 46.4647Z" fill="white"/></svg>
+                                    </div>YouTube</label>
+                                    <input type="url" id="tmm-youtube" class="tmf-input" placeholder="https://youtube.com/...">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 92" fill="none"><rect x="1" width="91.5618" height="91.5618" rx="15" fill="#337FFF"/><path fill-rule="evenodd" clip-rule="evenodd" d="M46.4 21C32 21 21 31.3 21 45.3c0 7.3 3 13.6 8 17.9l.1 4.5 5.1-2.2c2.3.6 4.8.9 7.4.9C56 66.4 72 56 72 45.3 72 31.3 60.7 21 46.4 21zm15 18.7L53.2 51.4c-1.2 1.9-3.8 2.3-5.6 1L41.1 48c-.6-.4-1.3-.4-1.8 0l-8 6-1.1-1.4 7.5-11.7c1.2-1.9 3.7-2.3 5.5-1L49.2 44c.5.4 1.3.4 1.8 0l8-6 1.4 1.7z" fill="white"/></svg>
+                                    </div>Messenger</label>
+                                    <input type="url" id="tmm-messenger" class="tmf-input" placeholder="https://m.me/...">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 93" fill="none"><rect x="1" y="1" width="91.5618" height="91.5618" rx="15" fill="url(#ms_d)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M46.4 21C32 21 21 31.3 21 45.3c0 7.3 3 13.6 8 17.9l.1 4.5 5.1-2.2c2.3.6 4.8.9 7.4.9C56 66.4 72 56 72 45.3 72 31.3 60.7 21 46.4 21zm15 18.7L53.2 51.4c-1.2 1.9-3.8 2.3-5.6 1L41.1 48c-.6-.4-1.3-.4-1.8 0l-8 6-1.1-1.4 7.5-11.7c1.2-1.9 3.7-2.3 5.5-1L49.2 44c.5.4 1.3.4 1.8 0l8-6 1.4 1.7z" fill="white"/><defs><radialGradient id="ms_d" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(15 93) scale(101)"><stop stop-color="#0099FF"/><stop offset="0.6" stop-color="#A033FF"/><stop offset="0.9" stop-color="#FF5280"/><stop offset="1" stop-color="#FF7061"/></radialGradient></defs></svg>
+                                    </div>Pinterest</label>
+                                    <input type="url" id="tmm-pinterest" class="tmf-input" placeholder="https://pinterest.com/...">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 92" fill="none"><rect x="1" width="91.5618" height="91.5618" rx="15" fill="#00D95F"/><path d="M23.5 66.8l3.3-12.2c-2.6-4.7-3.5-10.3-2.4-15.6 1.1-5.3 4.1-10 8.5-13.3 4.3-3.3 9.7-4.9 15.2-4.6 5.4.4 10.5 2.7 14.4 6.5s6.2 8.8 6.6 14.3c.4 5.4-1.1 10.8-4.4 15.2-3.2 4.4-7.9 7.4-13.2 8.6-5.3 1.2-10.9.4-15.7-2.2L23.5 66.8zm12.9-7.9l.8.5c3.5 2 7.6 2.9 11.6 2.4 4-.5 7.7-2.3 10.6-5.1 2.9-2.8 4.7-6.5 5.3-10.4.5-4-.3-8-2.3-11.5-2-3.5-5.1-6.3-8.8-7.8-3.7-1.6-7.9-1.8-11.8-.8-3.9 1-7.3 3.3-9.8 6.5-2.5 3.2-3.8 7.1-3.8 11.1 0 3.3.9 6.6 2.7 9.5l.5.8-1.8 6.8 6.8-1.8z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M55 46.9c-.5-.3-1-.6-1.6-.7-.6-.1-1.2-.1-1.7 0-.8.3-1.4 1.6-1.9 2.3-.1.2-.3.3-.5.3-.2.1-.4 0-.6-.1-3.1-1.2-5.6-3.4-7.3-6.3-.1-.2-.2-.4-.2-.7 0-.2.1-.4.3-.6.6-.6 1-.3 1.3-2.1.1-.9-.1-1.8-.5-2.6-.3-1.1-1-2.1-1.9-2.8-.5-.2-1-.3-1.5-.2-.5.1-1 .3-1.3.6-.6.6-1.1 1.3-1.5 2.1-.4.8-.5 1.6-.5 2.5 0 .5.1 1 .2 1.5.3 1.1.8 2.2 1.4 3.2.4.7.9 1.4 1.4 2.1 1.7 2.3 3.8 4.2 6.3 5.7 1.2.8 2.5 1.4 3.8 1.9 1.4.6 3 .9 4.5.7.9-.1 1.7-.5 2.4-1 .7-.5 1.3-1.2 1.7-2 .2-.5.3-1 .2-1.5-.2-1.1-1.7-1.7-2.6-2.3z" fill="white"/></svg>
+                                    </div>WhatsApp</label>
+                                    <input type="text" id="tmm-whatsapp" class="tmf-input" placeholder="+84 9x...">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi" style="background:#34AADF">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 93" fill="none"><path d="M25 53.6C25 53.6 43.7 45.7 50.2 43c2.5-1.1 10.9-4.6 10.9-4.6s3.9-1.5 3.6 2.2c-.1 1.5-1 6.9-1.8 12.8-1.3 8.3-2.7 17.4-2.7 17.4S59.9 73.2 58 73.7c-1.8.4-4.8-1.6-5.4-2l-7.8-5.6c-2.8-2.4-1.9-3.8.4-5.9 3.9-3.6 8.5-8.1 11.3-11l-17.2 11.3-6.6-2.2-7.7-2.7s-2.6-1.7 1.8-3.4z" fill="white"/></svg>
+                                    </div>Telegram</label>
+                                    <input type="url" id="tmm-telegram" class="tmf-input" placeholder="https://t.me/...">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi" style="background:#0068FF;font-size:8px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;">Zalo</div>Zalo</label>
+                                    <input type="text" id="tmm-zalo" class="tmf-input" placeholder="SĐT hoặc link Zalo">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92 93" fill="none"><rect y="1" width="91.5618" height="91.5618" rx="15" fill="#754A91"/><path d="M24.4 64.8v-4.3c-2-.5-3.7-1.5-5.2-2.8-1.1-1-2-2.1-2.7-3.4-.9-1.9-1.5-3.9-1.8-5.9-.4-2.6-.5-5.2-.4-7.8.1-1.2.1-2.4.3-3.6.2-2.3.8-4.5 1.7-6.6 1.2-2.6 3.3-4.7 5.9-5.9 1.8-.8 3.7-1.4 5.6-1.8 1.9-.4 3.8-.6 5.8-.7 1.7-.1 3.5-.1 5.2.05 2.5.1 5 .5 7.4 1.2 1.8.5 3.5 1.3 5 2.3 1.5 1 2.7 2.4 3.5 3.9.9 1.9 1.5 3.1 1.8 5.2.2 1.2.3 2.5.4 3.7.1 1.6.1 3.2.05 4.8-.05 1.6-.2 3.1-.4 4.7-.3 2.3-1 4.4-2.1 6.4-1.5 2.5-3.8 4.4-6.5 5.3-1.9.7-3.9 1.1-5.9 1.4-1.5.2-3 .4-4.5.4-1.1 0-2.2 0-3.3-.05-.6 0-1.3-.06-1.9-.1-.1 0-.2.04-.3.09-.1.05-.1.1-.1.16-1.3 1.5-2.6 3.05-3.9 4.5-.2.3-.5.55-.8.74-.2.1-.4.2-.6.2-.9-.1-1.6-.6-1.9-1.4-.1-.4-.2-.9-.2-1.3V64.8zm1.6 3l.2-.15 2.9-3.2c1.1-1.2 2.2-2.4 3.3-3.6.05-.1.1-.15.2-.18.1-.04.2-.04.3-.03.4.04.8.05 1.2.05 1.3 0 2.6 0 3.9-.09 1.2-.1 2.4-.25 3.6-.45 1.3-.2 2.6-.5 3.8-.87 2.8-.75 4.9-2.35 6.3-4.9.8-1.6 1.3-3.3 1.5-5.1.2-1.7.3-3.4.4-5.1.05-2.1-.1-4.2-.4-6.3-.3-1.5-.8-2.9-1.5-4.3-.8-1.7-1.9-3.1-3.6-4.1-2.6-1.4-5.5-2.1-8.4-2.4-.8-.1-1.6-.15-2.4-.18-1.7-.08-3.4-.07-5.1 0-1.2.09-2.4.25-3.6.48-1.8.33-3.5.92-5.1 1.75-.9.47-1.7 1.1-2.5 1.86-1.1 1.3-1.9 2.85-2.4 4.5-.6 2-.9 4-.93 6.1-.1 2.1-.08 4.1.1 6.2.1 1.2.3 2.4.6 3.6.45 1.8 1.3 3.4 2.5 4.8 1.3 1.5 3 2.6 4.9 3.1.25.07.4.15.4.42-.02 1-.01 2 0 3.1l-.02 5.1z" fill="white"/><path d="M23.5 36.7c-.1-.8.3-1.3.8-1.8.7-.6 1.4-1.1 2.2-1.6.4-.2.8-.3 1.2-.26.4.07.8.28 1.1.58.9 1 1.8 2.05 2.5 3.2.4.5.7 1.1.9 1.7.07.24.08.5.02.74-.07.24-.2.46-.37.64-.4.39-.84.73-1.3 1.03-.2.18-.4.42-.48.68-.08.27-.07.55.01.82.3 1.3.97 2.5 1.9 3.5 1.1 1.35 2.6 2.4 4.3 3 .4.2.8.3 1.2.25.24-.07.45-.22.6-.43.25-.3.52-.59.74-.88.29-.41.73-.7 1.23-.8s1 .05 1.45.34c1.2.68 2.3 1.47 3.3 2.35.25.21.5.42.75.63.29.22.5.53.6.88.1.36.1.74-.03 1.09-.2.56-.5 1.08-.9 1.54-.5.68-1.1 1.25-1.8 1.67-.35.2-.74.31-1.14.34-.4.03-.8-.04-1.17-.2-2.8-1.1-5.4-2.7-7.8-4.6-2.3-1.9-4.3-4.1-5.9-6.6-1.4-2-2.5-4.3-3.3-6.6-.08-.28-.15-.57-.2-.86-.02-.12-.02-.25-.01-.37z" fill="white"/></svg>
+                                    </div>Viber</label>
+                                    <input type="text" id="tmm-viber" class="tmf-input" placeholder="+84 9x...">
+                                </div>
+                            </div>
+                            <div class="drawer-si-grid">
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92 92" fill="none"><rect width="92" height="92" rx="15" fill="#00B7F0"/><text x="10" y="62" font-family="Arial" font-weight="900" font-size="36" fill="white">S</text></svg>
+                                    </div>Skype</label>
+                                    <input type="text" id="tmm-skype" class="tmf-input" placeholder="Skype ID">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="tmf-label"><div class="dsi">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 93 93" fill="none"><rect x="1" y="1" width="91.5618" height="91.5618" rx="15" fill="#51C332"/><path d="M55.9 36.5c1 0 1.9.1 2.9.2-1.7-7.6-9.6-13.3-19.2-13.3-10.8 0-19.6 7.3-19.6 16.4 0 5.2 2.9 9.8 7.5 12.8l-2.6 5.2 7-3 1.7.5c1.6.3 3.1.5 4.7.5v-3c0-9 8.8-16.3 19.6-16.3zm-9.8-5.7c1.4 0 2.5 1.1 2.5 2.5s-1.1 2.5-2.5 2.5-2.5-1.1-2.5-2.5 1.1-2.5 2.5-2.5zm-13 4.9c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z" fill="white"/><path d="M72.2 53c0-7.2-7.3-13.1-16.3-13.1-9 0-16.3 5.9-16.3 13.1s7.3 13.1 16.3 13.1c1.5 0 2.9-.2 4.3-.5l8.8 3.8-3-6.1c3.8-2.4 6.2-6.1 6.2-10.3zm-21.2-.8c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zm9.8 0c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5z" fill="white"/></svg>
+                                    </div>WeChat</label>
+                                    <input type="text" id="tmm-wechat" class="tmf-input" placeholder="WeChat ID">
+                                </div>
+                            </div>
+                            <div class="tmf-field">
+                                <label class="tmf-label"><div class="dsi" style="background:#06C755">
+                                    <span class="dsi-text">LINE</span>
+                                </div>Line App</label>
+                                <input type="text" id="tmm-line_app" class="tmf-input" placeholder="Line ID">
+                            </div>
+                        </div>
+                    </div>
+
+
                                     <input type="email" id="tmm-email" class="tmf-input" placeholder="admin@domain.com">
                                 </div>
                             </div>
@@ -1014,8 +1135,12 @@ class AdminTeamController {
                 'x_twitter'  => $m['x_twitter'] ?? '',
                 'linkedin'   => $m['linkedin'] ?? '',
                 'youtube'    => $m['youtube'] ?? '',
+                'pinterest'  => $m['pinterest'] ?? '',
+                'messenger'  => $m['messenger'] ?? '',
+                'telegram'   => $m['telegram'] ?? '',
                 'whatsapp'   => $m['whatsapp'] ?? '',
                 'zalo'       => $m['zalo'] ?? '',
+                'viber'      => $m['viber'] ?? '',
                 'skype'      => $m['skype'] ?? '',
                 'line_app'   => $m['line_app'] ?? '',
                 'wechat'     => $m['wechat'] ?? '',
@@ -1581,8 +1706,12 @@ class AdminTeamController {
                 var xtF = $('#tmm-x_twitter'); if (xtF) xtF.value = m.x_twitter || '';
                 var inF = $('#tmm-linkedin'); if (inF) inF.value = m.linkedin || '';
                 var ytF = $('#tmm-youtube'); if (ytF) ytF.value = m.youtube || '';
+                var ptF = $('#tmm-pinterest'); if (ptF) ptF.value = m.pinterest || '';
+                var msF = $('#tmm-messenger'); if (msF) msF.value = m.messenger || '';
+                var tgF = $('#tmm-telegram'); if (tgF) tgF.value = m.telegram || '';
                 var waF = $('#tmm-whatsapp'); if (waF) waF.value = m.whatsapp || '';
                 var zlF = $('#tmm-zalo');   if (zlF) zlF.value = m.zalo || '';
+                var vbF = $('#tmm-viber');  if (vbF) vbF.value = m.viber || '';
                 var skF = $('#tmm-skype');  if (skF) skF.value = m.skype || '';
                 var lnF = $('#tmm-line_app'); if (lnF) lnF.value = m.line_app || '';
                 var wcF = $('#tmm-wechat'); if (wcF) wcF.value = m.wechat || '';
@@ -1713,8 +1842,12 @@ class AdminTeamController {
                         x_twitter: ($('#tmm-x_twitter') || {}).value || '',
                         linkedin: ($('#tmm-linkedin') || {}).value || '',
                         youtube: ($('#tmm-youtube') || {}).value || '',
+                        pinterest: ($('#tmm-pinterest') || {}).value || '',
+                        messenger: ($('#tmm-messenger') || {}).value || '',
+                        telegram: ($('#tmm-telegram') || {}).value || '',
                         whatsapp: ($('#tmm-whatsapp') || {}).value || '',
                         zalo: ($('#tmm-zalo') || {}).value || '',
+                        viber: ($('#tmm-viber') || {}).value || '',
                         skype: ($('#tmm-skype') || {}).value || '',
                         line_app: ($('#tmm-line_app') || {}).value || '',
                         wechat: ($('#tmm-wechat') || {}).value || '',
