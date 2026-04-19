@@ -435,6 +435,59 @@ class AdminVideoController {
 .vdf-or-line { flex:1; height:1px; background:var(--border); }
 .vdf-or-text { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-4); }
 
+/* ══ 2-col drawer layout ════════════════════════════════════════════ */
+.vdw-2col { display:flex; gap:14px; align-items:flex-start; }
+.vdw-col-left  { width:220px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; }
+.vdw-col-right { flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; }
+
+/* Compact thumb zone */
+.vdf-thumb-zone-sm {
+  width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
+  border:2px dashed var(--border); position:relative; cursor:pointer;
+  background:linear-gradient(135deg,#2a1f1a,#3d2d24);
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color var(--transition);
+}
+.vdf-thumb-zone-sm:hover { border-color:var(--accent); }
+.vdf-thumb-zone-sm img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; transition:transform .4s; }
+.vdf-thumb-zone-sm:hover img { transform:scale(1.04); }
+.vdf-thumb-zone-sm .vdf-thumb-ph { display:flex; flex-direction:column; align-items:center; gap:5px; color:var(--text-4); pointer-events:none; }
+.vdf-thumb-zone-sm .vdf-thumb-ph svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.3; opacity:.6; }
+.vdf-thumb-zone-sm .vdf-thumb-ph span { font-size:10px; font-weight:500; text-align:center; }
+.vdf-thumb-zone-sm .vdf-thumb-overlay {
+  position:absolute; inset:0; background:rgba(0,0,0,.5);
+  display:none; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600; color:#fff; gap:5px; border-radius:8px;
+}
+.vdf-thumb-zone-sm:hover .vdf-thumb-overlay { display:flex; }
+.vdf-thumb-zone-sm .vdf-thumb-overlay svg { width:12px; height:12px; stroke:#fff; fill:none; stroke-width:1.8; }
+
+/* YT mini preview */
+.vdf-yt-preview {
+  width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
+  border:1.5px solid var(--green-border); display:none; position:relative; background:#000;
+}
+.vdf-yt-preview iframe { width:100%; height:100%; border:none; display:block; }
+.vdf-yt-preview-badge {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+  padding:10px 10px 7px; font-size:10px; font-weight:600; color:#fff;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; pointer-events:none;
+}
+
+/* Source chip (replaces old vdf-src-badge in drawer) */
+.vdf-src-chip {
+  display:flex; align-items:center; gap:7px;
+  padding:6px 12px; border-radius:20px; font-size:11px; font-weight:600;
+  border:1px solid; width:100%; transition:all var(--transition);
+}
+.vdf-src-chip.none { background:var(--surface-2); color:var(--text-4); border-color:var(--border); }
+.vdf-src-chip.yt   { background:var(--yt-bg); color:#dc2626; border-color:var(--yt-border); }
+.vdf-src-chip.up   { background:var(--up-bg); color:var(--up-color); border-color:var(--up-border); }
+.vdf-src-chip-dot  { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.vdf-src-chip.yt .vdf-src-chip-dot,.vdf-src-chip.up .vdf-src-chip-dot { animation:pulse-dot 1.5s infinite; }
+.vdf-src-chip.none .vdf-src-chip-dot { animation:none; opacity:.3; }
+
 /* ══ Category table ══════════════════════════════════════════════════ */
 .vd-table-wrap { overflow:hidden; }
 .vd-table { width:100%; border-collapse:collapse; }
@@ -786,109 +839,132 @@ class AdminVideoController {
 
   <div class="vdw-body">
 
-    <!-- Source -->
-    <div class="vdf-card">
-      <div class="vdf-head">
-        <svg viewBox="0 0 12 12"><polygon points="4,2 10,6 4,10"/></svg>Nguồn Video
-      </div>
-      <div class="vdf-body">
-        <div id="vd-src-badge" class="vdf-src-badge none">
-          <span class="vdf-src-badge-dot"></span>
-          <span id="vd-src-badge-text">Chưa có nguồn video</span>
-        </div>
-        <div class="vdf-field">
-          <label class="vdf-label">Link YouTube hoặc URL video <span class="vdf-req">*</span></label>
-          <div class="vdf-input-group">
-            <input class="vdf-input" type="text" id="vd-src-url" placeholder="Dán link YouTube hoặc URL file video…" autocomplete="off">
-            <div class="vdf-spinner" id="vd-src-spinner"></div>
-          </div>
-          <div class="vdf-hint">youtube.com/watch?v=… · youtu.be/… · shorts/… · file .mp4</div>
-        </div>
-        <div class="vdf-or"><div class="vdf-or-line"></div><div class="vdf-or-text">Hoặc</div><div class="vdf-or-line"></div></div>
-        <button type="button" class="vd-btn vd-btn-secondary" id="vd-pick-video" style="width:100%;justify-content:center;height:40px;">
-          <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1.2"/><path d="M1 6h12M5 2v4M9 2v4"/></svg>
-          Chọn file video từ Thư viện WordPress
-        </button>
-        <input type="hidden" id="vd-yt-id">
-        <input type="hidden" id="vd-detected-type" value="">
-      </div>
-    </div>
+    <div class="vdw-2col">
 
-    <!-- Thumbnail -->
-    <div class="vdf-card">
-      <div class="vdf-head">
-        <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5"/><circle cx="4" cy="4" r="1"/><path d="M1 8.5l3-3 2.5 2L9 5l3 3.5"/></svg>
-        Ảnh Thumbnail
-        <span style="font-size:10px;color:var(--text-4);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">— Tự động lấy từ YouTube nếu bỏ trống</span>
-      </div>
-      <div class="vdf-body">
-        <div class="vdf-thumb-zone" id="vd-thumb-zone">
+      <!-- LEFT: Source + Thumbnail -->
+      <div class="vdw-col-left">
+
+        <!-- Source chip -->
+        <div id="vd-src-badge" class="vdf-src-chip none">
+          <span class="vdf-src-chip-dot"></span>
+          <span id="vd-src-badge-text" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Chưa có nguồn</span>
+          <div class="vdf-spinner" id="vd-src-spinner" style="margin-left:auto;"></div>
+        </div>
+
+        <!-- Thumbnail zone -->
+        <div class="vdf-thumb-zone-sm" id="vd-thumb-zone">
           <img id="vd-thumb-img" alt="">
           <div class="vdf-thumb-ph">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-            <span>Nhấp để chọn ảnh bìa</span>
+            <span>Thumbnail</span>
           </div>
           <div class="vdf-thumb-overlay">
-            <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z"/></svg>Thay đổi ảnh
+            <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z" stroke-linecap="round"/></svg>Thay ảnh
           </div>
         </div>
-        <div class="vdf-thumb-hint" id="vd-thumb-hint">Thumbnail lấy tự động từ YouTube — nhấp để thay thế.</div>
+        <div class="vdf-thumb-hint" id="vd-thumb-hint" style="font-size:10px;color:var(--text-4);text-align:center;display:none;">Tự lấy từ YouTube — nhấp để đổi</div>
         <input type="hidden" id="vd-thumb-url">
-      </div>
-    </div>
 
-    <!-- Info -->
-    <div class="vdf-card">
-      <div class="vdf-head">
-        <svg viewBox="0 0 12 12"><path d="M2 3h8M2 6h8M2 9h5"/></svg>Thông tin Video
-      </div>
-      <div class="vdf-body">
-        <div class="vdf-field">
-          <label class="vdf-label">Tiêu đề <span class="vdf-req">*</span></label>
-          <input class="vdf-input" type="text" id="vd-title" placeholder="Tiêu đề video…">
+        <!-- YouTube mini preview -->
+        <div class="vdf-yt-preview" id="vd-yt-preview">
+          <div id="vd-yt-preview-inner"></div>
+          <div class="vdf-yt-preview-badge" id="vd-yt-preview-title"></div>
         </div>
-        <div class="vdf-field">
-          <label class="vdf-label">Mô tả ngắn</label>
-          <textarea class="vdf-textarea" id="vd-desc" placeholder="Mô tả ngắn về nội dung video…"></textarea>
-        </div>
-        <div class="vdf-2col">
-          <div class="vdf-field">
-            <label class="vdf-label">Danh mục</label>
-            <select class="vdf-select" id="vd-cat">
-              <option value="0">— Chưa phân loại —</option>
-              <?php foreach ($cats as $c): ?>
-              <option value="<?php echo esc_attr($c['id']); ?>"><?php echo esc_html($c['name']); ?></option>
-              <?php endforeach; ?>
-            </select>
+
+        <!-- Danh mục + Thời lượng -->
+        <div class="vdf-card">
+          <div class="vdf-head">
+            <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="5" rx="1"/><rect x="1" y="8" width="4" height="4" rx="1"/><rect x="7" y="8" width="4" height="4" rx="1"/></svg>Phân loại
           </div>
-          <div class="vdf-field">
-            <label class="vdf-label">Thời lượng</label>
-            <input class="vdf-input" type="text" id="vd-duration" placeholder="12:34">
+          <div class="vdf-body">
+            <div class="vdf-field">
+              <label class="vdf-label">Danh mục</label>
+              <select class="vdf-select" id="vd-cat">
+                <option value="0">— Chưa phân loại —</option>
+                <?php foreach ($cats as $c): ?>
+                <option value="<?php echo esc_attr($c['id']); ?>"><?php echo esc_html($c['name']); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="vdf-field">
+              <label class="vdf-label">Thời lượng</label>
+              <input class="vdf-input" type="text" id="vd-duration" placeholder="12:34">
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Visibility -->
-    <div class="vdf-card">
-      <div class="vdf-head">
-        <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 4"/></svg>Trạng thái hiển thị
-      </div>
-      <div class="vdf-body">
-        <div class="vdf-toggle-group">
-          <label class="vdf-toggle active-show" id="vtog-show">
-            <input type="radio" name="vd_status" value="1" checked>
-            <div class="vdf-toggle-icon"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M4.5 7l2 2 3-3" stroke-linecap="round"/></svg></div>
-            Hiển thị trên website
-          </label>
-          <label class="vdf-toggle" id="vtog-hide">
-            <input type="radio" name="vd_status" value="0">
-            <div class="vdf-toggle-icon"><svg viewBox="0 0 14 14"><path d="M2 7s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><path d="M12 2L2 12" stroke-linecap="round"/></svg></div>
-            Ẩn (không hiển thị)
-          </label>
+        <!-- Visibility -->
+        <div class="vdf-card">
+          <div class="vdf-head">
+            <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 4"/></svg>Trạng thái
+          </div>
+          <div class="vdf-body">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label class="vdf-toggle active-show" id="vtog-show" style="padding:8px 10px;">
+                <input type="radio" name="vd_status" value="1" checked>
+                <div class="vdf-toggle-icon" style="width:24px;height:24px;border-radius:6px;"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M4.5 7l2 2 3-3" stroke-linecap="round"/></svg></div>
+                Hiển thị
+              </label>
+              <label class="vdf-toggle" id="vtog-hide" style="padding:8px 10px;">
+                <input type="radio" name="vd_status" value="0">
+                <div class="vdf-toggle-icon" style="width:24px;height:24px;border-radius:6px;"><svg viewBox="0 0 14 14"><path d="M2 7s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><path d="M12 2L2 12" stroke-linecap="round"/></svg></div>
+                Ẩn
+              </label>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+
+      </div><!-- /col-left -->
+
+      <!-- RIGHT: Info + Source URL -->
+      <div class="vdw-col-right">
+
+        <!-- URL input -->
+        <div class="vdf-card">
+          <div class="vdf-head">
+            <svg viewBox="0 0 12 12"><polygon points="4,2 10,6 4,10"/></svg>Nguồn Video <span class="vdf-req" style="font-size:10px;">*</span>
+          </div>
+          <div class="vdf-body">
+            <div class="vdf-field">
+              <label class="vdf-label">Link YouTube hoặc URL file video</label>
+              <div class="vdf-input-group">
+                <input class="vdf-input" type="text" id="vd-src-url"
+                       placeholder="Dán link YouTube hoặc URL .mp4, .webm…" autocomplete="off">
+              </div>
+              <div class="vdf-hint" style="margin-top:4px;">youtube.com/watch?v=… · youtu.be/… · shorts/… · URL file .mp4</div>
+            </div>
+            <div class="vdf-or"><div class="vdf-or-line"></div><div class="vdf-or-text">Hoặc chọn file</div><div class="vdf-or-line"></div></div>
+            <button type="button" class="vd-btn vd-btn-secondary" id="vd-pick-video"
+                    style="width:100%;justify-content:center;">
+              <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1.2"/><path d="M1 6h12M5 2v4M9 2v4"/></svg>
+              Thư viện WordPress
+            </button>
+            <input type="hidden" id="vd-yt-id">
+            <input type="hidden" id="vd-detected-type" value="">
+          </div>
+        </div>
+
+        <!-- Title + Desc -->
+        <div class="vdf-card">
+          <div class="vdf-head">
+            <svg viewBox="0 0 12 12"><path d="M2 3h8M2 6h8M2 9h5"/></svg>Thông tin Video
+          </div>
+          <div class="vdf-body">
+            <div class="vdf-field">
+              <label class="vdf-label">Tiêu đề <span class="vdf-req">†</span></label>
+              <input class="vdf-input" type="text" id="vd-title" placeholder="Tiêu đề video…">
+            </div>
+            <div class="vdf-field">
+              <label class="vdf-label">Mô tả ngắn</label>
+              <textarea class="vdf-textarea" id="vd-desc"
+                        placeholder="Mô tả ngắn về nội dung video…"
+                        style="min-height:90px;"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /col-right -->
+    </div><!-- /2col -->
 
     <input type="hidden" id="vdw-id" value="0">
   </div><!-- /body -->
@@ -1126,17 +1202,32 @@ function extractYtId(url){
   return m?m[1]:'';
 }
 
-/* ─ Source badge ─ */
+/* ─ Source chip ─ */
 function setSrcBadge(type,label){
   var el=document.getElementById('vd-src-badge');
-  el.className='vdf-src-badge '+type;
+  el.className='vdf-src-chip '+type;
   document.getElementById('vd-src-badge-text').textContent=label;
+}
+
+/* ─ YouTube mini preview ─ */
+function showYtPreview(ytId,title){
+  var box=document.getElementById('vd-yt-preview');
+  var inner=document.getElementById('vd-yt-preview-inner');
+  var badge=document.getElementById('vd-yt-preview-title');
+  box.style.display='block';
+  inner.innerHTML='<iframe src="https://www.youtube.com/embed/'+ytId+'?rel=0&modestbranding=1" allowfullscreen loading="lazy" style="width:100%;height:100%;border:none;"></iframe>';
+  badge.textContent=title||'';
+}
+function hideYtPreview(){
+  var box=document.getElementById('vd-yt-preview');
+  var inner=document.getElementById('vd-yt-preview-inner');
+  box.style.display='none'; inner.innerHTML='';
 }
 
 /* ─ Thumbnail ─ */
 function setThumb(url,auto){
   var img=document.getElementById('vd-thumb-img');
-  var ph=document.querySelector('.vdf-thumb-ph');
+  var ph=document.querySelector('.vdf-thumb-zone-sm .vdf-thumb-ph');
   var hint=document.getElementById('vd-thumb-hint');
   document.getElementById('vd-thumb-url').value=url||'';
   if(url){ img.src=url; img.style.display='block'; if(ph) ph.style.display='none'; hint.style.display=auto?'block':'none'; }
@@ -1192,11 +1283,13 @@ function fetchYtInfo(url,ytId){
   var fd=new FormData(); fd.append('action','bacera_yt_info'); fd.append('_nonce',NONCE); fd.append('url',url);
   fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
     srcSpin.style.display='none';
-    if(!res.success){ setSrcBadge('yt','YouTube ID: '+ytId); return; }
-    setSrcBadge('yt','YouTube — '+(res.data.title||'ID: '+res.data.yt_id));
+    if(!res.success){ setSrcBadge('yt','ID: '+ytId); showYtPreview(ytId,''); return; }
+    var title=res.data.title||'ID: '+res.data.yt_id;
+    setSrcBadge('yt','YouTube — '+title);
     if(!document.getElementById('vd-title').value&&res.data.title) document.getElementById('vd-title').value=res.data.title;
     if(res.data.thumbnail&&!document.getElementById('vd-thumb-url').value) setThumb(res.data.thumbnail,true);
-  }).catch(function(){ srcSpin.style.display='none'; setSrcBadge('yt','YouTube ID: '+ytId); });
+    showYtPreview(ytId, title);
+  }).catch(function(){ srcSpin.style.display='none'; setSrcBadge('yt','ID: '+ytId); showYtPreview(ytId,''); });
 }
 
 /* ─ Reset ─ */
@@ -1208,8 +1301,9 @@ function resetDr(){
   document.getElementById('vd-desc').value='';
   document.getElementById('vd-cat').value='0';
   document.getElementById('vd-duration').value='';
-  setSrcBadge('none','Chưa có nguồn video');
+  setSrcBadge('none','Chưa có nguồn');
   setThumb('',false);
+  hideYtPreview();
 }
 
 /* ─ Open ADD ─ */
@@ -1241,8 +1335,13 @@ document.querySelectorAll('.vd-edit-btn').forEach(function(btn){
       document.getElementById('vd-detected-type').value=type;
       document.getElementById('vd-src-url').value=data.video_url||(type==='youtube'&&data.youtube_id?'https://youtu.be/'+data.youtube_id:'');
       document.getElementById('vd-yt-id').value=data.youtube_id||'';
-      if(type==='youtube') setSrcBadge('yt','YouTube — '+(data.title||'ID: '+data.youtube_id));
-      else setSrcBadge('up','Upload — '+(data.video_url||'').split('/').pop());
+      if(type==='youtube'){
+        setSrcBadge('yt','YouTube — '+(data.title||'ID: '+data.youtube_id));
+        if(data.youtube_id) showYtPreview(data.youtube_id, data.title||'');
+      } else {
+        setSrcBadge('up','Upload — '+(data.video_url||'').split('/').pop());
+        hideYtPreview();
+      }
       document.getElementById('vd-title').value=data.title||'';
       document.getElementById('vd-desc').value=data.description||'';
       document.getElementById('vd-cat').value=data.category_id||'0';
