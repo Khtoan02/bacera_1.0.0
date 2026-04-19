@@ -14,7 +14,7 @@
                     <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block hover:opacity-80 transition-opacity mb-6">
 
                         <div class="w-32 h-14 relative overflow-hidden flex items-center">
-                            <img src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2026/03/Logo-1.png'); ?>" class="w-full h-full object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Footer Logo">
+                            <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>" class="w-full h-full object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Footer Logo">
                         </div>
                     </a>
                 </div>

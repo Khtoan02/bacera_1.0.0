@@ -1,16 +1,47 @@
 <?php
 $data = get_query_var('bacera_dashboard_data');
 extract($data);
+$pancake_configured      = isset( $pancake_configured ) ? $pancake_configured : false;
+$pancake_plugin_active   = isset( $pancake_plugin_active ) ? $pancake_plugin_active : false;
+$sync_disabled           = ! $pancake_plugin_active || ! $pancake_configured;
 ?>
 
 <div class="bacera-dashboard wrap m-0 p-6 bg-stone-50 min-h-screen">
+
+    <?php if ( isset( $_GET['bacera_sync'] ) && $_GET['bacera_sync'] === '1' ) : ?>
+        <div class="notice notice-success is-dismissible mb-6">
+            <p>
+                <strong>Đồng bộ Pancake hoàn tất.</strong>
+                Đã xử lý: <?php echo isset( $_GET['sync_pulled'] ) ? (int) $_GET['sync_pulled'] : 0; ?> bản ghi từ POS;
+                thêm <?php echo isset( $_GET['sync_inserted'] ) ? (int) $_GET['sync_inserted'] : 0; ?>,
+                cập nhật <?php echo isset( $_GET['sync_updated'] ) ? (int) $_GET['sync_updated'] : 0 ?>;
+                liên kết <?php echo isset( $_GET['sync_linked'] ) ? (int) $_GET['sync_linked'] : 0 ?>;
+                tạo mới trên POS <?php echo isset( $_GET['sync_pushed'] ) ? (int) $_GET['sync_pushed'] : 0 ?>.
+            </p>
+            <?php if ( ! empty( $_GET['bacera_sync_err'] ) ) : ?>
+                <p class="text-amber-800"><?php echo esc_html( urldecode( (string) $_GET['bacera_sync_err'] ) ); ?></p>
+            <?php endif; ?>
+        </div>
+    <?php elseif ( isset( $_GET['bacera_sync'] ) && $_GET['bacera_sync'] === 'no_plugin' ) : ?>
+        <div class="notice notice-error is-dismissible mb-6">
+            <p>Cần kích hoạt plugin <strong>Bacera Pancake POS Integration</strong> để đồng bộ.</p>
+        </div>
+    <?php endif; ?>
     
     <div class="flex items-center justify-between mb-8">
         <div>
             <h1 class="text-3xl font-bold text-stone-900 m-0 p-0">Quản lý Khách hàng</h1>
-            <p class="text-stone-500 mt-2">Theo dõi và quản lý dữ liệu người dùng Bacera của bạn.</p>
+            <p class="text-stone-500 mt-2">Theo dõi và quản lý dữ liệu người dùng Bacera của bạn. Đồng bộ từ Pancake POS lấy dữ liệu chuẩn từ cửa hàng.</p>
         </div>
-        <div class="flex gap-4">
+        <div class="flex gap-4 flex-wrap items-center">
+            <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="inline">
+                <?php wp_nonce_field( 'bacera_sync_pancake_customers' ); ?>
+                <input type="hidden" name="action" value="bacera_sync_pancake_customers" />
+                <button type="submit" class="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold border border-stone-300 bg-white text-stone-800 hover:bg-stone-100 disabled:opacity-50 disabled:cursor-not-allowed" <?php disabled( $sync_disabled ); ?> title="<?php echo $sync_disabled ? esc_attr( 'Cấu hình API Key & Shop ID trong Settings Pancake và bật plugin.' ) : ''; ?>">
+                    <svg class="w-4 h-4 mr-2 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Đồng bộ từ Pancake
+                </button>
+            </form>
             <?php 
             get_template_part('app/Views/components/button', null, [
                 'text' => 'Tải lại dữ liệu',
@@ -87,6 +118,7 @@ extract($data);
                         <th class="text-stone-500 font-medium text-sm">Số Điện Thoại</th>
                         <th class="text-stone-500 font-medium text-sm">Email</th>
                         <th class="text-stone-500 font-medium text-sm">Trạng Thái MK</th>
+                        <th class="text-stone-500 font-medium text-sm">Pancake ID</th>
                         <th class="text-stone-500 font-medium text-sm">Ngày Tạo</th>
                         <th class="text-stone-500 font-medium text-sm">Cập Nhật LK</th>
                         <th class="text-right text-stone-500 font-medium text-sm">Thao Tác</th>
@@ -95,7 +127,7 @@ extract($data);
                 <tbody class="text-sm">
                     <?php if (empty($customers)): ?>
                     <tr>
-                        <td colspan="8" class="text-center py-12 text-stone-500">
+                        <td colspan="9" class="text-center py-12 text-stone-500">
                             Không tìm thấy dữ liệu phù hợp.
                         </td>
                     </tr>
@@ -106,6 +138,7 @@ extract($data);
                             <td class="font-medium text-stone-900"><?php echo esc_html($c['name']); ?></td>
                             <td class="text-stone-600"><?php echo esc_html($c['phone']); ?></td>
                             <td class="text-stone-600"><?php echo esc_html($c['email']); ?></td>
+                            <td class="text-stone-500 font-mono text-xs"><?php echo ! empty( $c['pancake_customer_id'] ) ? esc_html( $c['pancake_customer_id'] ) : '—'; ?></td>
                             <td>
                                 <?php if ($c['has_password']): ?>
                                     <?php get_template_part('app/Views/components/badge', null, ['text' => 'Đã Thiết Lập', 'type' => 'success']); ?>

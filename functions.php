@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'BACERA_THEME_DIR', trailingslashit( get_template_directory() ) );
 define( 'BACERA_THEME_URI', trailingslashit( get_template_directory_uri() ) );
 define( 'BACERA_THEME_VERSION', '1.0.0' );
+/** Tăng khi đổi rewrite theme (vd. /bacera-img/) — tự flush permalink một lần sau deploy. */
+define( 'BACERA_IMG_REWRITE_VERSION', '2' );
 
 /* ==========================================================================
    GIAI ĐOẠN 3 & 4: CẤU HÌNH ĐƯỜNG DẪN ẢO (REWRITE RULES)
@@ -27,27 +29,46 @@ add_action( 'init', function() {
         'index.php?bacera_img_slug=$matches[1]',
         'top'
     );
-});
+}, 10 );
 
-// 3. Kích hoạt trạm trung chuyển ảnh khi bắt được đường dẫn ảo
-add_action( 'template_redirect', function() {
-    if ( get_query_var( 'bacera_img_slug' ) ) {
-        // Gọi hàm xử lý từ Utils để đẩy dữ liệu ảnh về trình duyệt 
-        Bacera_Utils::handle_image_streaming();
-        exit;
+/**
+ * Sau khi đăng ký rewrite: flush một lần khi version đổi (tránh server mới / WP Pusher không có rule bacera-img).
+ */
+add_action( 'init', function() {
+    if ( ! defined( 'BACERA_IMG_REWRITE_VERSION' ) ) {
+        return;
     }
+    $stored = get_option( 'bacera_img_rewrite_version', '' );
+    if ( (string) $stored === (string) BACERA_IMG_REWRITE_VERSION ) {
+        return;
+    }
+    flush_rewrite_rules( false );
+    update_option( 'bacera_img_rewrite_version', (string) BACERA_IMG_REWRITE_VERSION, false );
+}, 99 );
 
-    // 4. Bắt route /our-team/{slug}
-    $member_slug = get_query_var('bacera_member_slug');
+// 3. Kích hoạt trạm trung chuyển ảnh khi bắt được đường dẫn ảo (plugin phải có Bacera_Utils)
+add_action( 'template_redirect', function() {
+    if ( ! get_query_var( 'bacera_img_slug' ) ) {
+        return;
+    }
+    if ( ! class_exists( 'Bacera_Utils' ) || ! is_callable( array( 'Bacera_Utils', 'handle_image_streaming' ) ) ) {
+        return;
+    }
+    Bacera_Utils::handle_image_streaming();
+}, 1 );
+
+// 4. Bắt route /our-team/{slug}
+add_action( 'template_redirect', function() {
+    $member_slug = get_query_var( 'bacera_member_slug' );
     if ( $member_slug ) {
-        $template = locate_template('templates/template-member-detail.php');
+        $template = locate_template( 'templates/template-member-detail.php' );
         if ( $template ) {
             $_GET['member_slug'] = $member_slug;
             include $template;
             exit;
         }
     }
-});
+} );
 
 add_action( 'init', function() {
     add_rewrite_tag('%bacera_member_slug%', '([^/]+)');
@@ -133,7 +154,59 @@ function bacera_enqueue_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'bacera_enqueue_scripts' );
 
+/**
+ * Quy tắc rewrite /bacera-img/ đã được ghi vào DB (sau Settings → Permalinks hoặc sau flush tự động của theme).
+ *
+ * @return bool
+ */
+function bacera_img_rewrite_is_flushed() {
+    $rules = get_option( 'rewrite_rules' );
+    if ( ! is_array( $rules ) ) {
+        return false;
+    }
+    foreach ( $rules as $pattern => $query ) {
+        if ( is_string( $pattern ) && strpos( $pattern, 'bacera-img' ) !== false ) {
+            return true;
+        }
+        if ( is_string( (string) $query ) && strpos( (string) $query, 'bacera_img_slug' ) !== false ) {
+            return true;
+        }
+    }
+    return false;
+}
 
+/**
+ * Logo header/footer: proxy /bacera-img/… khi rewrite đã flush; nếu chưa flush thì dùng URL gốc Pancake CDN
+ * (tránh ảnh vỡ trên server mới). Fallback file upload / theme.
+ *
+ * @return string
+ */
+function bacera_get_brand_logo_url() {
+    $upload     = wp_upload_dir();
+    $upload_rel = '/2026/03/Logo.png';
+    $upload_abs = isset( $upload['basedir'] ) ? $upload['basedir'] . $upload_rel : '';
+    $upload_url = isset( $upload['baseurl'] ) ? $upload['baseurl'] . $upload_rel : '';
+
+    if ( class_exists( 'Bacera_Utils' ) ) {
+        $proxy = Bacera_Utils::get_pancake_shop_logo_proxy_url();
+        if ( is_string( $proxy ) && $proxy !== '' ) {
+            if ( bacera_img_rewrite_is_flushed() ) {
+                return $proxy;
+            }
+            $direct = get_option( 'bacera_pancake_shop_avatar_source_url', '' );
+            if ( is_string( $direct ) && $direct !== '' && function_exists( 'wp_http_validate_url' ) && wp_http_validate_url( $direct ) ) {
+                return $direct;
+            }
+            return $proxy;
+        }
+    }
+
+    if ( $upload_abs !== '' && file_exists( $upload_abs ) ) {
+        return $upload_url;
+    }
+
+    return $upload_url;
+}
 
 // Boot the main controller
 add_action('init', function() {

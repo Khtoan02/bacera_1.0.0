@@ -9,14 +9,55 @@ class AdminCustomerController {
         add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
         add_action( 'admin_init', [ $this, 'init_database' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+        add_action( 'admin_post_bacera_sync_pancake_customers', [ $this, 'process_pancake_sync' ] );
     }
 
     public function init_database() {
-        $db_version = get_option('bacera_customers_db_version');
-        if ( $db_version !== '1.2' ) {
+        $db_version = get_option( 'bacera_customers_db_version', '0' );
+        if ( version_compare( $db_version, '1.3', '<' ) ) {
             CustomerTable::createTable();
-            update_option('bacera_customers_db_version', '1.2');
+            CustomerTable::migrate_to_1_3();
+            update_option( 'bacera_customers_db_version', '1.3' );
         }
+    }
+
+    /**
+     * Đồng bộ khách hàng từ Pancake POS (nguồn chính) vào bảng bacera_customers.
+     */
+    public function process_pancake_sync() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Không có quyền.', 'bacera' ), '', [ 'response' => 403 ] );
+        }
+        check_admin_referer( 'bacera_sync_pancake_customers' );
+
+        if ( ! class_exists( '\\Bacera_Module_Customers', false ) ) {
+            wp_safe_redirect(
+                add_query_arg(
+                    [ 'page' => 'bacera-customers', 'bacera_sync' => 'no_plugin' ],
+                    admin_url( 'admin.php' )
+                )
+            );
+            exit;
+        }
+
+        $stats = \Bacera_Module_Customers::sync_bacera_customers_full();
+
+        $args = [
+            'page'          => 'bacera-customers',
+            'bacera_sync'   => '1',
+            'sync_pulled'   => isset( $stats['pulled'] ) ? (int) $stats['pulled'] : 0,
+            'sync_inserted' => isset( $stats['inserted'] ) ? (int) $stats['inserted'] : 0,
+            'sync_updated'  => isset( $stats['updated'] ) ? (int) $stats['updated'] : 0,
+            'sync_linked'   => isset( $stats['linked'] ) ? (int) $stats['linked'] : 0,
+            'sync_pushed'   => isset( $stats['pushed'] ) ? (int) $stats['pushed'] : 0,
+        ];
+
+        if ( ! empty( $stats['errors'] ) ) {
+            $args['bacera_sync_err'] = rawurlencode( implode( ' | ', array_slice( $stats['errors'], 0, 5 ) ) );
+        }
+
+        wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
+        exit;
     }
 
     public function enqueue_admin_scripts($hook) {
@@ -329,7 +370,9 @@ class AdminCustomerController {
             'search' => $search,
             'paged' => $paged,
             'total_pages' => ceil($filtered_total / $per_page),
-            'filtered_total' => $filtered_total
+            'filtered_total' => $filtered_total,
+            'pancake_configured' => (bool) ( get_option( 'bacera_pancake_api_key' ) && get_option( 'bacera_pancake_shop_id' ) ),
+            'pancake_plugin_active' => class_exists( '\\Bacera_Module_Customers', false ),
         ]);
 
         get_template_part('app/Views/admin/customer-dashboard');
