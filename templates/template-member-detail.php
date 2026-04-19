@@ -355,31 +355,174 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
         </div>
     </section>
 
-    <!-- ═══ 2.5 GALLERY ══════════════════════════════════════════ -->
+    <!-- ═══ 2.5 GALLERY (Swiper Coverflow) ════════════════════════ -->
     <?php if ( ! empty( $gallery_urls ) ): ?>
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-24">
-        <div class="flex flex-col items-center mb-12">
-            <span class="w-12 h-[2px] bg-terracotta mb-4"></span>
-            <h2 class="font-serif text-3xl md:text-4xl text-textmain mb-3 text-center">
-                Personal Gallery
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <style>
+        /* ── Gallery Swiper ─────────────────────────────── */
+        .member-gallery-wrap {
+            width: 100%;
+            padding: 60px 0;
+            overflow: hidden;
+            background: transparent;
+        }
+        .member-swiper {
+            width: 100%;
+            padding-top: 20px;
+            padding-bottom: 60px;
+        }
+        .member-swiper .swiper-slide {
+            background-size: cover;
+            width: 300px;
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            flex-shrink: 0;
+        }
+        @media (min-width: 768px) {
+            .member-swiper .swiper-slide { width: 320px; height: 420px; }
+        }
+        .member-swiper .swiper-slide img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.35s ease;
+        }
+        .member-swiper .swiper-slide img:hover { transform: scale(1.03); }
+        .member-swiper .swiper-slide-active {
+            box-shadow: 0 25px 60px -10px rgba(0,0,0,0.35);
+        }
+        .member-swiper .swiper-pagination-bullet {
+            background: #c8b8a0;
+            opacity: 1;
+            width: 7px; height: 7px;
+            margin: 0 5px !important;
+            transition: transform .2s;
+        }
+        .member-swiper .swiper-pagination-bullet-active {
+            background: #8B5A3C;
+            transform: scale(1.3);
+        }
+
+        /* ── Lightbox ───────────────────────────────────── */
+        #glbOverlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.92);
+            align-items: center; justify-content: center;
+            opacity: 0; transition: opacity .3s;
+        }
+        #glbOverlay.open { display: flex; }
+        #glbOverlay.visible { opacity: 1; }
+        #glbOverlay img {
+            max-height: 90vh; max-width: 92vw;
+            border-radius: 10px; object-fit: contain;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            transform: scale(.94); transition: transform .3s;
+        }
+        #glbOverlay.visible img { transform: scale(1); }
+        #glbClose {
+            position: absolute; top: 18px; right: 22px; z-index: 10000;
+            background: none; border: none; cursor: pointer;
+            color: #fff; line-height: 1; font-size: 32px; opacity: .8;
+        }
+        #glbClose:hover { opacity: 1; }
+    </style>
+
+    <section class="max-w-[1400px] mx-auto pb-6">
+        <!-- Header -->
+        <div class="text-center mb-2 px-4">
+            <p class="text-[10px] uppercase tracking-[.25em] text-textmuted mb-2">Gallery pictures</p>
+            <h2 class="font-serif text-3xl md:text-4xl text-textmain">
+                Photo of <em><?php echo esc_html( $member['name'] ?? 'Member' ); ?></em>
             </h2>
-            <p class="text-sm text-textmuted text-center max-w-xl">
-                Những khoảnh khắc đáng nhớ và các hoạt động nổi bật.
-            </p>
         </div>
 
-        <div class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-            <?php foreach ( $gallery_urls as $idx => $gurl ): ?>
-            <div class="break-inside-avoid relative group rounded-xl overflow-hidden bg-[#EBE7DF] shadow-sm cursor-zoom-in">
-                <!-- Use actual aspect ratio if possible, else standard image rendering -->
-                <img src="<?php echo esc_url( $gurl ); ?>" alt="Gallery Image <?php echo $idx+1; ?>" 
-                     class="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
-                <div class="absolute inset-0 bg-textmain/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+        <!-- Swiper -->
+        <div class="swiper member-swiper">
+            <div class="swiper-wrapper">
+                <?php foreach ( $gallery_urls as $idx => $gurl ): ?>
+                <div class="swiper-slide">
+                    <img src="<?php echo esc_url( $gurl ); ?>"
+                         alt="<?php echo esc_attr( ($member['name'] ?? 'Gallery') . ' - ảnh ' . ($idx + 1) ); ?>"
+                         loading="lazy" />
+                </div>
+                <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
+            <div class="swiper-pagination"></div>
         </div>
     </section>
+
+    <!-- Lightbox overlay -->
+    <div id="glbOverlay">
+        <button id="glbClose" aria-label="Đóng">&#x2715;</button>
+        <img id="glbImg" src="" alt="Ảnh phóng to" />
+    </div>
+
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+    (function(){
+        /* ── Swiper init ── */
+        var memberSwiper = new Swiper('.member-swiper', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto',
+            initialSlide: Math.min(2, <?php echo max(0, count($gallery_urls) - 1); ?>),
+            coverflowEffect: {
+                rotate: 0,
+                stretch: 80,
+                depth: 220,
+                modifier: 1,
+                slideShadows: true,
+            },
+            pagination: { el: '.member-swiper .swiper-pagination', clickable: true },
+        });
+
+        /* ── Lightbox ── */
+        var overlay = document.getElementById('glbOverlay');
+        var glbImg  = document.getElementById('glbImg');
+        var glbClose = document.getElementById('glbClose');
+
+        function openLightbox(src, alt) {
+            glbImg.src = src;
+            glbImg.alt = alt || '';
+            overlay.classList.add('open');
+            requestAnimationFrame(function(){
+                requestAnimationFrame(function(){ overlay.classList.add('visible'); });
+            });
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            overlay.classList.remove('visible');
+            setTimeout(function(){
+                overlay.classList.remove('open');
+                glbImg.src = '';
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        document.querySelectorAll('.member-swiper .swiper-slide img').forEach(function(img){
+            img.addEventListener('click', function(){
+                openLightbox(this.src, this.alt);
+            });
+        });
+        glbClose.addEventListener('click', closeLightbox);
+        overlay.addEventListener('click', function(e){ if(e.target === overlay) closeLightbox(); });
+        document.addEventListener('keydown', function(e){
+            if(e.key === 'Escape') closeLightbox();
+        });
+    })();
+    </script>
+
     <?php endif; ?>
+
 
     <!-- ═══ 3. SAME DEPARTMENT ══════════════════════════════════ -->
     <?php if ( ! empty( $companions ) ): ?>
