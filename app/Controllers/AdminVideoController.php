@@ -270,19 +270,15 @@ class AdminVideoController {
 }
 .vdf-hint { font-size:11px; color:var(--text-3); line-height:1.5; }
 
-/* ── Video type toggle ── */
-.vdf-type-group { display:flex; gap:8px; }
-.vdf-type-pill {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
-  padding:10px 12px; border-radius:8px; border:2px solid var(--border);
-  background:var(--surface); cursor:pointer; transition:all .15s;
-  font-size:13px; font-weight:600; color:var(--text-2);
+/* ── Video source detected badge ── */
+.vdf-src-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;
+  margin-bottom:4px;
 }
-.vdf-type-pill:hover { border-color:var(--text-3); }
-.vdf-type-pill input { display:none; }
-.vdf-type-pill svg { width:16px; height:16px; flex-shrink:0; }
-.vdf-type-pill.sel-upload { border-color:#3b82f6; background:var(--blue-bg); color:var(--blue); }
-.vdf-type-pill.sel-youtube { border-color:var(--yt); background:#fff5f5; color:var(--yt); }
+.vdf-src-badge.yt   { background:#fff5f5; color:var(--yt); border:1px solid #fecaca; }
+.vdf-src-badge.up   { background:var(--blue-bg); color:var(--blue); border:1px solid var(--blue-border); }
+.vdf-src-badge.none { background:var(--surface-2); color:var(--text-3); border:1px solid var(--border); }
 
 /* ── Status toggle ── */
 .vdf-status-group { display:flex; gap:8px; }
@@ -715,90 +711,67 @@ class AdminVideoController {
 
             <div class="vdm-body">
 
-                <!-- Video type selector -->
+                <!-- Smart source input -->
                 <div class="vdf-section">
                     <div class="vdf-sec-head">
                         <svg viewBox="0 0 12 12"><polygon points="4,2 10,6 4,10"/></svg>
-                        Loại Video
+                        Nguồn Video
                     </div>
                     <div class="vdf-sec-body">
-                        <div class="vdf-type-group">
-                            <label class="vdf-type-pill sel-upload" id="pill-upload">
-                                <input type="radio" name="vd_type" value="upload" checked>
-                                <svg viewBox="0 0 16 16" style="stroke:#3b82f6;fill:none;stroke-width:1.8;"><path d="M8 2v9M5 5L8 2l3 3"/><path d="M2 13h12"/></svg>
-                                Upload từ Thư viện
-                            </label>
-                            <label class="vdf-type-pill" id="pill-youtube">
-                                <input type="radio" name="vd_type" value="youtube">
-                                <svg viewBox="0 0 16 16" style="fill:#FF0000;stroke:none;"><path d="M14.5 5s-.2-1.2-.7-1.7c-.7-.7-1.5-.7-1.8-.7C10 2.5 8 2.5 8 2.5s-2 0-4 .1c-.4 0-1.2 0-1.8.7C1.7 3.8 1.5 5 1.5 5S1.3 6.4 1.3 7.8v1.3c0 1.4.2 2.7.2 2.7s.2 1.2.7 1.7c.7.7 1.6.7 2 .8C5.5 14 8 14 8 14s2 0 4-.2c.4 0 1.2-.1 1.8-.7.5-.5.7-1.7.7-1.7s.2-1.4.2-2.7V7.8C14.7 6.4 14.5 5 14.5 5zM6.5 10V6l4 2-4 2z"/></svg>
-                                YouTube URL
-                            </label>
+
+                        <!-- Detected badge -->
+                        <div id="vd-src-badge" class="vdf-src-badge none">
+                            <span id="vd-src-badge-icon">○</span>
+                            <span id="vd-src-badge-text">Chưa có nguồn video</span>
                         </div>
+
+                        <!-- Single smart URL input -->
+                        <div class="vdf-field">
+                            <label class="vdf-label">Link YouTube hoặc URL video <span class="vdf-req">*</span></label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input class="vdf-input" type="text" id="vd-src-url"
+                                       placeholder="Dán link YouTube hoặc URL video...">
+                                <div class="vdf-spinner" id="vd-src-spinner"></div>
+                            </div>
+                            <div id="vd-src-hint" class="vdf-hint">Hỗ trợ: youtube.com/watch?v=... · youtu.be/... · shorts/... · hoặc URL file .mp4</div>
+                        </div>
+
+                        <!-- OR divider -->
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="flex:1;height:1px;background:var(--border);"></div>
+                            <span style="font-size:11px;color:var(--text-3);font-weight:600;">HOẶC</span>
+                            <div style="flex:1;height:1px;background:var(--border);"></div>
+                        </div>
+
+                        <!-- WP Media picker button -->
+                        <button type="button" class="vd-btn vd-btn-outline" id="vd-pick-video"
+                                style="width:100%;justify-content:center;height:42px;">
+                            <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1"/><path d="M1 6h12"/><path d="M5 2v4M9 2v4"/></svg>
+                            Chọn video từ Thư viện WordPress
+                        </button>
+
+                        <input type="hidden" id="vd-yt-id">
+                        <input type="hidden" id="vd-detected-type" value="">
+
                     </div>
                 </div>
 
-                <!-- Upload section -->
-                <div class="vdf-section" id="section-upload">
+                <!-- Thumbnail — always shown -->
+                <div class="vdf-section">
                     <div class="vdf-sec-head">
-                        <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5"/><path d="M4 8l2-2 2 2M6 6V4"/></svg>
-                        File Video & Thumbnail
+                        <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5"/><circle cx="4" cy="4" r="1"/><path d="M1 8l3-3 2.5 2.5L9 5l3 3"/></svg>
+                        Ảnh Thumbnail <span style="font-weight:400;color:var(--text-3);font-size:10px;"> — tự động lấy từ YouTube nếu không chọn</span>
                     </div>
                     <div class="vdf-sec-body">
-                        <div class="vdf-field">
-                            <label class="vdf-label">File Video <span class="vdf-req">*</span></label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input class="vdf-input" type="text" id="vd-video-url" placeholder="URL video từ thư viện WP...">
-                                <button type="button" class="vd-btn vd-btn-outline" id="vd-pick-video" style="flex-shrink:0;">
-                                    <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1"/><path d="M1 6h12"/><path d="M5 2v4M9 2v4"/></svg>
-                                    Chọn file
-                                </button>
-                            </div>
-                            <div id="vd-video-name" class="vdf-hint" style="margin-top:2px;"></div>
-                        </div>
-                        <div class="vdf-field">
-                            <label class="vdf-label">Thumbnail (ảnh bìa)</label>
-                            <div class="vdf-thumb-preview" id="vd-thumb-zone">
-                                <img id="vd-thumb-img" src="" alt="" style="display:none;">
-                                <div class="vdf-thumb-placeholder" id="vd-thumb-placeholder">
-                                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                                    <span>Nhấp để chọn ảnh thumbnail</span>
-                                </div>
-                            </div>
-                            <input type="hidden" id="vd-thumb-url">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- YouTube section -->
-                <div class="vdf-section" id="section-youtube" style="display:none;">
-                    <div class="vdf-sec-head">
-                        <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><polygon points="4.5,3.5 9,6 4.5,8.5" fill="currentColor"/></svg>
-                        YouTube Video
-                    </div>
-                    <div class="vdf-sec-body">
-                        <div class="vdf-field">
-                            <label class="vdf-label">YouTube URL <span class="vdf-req">*</span></label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input class="vdf-input" type="text" id="vd-yt-url" placeholder="https://youtube.com/watch?v=... hoặc youtu.be/...">
-                                <button type="button" class="vd-btn vd-btn-outline" id="vd-yt-fetch" style="flex-shrink:0;">
-                                    <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M7 4v3l2 2"/></svg>
-                                    Tải thông tin
-                                </button>
-                                <div class="vdf-spinner" id="vd-yt-spinner"></div>
-                            </div>
-                            <input type="hidden" id="vd-yt-id">
-                            <div id="vd-yt-error" class="vdf-hint" style="color:var(--accent);display:none;"></div>
-                        </div>
-                        <!-- YT Preview -->
-                        <div id="vd-yt-preview-wrap" style="display:none;">
-                            <div class="vdf-thumb-preview" style="cursor:default;pointer-events:none;">
-                                <img id="vd-yt-thumb" src="" alt="" style="display:block;">
-                            </div>
-                            <div class="vdf-hint" style="margin-top:6px;display:flex;align-items:center;gap:6px;">
-                                <span style="font-weight:600;color:var(--green);">✓</span>
-                                <span id="vd-yt-detected">Video đã được nhận diện</span>
+                        <div class="vdf-thumb-preview" id="vd-thumb-zone">
+                            <img id="vd-thumb-img" src="" alt="" style="display:none;">
+                            <div class="vdf-thumb-placeholder" id="vd-thumb-placeholder">
+                                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                <span>Nhấp để chọn ảnh bìa</span>
                             </div>
                         </div>
+                        <input type="hidden" id="vd-thumb-url">
+                        <div class="vdf-hint" id="vd-thumb-hint" style="display:none;">Thumbnail đã được tự động lấy từ YouTube — nhấp vào ảnh để thay thế.</div>
                     </div>
                 </div>
 
@@ -1141,79 +1114,71 @@ document.getElementById('vd-yt-fetch').addEventListener('click',function(){
     fetch(AJAX,{method:'POST',body:fd})
     .then(function(r){return r.json();})
     .then(function(res){
-        spinner.style.display='none';
-        if(!res.success){ errEl.textContent=res.data.message||'Lỗi'; errEl.style.display='block'; return; }
-        document.getElementById('vd-yt-id').value=res.data.yt_id;
-        document.getElementById('vd-yt-thumb').src=res.data.thumbnail;
-        document.getElementById('vd-yt-preview-wrap').style.display='block';
-        document.getElementById('vd-yt-detected').textContent='ID: '+res.data.yt_id+(res.data.title?' — '+res.data.title:'');
-        if(!document.getElementById('vd-title').value && res.data.title){
-            document.getElementById('vd-title').value=res.data.title;
+        srcSpinner.style.display='none';
+        if(!res.success){ setSrcBadge('yt','YouTube ID: '+ytId); return; }
+        setSrcBadge('yt','YouTube — '+(res.data.title||'ID: '+res.data.yt_id));
+        var titleEl=document.getElementById('vd-title');
+        if(!titleEl.value && res.data.title) titleEl.value=res.data.title;
+        if(res.data.thumbnail && !document.getElementById('vd-thumb-url').value){
+            setThumb(res.data.thumbnail, true);
         }
-        document.getElementById('vd-thumb-url').value=res.data.thumbnail;
     })
-    .catch(function(){ spinner.style.display='none'; errEl.textContent='Không thể kết nối.'; errEl.style.display='block'; });
-});
+    .catch(function(){ srcSpinner.style.display='none'; setSrcBadge('yt','YouTube ID: '+ytId); });
+}
 
-/* ── Open drawer: ADD ── */
-function openAdd(){
-    document.getElementById('vdm-title').textContent='Thêm Video mới';
-    document.getElementById('vdm-sub').textContent='Điền thông tin video bên dưới';
-    document.getElementById('vdm-id').value='0';
+/* ── Reset form ── */
+function resetDrawer(){
+    document.getElementById('vd-src-url').value='';
+    document.getElementById('vd-yt-id').value='';
+    document.getElementById('vd-detected-type').value='';
     document.getElementById('vd-title').value='';
     document.getElementById('vd-desc').value='';
     document.getElementById('vd-cat').value='0';
     document.getElementById('vd-duration').value='';
-    document.getElementById('vd-video-url').value='';
-    document.getElementById('vd-video-name').textContent='';
-    document.getElementById('vd-yt-url').value='';
-    document.getElementById('vd-yt-id').value='';
-    document.getElementById('vd-yt-preview-wrap').style.display='none';
-    document.getElementById('vd-yt-error').style.display='none';
-    setThumb('');
-    document.querySelector('[name="vd_type"][value="upload"]').checked=true; updateTypeUI('upload');
+    setSrcBadge('none','Chưa có nguồn video');
+    setThumb('', false);
+}
+
+/* ── Open ADD ── */
+function openAdd(){
+    document.getElementById('vdm-title').textContent='Thêm Video mới';
+    document.getElementById('vdm-sub').textContent='Nhập link YouTube hoặc chọn file từ thư viện';
+    document.getElementById('vdm-id').value='0';
+    resetDrawer();
     document.querySelector('[name="vd_status"][value="1"]').checked=true; updateStatusUI('1');
     document.getElementById('vdm-del-btn').style.display='none';
     openDrawer();
 }
-var addBtn=document.getElementById('vd-add-btn');
-if(addBtn) addBtn.addEventListener('click',openAdd);
-var addBtn2=document.getElementById('vd-add-btn-2');
-if(addBtn2) addBtn2.addEventListener('click',openAdd);
+var aBtn=document.getElementById('vd-add-btn');
+if(aBtn) aBtn.addEventListener('click',openAdd);
+var aBtn2=document.getElementById('vd-add-btn-2');
+if(aBtn2) aBtn2.addEventListener('click',openAdd);
 
-/* ── Open drawer: EDIT ── */
+/* ── Open EDIT ── */
 document.querySelectorAll('.vd-edit-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
         var id=btn.getAttribute('data-id');
-        var card=document.querySelector('[data-id="'+id+'"]');
-        var type=card.getAttribute('data-type');
-        // We'll reconstruct from dataset — real implementation should fetch via AJAX
-        // For now, open blank and let user re-fill (simple approach without extra endpoint)
-        // Full data is embedded in dataset for the common fields
+        var data=window._vd_data && window._vd_data[id];
         document.getElementById('vdm-title').textContent='Chỉnh sửa Video';
+        document.getElementById('vdm-sub').textContent='Cập nhật thông tin video';
         document.getElementById('vdm-id').value=id;
         document.getElementById('vdm-del-btn').style.display='';
-        document.querySelector('[name="vd_type"][value="'+type+'"]').checked=true; updateTypeUI(type);
-        // Prefill from PHP data attributes (added below)
-        var data=window._vd_data && window._vd_data[id];
+        resetDrawer();
         if(data){
             document.getElementById('vd-title').value=data.title||'';
             document.getElementById('vd-desc').value=data.description||'';
             document.getElementById('vd-cat').value=data.category_id||'0';
             document.getElementById('vd-duration').value=data.duration||'';
-            document.getElementById('vd-video-url').value=data.video_url||'';
-            document.getElementById('vd-yt-url').value=data.video_url||'';
+            var type=data.type==='youtube'?'youtube':'upload';
+            document.getElementById('vd-detected-type').value=type;
+            document.getElementById('vd-src-url').value=data.video_url||( type==='youtube' && data.youtube_id ? 'https://youtu.be/'+data.youtube_id : '' );
             document.getElementById('vd-yt-id').value=data.youtube_id||'';
-            if(data.youtube_id){
-                document.getElementById('vd-yt-thumb').src='https://img.youtube.com/vi/'+data.youtube_id+'/hqdefault.jpg';
-                document.getElementById('vd-yt-preview-wrap').style.display='block';
-                document.getElementById('vd-yt-detected').textContent='ID: '+data.youtube_id;
-            } else {
-                document.getElementById('vd-yt-preview-wrap').style.display='none';
-            }
-            setThumb(data.thumbnail_url||'');
-            var statusVal=data.is_active?'1':'0';
-            document.querySelector('[name="vd_status"][value="'+statusVal+'"]').checked=true; updateStatusUI(statusVal);
+            if(type==='youtube') setSrcBadge('yt','YouTube — '+(data.title||'ID: '+data.youtube_id));
+            else setSrcBadge('up','Upload — '+(data.video_url||'').split('/').pop());
+            var thumb=data.thumbnail_url||( data.youtube_id ? 'https://img.youtube.com/vi/'+data.youtube_id+'/hqdefault.jpg' : '');
+            setThumb(thumb, type==='youtube'&&!data.thumbnail_url);
+            var sv=( data.is_active==='1'||data.is_active===1 ) ? '1' : '0';
+            document.querySelector('[name="vd_status"][value="'+sv+'"]').checked=true; updateStatusUI(sv);
         }
         openDrawer();
     });
@@ -1221,28 +1186,27 @@ document.querySelectorAll('.vd-edit-btn').forEach(function(btn){
 
 /* ── Save ── */
 document.getElementById('vdm-save').addEventListener('click',function(){
-    var type=document.querySelector('[name="vd_type"]:checked').value;
+    var detectedType=document.getElementById('vd-detected-type').value||'upload';
     var status=document.querySelector('[name="vd_status"]:checked').value;
+    var srcUrl=document.getElementById('vd-src-url').value.trim();
     var ytId=document.getElementById('vd-yt-id').value;
-    var ytUrl=document.getElementById('vd-yt-url').value;
-
+    var thumbUrl=document.getElementById('vd-thumb-url').value;
+    if(!srcUrl){ toast('Vui lòng nhập link YouTube hoặc chọn file video.',false); return; }
+    if(!document.getElementById('vd-title').value.trim()){ toast('Tiêu đề không được để trống.',false); return; }
     var fd=new FormData();
-    fd.append('action','bacera_video_save');
-    fd.append('_nonce',NONCE);
+    fd.append('action','bacera_video_save'); fd.append('_nonce',NONCE);
     fd.append('id',document.getElementById('vdm-id').value);
     fd.append('title',document.getElementById('vd-title').value.trim());
     fd.append('description',document.getElementById('vd-desc').value.trim());
     fd.append('category_id',document.getElementById('vd-cat').value);
     fd.append('duration',document.getElementById('vd-duration').value.trim());
-    fd.append('type',type);
-    fd.append('video_url',type==='upload'?document.getElementById('vd-video-url').value:ytUrl);
-    fd.append('thumbnail_url',document.getElementById('vd-thumb-url').value);
+    fd.append('type',detectedType);
+    fd.append('video_url',srcUrl);
+    fd.append('thumbnail_url',thumbUrl);
     fd.append('youtube_id',ytId);
     fd.append('is_active',status);
-
     var btn=document.getElementById('vdm-save');
     btn.disabled=true; btn.textContent='Đang lưu...';
-
     fetch(AJAX,{method:'POST',body:fd})
     .then(function(r){return r.json();})
     .then(function(res){
@@ -1253,22 +1217,19 @@ document.getElementById('vdm-save').addEventListener('click',function(){
     .catch(function(){ btn.disabled=false; toast('Lỗi kết nối',false); });
 });
 
-/* ── Delete (from card) ── */
+/* ── Delete (card & drawer) ── */
 document.querySelectorAll('.vd-del-btn').forEach(function(btn){
     btn.addEventListener('click',function(e){
         e.stopPropagation();
         if(!confirm('Xóa video này? Hành động không thể hoàn tác.')) return;
-        var id=btn.getAttribute('data-id');
         var fd=new FormData();
-        fd.append('action','bacera_video_delete'); fd.append('_nonce',NONCE); fd.append('id',id);
+        fd.append('action','bacera_video_delete'); fd.append('_nonce',NONCE); fd.append('id',btn.getAttribute('data-id'));
         fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
             if(res.success){ toast(res.data.message,true); setTimeout(function(){location.reload();},800); }
             else toast(res.data.message||'Lỗi',false);
         });
     });
 });
-
-/* ── Delete (from drawer) ── */
 document.getElementById('vdm-del-btn').addEventListener('click',function(){
     var id=document.getElementById('vdm-id').value;
     if(!id||id==='0') return;
