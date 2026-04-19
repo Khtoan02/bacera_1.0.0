@@ -1406,25 +1406,18 @@ class AdminTeamController {
 
                             <!-- Clickable photo zone -->
                             <div class="tmf-photo-zone" id="tm-photo-zone" onclick="document.getElementById('tm-media-btn').click()">
-                                <?php if (!empty($m['photo_url'])): ?>
-                                <img id="tm-photo-img" src="<?php echo esc_url($m['photo_url']); ?>" alt=""
+                                <?php $has_photo = !empty($m['photo_url']); ?>
+                                <img id="tm-photo-img" src="<?php echo esc_url($m['photo_url'] ?? ''); ?>" alt=""
+                                     style="display:<?php echo $has_photo ? 'block' : 'none'; ?>"
                                      onerror="this.style.display='none';document.getElementById('tm-photo-placeholder').style.display='flex'">
-                                <div class="tmf-photo-initials" id="tm-photo-placeholder" style="display:none;">
+                                <div class="tmf-photo-initials" id="tm-photo-placeholder"
+                                     style="display:<?php echo $has_photo ? 'none' : 'flex'; ?>">
                                     <div class="tmf-photo-initials-text" id="tm-photo-initials-big"></div>
                                     <div class="tmf-photo-initials-label">
                                         <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
-                                        Chọn ảnh
+                                        <?php echo $has_photo ? 'Đổi ảnh' : 'Nhấp để chọn'; ?>
                                     </div>
                                 </div>
-                                <?php else: ?>
-                                <div class="tmf-photo-initials" id="tm-photo-placeholder">
-                                    <div class="tmf-photo-initials-text" id="tm-photo-initials-big"></div>
-                                    <div class="tmf-photo-initials-label">
-                                        <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
-                                        Nhấp để chọn
-                                    </div>
-                                </div>
-                                <?php endif; ?>
 
                                 <!-- Hover overlay -->
                                 <div class="tmf-photo-overlay">
@@ -1584,6 +1577,27 @@ class AdminTeamController {
                     if (ph) ph.style.display = 'flex';
                     if (clr) clr.style.display = 'none';
                 }
+            }
+
+            function setExpandedPhoto(url) {
+                var img = $('#tm-photo-img'), ph = $('#tm-photo-placeholder'), clr = $('#tm-photo-clear');
+                if (url) {
+                    if (img) { img.src = url; img.style.display = 'block'; }
+                    if (ph) ph.style.display = 'none';
+                    if (clr) clr.style.display = '';
+                } else {
+                    if (img) { img.src = ''; img.style.display = 'none'; }
+                    if (ph) ph.style.display = 'flex';
+                    if (clr) clr.style.display = 'none';
+                }
+            }
+
+            // Live preview khi người dùng paste URL thủ công vào input
+            var pUrlInp = document.getElementById('tm-photo-input');
+            if (pUrlInp) {
+                pUrlInp.addEventListener('input', function() {
+                    setExpandedPhoto(this.value.trim());
+                });
             }
 
             function openDrawer(id) {
@@ -1840,10 +1854,7 @@ class AdminTeamController {
                             setDrawerPhoto(att.url);
                         } else {
                             var pInp = $('#tm-photo-input'); if (pInp) pInp.value = att.url;
-                            var pbImg = $('#tm-photo-img'), pc = $('#tm-photo-clear'), pf = $('#tm-photo-placeholder');
-                            if (pbImg){ pbImg.src = att.url; pbImg.style.display = 'block'; }
-                            if (pc) pc.style.display = '';
-                            if (pf) pf.style.display = 'none';
+                            setExpandedPhoto(att.url);
                         }
                     });
                     frame.open();
