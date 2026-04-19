@@ -2,11 +2,8 @@
 namespace Bacera\Controllers;
 
 /**
- * AdminVideoController
- * ─────────────────────────────────────────────────────────────────
- * Quản lý Video: 2 submenu (Video + Danh mục Video) dưới bacera-main.
- * Hỗ trợ 2 loại: Upload từ thư viện WP | Nhúng YouTube URL.
- * Mỗi video có: tiêu đề, mô tả ngắn, danh mục, thumbnail, trạng thái.
+ * AdminVideoController — Premium UI/UX Edition
+ * Quản lý Video: Upload từ thư viện WP hoặc nhúng YouTube.
  */
 class AdminVideoController {
 
@@ -21,325 +18,461 @@ class AdminVideoController {
         add_action( 'admin_init',            [ $this, 'create_tables' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 
-        // Video AJAX
-        add_action( 'wp_ajax_bacera_video_save',    [ $this, 'ajax_video_save' ] );
-        add_action( 'wp_ajax_bacera_video_delete',  [ $this, 'ajax_video_delete' ] );
-        add_action( 'wp_ajax_bacera_video_order',   [ $this, 'ajax_video_order' ] );
-        // Category AJAX
-        add_action( 'wp_ajax_bacera_vcat_save',     [ $this, 'ajax_cat_save' ] );
-        add_action( 'wp_ajax_bacera_vcat_delete',   [ $this, 'ajax_cat_delete' ] );
-        add_action( 'wp_ajax_bacera_vcat_order',    [ $this, 'ajax_cat_order' ] );
-        // YouTube info fetch
-        add_action( 'wp_ajax_bacera_yt_info',       [ $this, 'ajax_yt_info' ] );
+        add_action( 'wp_ajax_bacera_video_save',   [ $this, 'ajax_video_save' ] );
+        add_action( 'wp_ajax_bacera_video_delete', [ $this, 'ajax_video_delete' ] );
+        add_action( 'wp_ajax_bacera_video_order',  [ $this, 'ajax_video_order' ] );
+        add_action( 'wp_ajax_bacera_vcat_save',    [ $this, 'ajax_cat_save' ] );
+        add_action( 'wp_ajax_bacera_vcat_delete',  [ $this, 'ajax_cat_delete' ] );
+        add_action( 'wp_ajax_bacera_vcat_order',   [ $this, 'ajax_cat_order' ] );
+        add_action( 'wp_ajax_bacera_yt_info',      [ $this, 'ajax_yt_info' ] );
     }
-
-    /* ── DB ─────────────────────────────────────────────────────── */
 
     public function create_tables(): void {
         \Bacera\Database\VideoTables::createTables();
     }
 
-    /* ── Menu ───────────────────────────────────────────────────── */
-
     public function add_menus(): void {
-        add_submenu_page(
-            'bacera-main',
-            'Quản lý Video',
-            'Video',
-            'manage_options',
-            self::PAGE_VIDEOS,
-            [ $this, 'render_videos_page' ]
-        );
-        add_submenu_page(
-            'bacera-main',
-            'Danh mục Video',
-            'Danh mục Video',
-            'manage_options',
-            self::PAGE_CATS,
-            [ $this, 'render_cats_page' ]
-        );
+        add_submenu_page( 'bacera-main', 'Quản lý Video', 'Video', 'manage_options', self::PAGE_VIDEOS, [ $this, 'render_videos_page' ] );
+        add_submenu_page( 'bacera-main', 'Danh mục Video', 'Danh mục Video', 'manage_options', self::PAGE_CATS, [ $this, 'render_cats_page' ] );
     }
 
-    /* ── Assets ─────────────────────────────────────────────────── */
+    /* ── Assets ───────────────────────────────────────────────────── */
 
     public function enqueue_assets( string $hook ): void {
         if ( strpos( $hook, 'bacera-video' ) === false ) return;
         wp_enqueue_media();
+        echo '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;400;500;600;700&display=swap" rel="stylesheet">';
         echo '<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>';
+        echo '<style>' . $this->get_css() . '</style>';
+    }
 
-        // Shared CSS (same variables as team controller)
-        $css = '
+    private function get_css(): string { return '
+/* ══ Reset & Variables ═══════════════════════════════════════════ */
 :root {
-  --bg:#F8F7F3; --surface:#fff; --surface-2:#F1EEE1; --border:#EAE3D1;
-  --text:#3d2f26; --text-2:#8d6a54; --text-3:#c0a28e;
-  --accent:#d95f47; --accent-2:#c8513b;
-  --green:#166534; --green-bg:#f0fdf4; --green-border:#bbf7d0;
-  --amber:#92400e; --amber-bg:#fffbeb; --amber-border:#fde68a;
-  --red:#991b1b;   --red-bg:#fef2f2;   --red-border:#fecaca;
-  --blue:#1e3a5f;  --blue-bg:#eff6ff;  --blue-border:#bfdbfe;
-  --yt:#FF0000;
-  --r:10px; --rl:14px;
+  --bg:#F6F5EF; --surface:#ffffff; --surface-2:#F1EDE2; --surface-3:#EAE3D0;
+  --border:#E3DAC8; --border-2:#D5C9B3;
+  --text:#3d2f26; --text-2:#7a5c47; --text-3:#b09070; --text-4:#d4bfa8;
+  --accent:#d95f47; --accent-h:#c8513b; --accent-light:#FDF1EE; --accent-border:#f3c4b9;
+  --yt:#FF0000; --yt-bg:#FFF5F5; --yt-border:#fecaca;
+  --up-color:#2563eb; --up-bg:#EFF6FF; --up-border:#bfdbfe;
+  --green:#16a34a; --green-bg:#f0fdf4; --green-border:#bbf7d0;
+  --amber:#d97706; --amber-bg:#fffbeb; --amber-border:#fde68a;
+  --red:#dc2626; --red-bg:#fef2f2; --red-border:#fecaca;
+  --shadow-sm:0 1px 3px rgba(61,47,38,.06); --shadow-md:0 4px 16px rgba(61,47,38,.1); --shadow-lg:0 12px 40px rgba(61,47,38,.15);
+  --r:8px; --rl:12px; --rxl:16px;
+  --transition:.18s cubic-bezier(.4,0,.2,1);
 }
 #wpcontent { padding-left:0 !important; }
 #wpbody-content { padding-bottom:0; }
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
-.vd-wrap * { box-sizing:border-box; margin:0; padding:0; }
-.vd-wrap {
-  font-family:"Bricolage Grotesque",system-ui,sans-serif;
-  background:var(--bg); color:var(--text); font-size:14px; line-height:1.6;
-  min-height:calc(100vh - 32px); padding:32px 36px 64px;
+/* ══ Base ══════════════════════════════════════════════════════════ */
+.vd-app {
+  font-family:"Bricolage Grotesque", system-ui, sans-serif;
+  font-size:14px; line-height:1.6; color:var(--text);
+  background:var(--bg); min-height:calc(100vh - 32px);
 }
 
-/* ── Buttons ── */
-.vd-btn { height:34px; padding:0 14px; border-radius:var(--r); font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; display:inline-flex; align-items:center; gap:6px; border:1px solid transparent; text-decoration:none!important; }
-.vd-btn-outline { background:var(--surface); border-color:var(--border); color:var(--text)!important; }
-.vd-btn-outline:hover { background:var(--surface-2)!important; }
-.vd-btn-solid  { background:var(--accent); color:#fff!important; border-color:var(--accent); }
-.vd-btn-solid:hover { background:var(--accent-2)!important; }
+/* ══ Topbar ════════════════════════════════════════════════════════ */
+.vd-topbar {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 32px; height:60px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  position:sticky; top:32px; z-index:100; box-shadow:var(--shadow-sm);
+}
+.vd-topbar-left { display:flex; align-items:center; gap:16px; }
+.vd-topbar-logo {
+  width:36px; height:36px; border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#e8845c);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.vd-topbar-logo svg { width:18px; height:18px; fill:#fff; }
+.vd-topbar-title { font-size:16px; font-weight:700; color:var(--text); letter-spacing:-.3px; }
+.vd-topbar-sub { font-size:12px; color:var(--text-3); margin-top:1px; }
+.vd-topbar-nav { display:flex; gap:4px; }
+.vd-nav-link {
+  height:32px; padding:0 14px; display:flex; align-items:center; gap:6px;
+  font-size:12px; font-weight:600; border-radius:var(--r); text-decoration:none!important;
+  color:var(--text-2)!important; transition:all var(--transition); border:1px solid transparent;
+}
+.vd-nav-link:hover { background:var(--surface-2); color:var(--text)!important; }
+.vd-nav-link.active { background:var(--accent-light); color:var(--accent)!important; border-color:var(--accent-border); }
+.vd-nav-link svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; }
+
+/* ══ Buttons ═══════════════════════════════════════════════════════ */
+.vd-btn { height:36px; padding:0 16px; display:inline-flex; align-items:center; gap:7px; border-radius:var(--r); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; transition:all var(--transition); border:1px solid transparent; text-decoration:none!important; white-space:nowrap; flex-shrink:0; }
+.vd-btn svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; flex-shrink:0; }
+.vd-btn-primary { background:var(--accent); color:#fff!important; box-shadow:0 1px 3px rgba(217,95,71,.3); }
+.vd-btn-primary:hover { background:var(--accent-h)!important; box-shadow:0 2px 8px rgba(217,95,71,.4); transform:translateY(-1px); }
+.vd-btn-secondary { background:var(--surface); color:var(--text)!important; border-color:var(--border); box-shadow:var(--shadow-sm); }
+.vd-btn-secondary:hover { background:var(--surface-2)!important; border-color:var(--border-2); }
+.vd-btn-ghost { background:transparent; color:var(--text-2)!important; border:none; height:32px; padding:0 10px; font-size:12px; border-radius:var(--r); }
+.vd-btn-ghost:hover { background:var(--surface-2); color:var(--text)!important; }
 .vd-btn-danger { background:var(--red-bg); color:var(--red)!important; border-color:var(--red-border); }
-.vd-btn-ghost  { background:none; border:none; color:var(--text-2); font-family:inherit; font-size:13px; cursor:pointer; padding:4px 8px; border-radius:6px; transition:all .15s; display:inline-flex; align-items:center; gap:5px; }
-.vd-btn-ghost:hover { background:var(--surface-2); }
-.vd-btn svg { width:13px; height:13px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; }
-.vd-btn-sm { height:28px; padding:0 10px; font-size:12px; }
+.vd-btn-danger:hover { background:#fee2e2!important; }
+.vd-btn-sm { height:30px; padding:0 12px; font-size:12px; }
+.vd-btn-xs { height:26px; padding:0 9px; font-size:11px; border-radius:6px; }
+.vd-btn-icon { width:32px; height:32px; padding:0; justify-content:center; }
+.vd-btn-icon svg { width:14px; height:14px; }
 
-/* ── Badges ── */
-.vd-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; }
-.vd-badge-green { background:var(--green-bg); color:var(--green); border:1px solid var(--green-border); }
-.vd-badge-gray  { background:var(--surface-2); color:var(--text-2); border:1px solid var(--border); }
-.vd-badge-yt    { background:#fff5f5; color:var(--yt); border:1px solid #fecaca; }
-.vd-badge-upload { background:var(--blue-bg); color:var(--blue); border:1px solid var(--blue-border); }
-.vd-badge-dot   { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+/* ══ Stats strip ═══════════════════════════════════════════════════ */
+.vd-stats { display:flex; gap:0; padding:24px 32px 0; }
+.vd-stat {
+  flex:1; background:var(--surface); border:1px solid var(--border);
+  padding:18px 20px; position:relative; overflow:hidden;
+  transition:box-shadow var(--transition);
+}
+.vd-stat:first-child { border-radius:var(--rl) 0 0 var(--rl); }
+.vd-stat:last-child  { border-radius:0 var(--rl) var(--rl) 0; }
+.vd-stat + .vd-stat  { border-left:none; }
+.vd-stat:hover { box-shadow:var(--shadow-md); z-index:1; }
+.vd-stat-accent { position:absolute; left:0; top:0; bottom:0; width:3px; }
+.vd-stat-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-3); margin-bottom:8px; }
+.vd-stat-value { font-size:28px; font-weight:700; letter-spacing:-.8px; color:var(--text); line-height:1; }
+.vd-stat-sub   { font-size:11px; color:var(--text-3); margin-top:5px; }
+.vd-stat-icon  { position:absolute; right:16px; top:50%; transform:translateY(-50%); opacity:.06; }
+.vd-stat-icon svg { width:48px; height:48px; }
 
-/* ── Page header ── */
-.vd-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
-.vd-title  { font-size:24px; font-weight:700; letter-spacing:-.5px; }
-.vd-sub    { font-size:13px; color:var(--text-2); margin-top:4px; }
+/* ══ Toolbar ═══════════════════════════════════════════════════════ */
+.vd-toolbar {
+  display:flex; align-items:center; gap:10px; padding:20px 32px 16px; flex-wrap:wrap;
+}
+.vd-search-wrap { position:relative; flex:1; min-width:200px; max-width:320px; }
+.vd-search-wrap svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; stroke:var(--text-3); fill:none; stroke-width:1.5; pointer-events:none; }
+.vd-search-input {
+  width:100%; height:36px; padding:0 12px 0 36px; font-family:inherit; font-size:13px;
+  border:1px solid var(--border); border-radius:var(--r); background:var(--surface);
+  color:var(--text); outline:none; transition:all var(--transition);
+}
+.vd-search-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,95,71,.1); }
+.vd-search-input::placeholder { color:var(--text-4); }
+.vd-filter-group { display:flex; gap:6px; align-items:center; }
+.vd-select {
+  height:36px; padding:0 30px 0 11px; font-family:inherit; font-size:12px; font-weight:500;
+  border:1px solid var(--border); border-radius:var(--r); background:var(--surface);
+  color:var(--text-2); outline:none; cursor:pointer; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' stroke='%23b09070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 9px center;
+  transition:all var(--transition);
+}
+.vd-select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,95,71,.1); }
+.vd-toolbar-gap { flex:1; }
+.vd-view-toggle { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:2px; }
+.vd-view-btn { width:30px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; border:none; background:transparent; color:var(--text-3); transition:all var(--transition); }
+.vd-view-btn:hover { color:var(--text-2); }
+.vd-view-btn.active { background:var(--surface-2); color:var(--text); }
+.vd-view-btn svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.vd-count-badge { font-size:11px; font-weight:600; color:var(--text-3); background:var(--surface-2); padding:3px 9px; border-radius:20px; border:1px solid var(--border); }
 
-/* ── Metrics ── */
-.vd-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
-.vd-mc { background:var(--surface); border:1px solid var(--border); border-radius:var(--rl); padding:16px 18px; }
-.vd-mc:nth-child(1) { border-top:3px solid var(--accent); }
-.vd-mc:nth-child(2) { border-top:3px solid var(--yt); }
-.vd-mc:nth-child(3) { border-top:3px solid #3b82f6; }
-.vd-mc:nth-child(4) { border-top:3px solid var(--green); }
-.vd-ml { font-size:11px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px; }
-.vd-mv { font-size:26px; font-weight:700; letter-spacing:-.6px; }
-.vd-ms { font-size:12px; color:var(--text-2); margin-top:4px; }
+/* ══ Video Grid ════════════════════════════════════════════════════ */
+.vd-body { padding:0 32px 48px; }
+.vd-grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:16px;
+}
+.vd-grid.list-view { grid-template-columns:1fr; gap:8px; }
 
-/* ── Filter row ── */
-.vd-filter { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
-.vd-search-wrap { position:relative; flex:1; max-width:300px; }
-.vd-search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; stroke:var(--text-3); fill:none; stroke-width:1.5; }
-.vd-inp { width:100%; height:36px; padding:0 12px 0 34px; font-family:inherit; font-size:13px; border:1px solid var(--border); border-radius:var(--r); background:var(--surface); color:var(--text); outline:none; transition:all .15s; }
-.vd-inp:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,95,71,.1); }
-.vd-sel { height:36px; padding:0 10px; font-family:inherit; font-size:13px; border:1px solid var(--border); border-radius:var(--r); background:var(--surface); color:var(--text-2); outline:none; cursor:pointer; }
-
-/* ── Section card ── */
-.vd-sc { background:var(--surface); border:1px solid var(--border); border-radius:var(--rl); overflow:hidden; }
-.vd-sh { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-bottom:1px solid var(--border); }
-.vd-stitle { font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
-.vd-stitle svg { width:15px; height:15px; stroke:var(--text-2); fill:none; stroke-width:1.8; }
-
-/* ── Video grid ── */
-.vd-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; padding:20px; }
-
-/* ── Video card ── */
+/* ══ Video Card ════════════════════════════════════════════════════ */
 .vd-card {
   background:var(--surface); border:1px solid var(--border); border-radius:var(--rl);
-  overflow:hidden; display:flex; flex-direction:column;
-  transition:border-color .18s, box-shadow .18s, transform .18s;
-  position:relative;
+  overflow:hidden; display:flex; flex-direction:column; position:relative;
+  transition:border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  cursor:pointer;
 }
-.vd-card:hover { border-color:var(--text-3); box-shadow:0 6px 24px rgba(61,47,38,.09); transform:translateY(-2px); }
-.vd-card.hidden-video { opacity:.55; }
+.vd-card:hover { border-color:var(--border-2); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.vd-card.is-hidden { opacity:.5; }
+.vd-card.is-selected { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-light),var(--shadow-md); }
 
-/* Thumbnail zone */
+/* Thumb */
 .vd-card-thumb {
-  position:relative; aspect-ratio:16/9;
-  background:linear-gradient(135deg,#2c2420,#3d3028);
-  overflow:hidden; cursor:pointer;
+  position:relative; aspect-ratio:16/9; background:linear-gradient(135deg,#2a1f1a,#3d2d24);
+  overflow:hidden;
 }
-.vd-card-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .6s; }
-.vd-card:hover .vd-card-thumb img { transform:scale(1.04); }
-.vd-play-btn {
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  background:rgba(28,25,23,.3); transition:background .2s;
-}
-.vd-card:hover .vd-play-btn { background:rgba(28,25,23,.5); }
-.vd-play-circle {
-  width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.9);
+.vd-card-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+.vd-card:hover .vd-card-thumb img { transform:scale(1.05); }
+.vd-thumb-skeleton { position:absolute; inset:0; background:linear-gradient(90deg,#2a1f1a 25%,#3d2d24 50%,#2a1f1a 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Play overlay */
+.vd-play-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.55) 0%, rgba(0,0,0,.1) 60%);
   display:flex; align-items:center; justify-content:center;
-  transition:transform .2s; flex-shrink:0;
+  transition:background var(--transition); opacity:0;
+}
+.vd-card:hover .vd-play-overlay { opacity:1; }
+.vd-play-circle {
+  width:46px; height:46px; border-radius:50%;
+  background:rgba(255,255,255,.92); backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center;
+  transition:transform var(--transition); box-shadow:0 4px 16px rgba(0,0,0,.3);
 }
 .vd-card:hover .vd-play-circle { transform:scale(1.1); }
-.vd-play-circle svg { width:16px; height:16px; fill:#3d2f26; margin-left:3px; }
+.vd-play-circle svg { width:14px; height:14px; fill:#3d2f26; margin-left:3px; }
 
-/* Type badge on thumb */
+/* Badges on thumb */
+.vd-thumb-badges { position:absolute; top:8px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:6px; }
 .vd-type-badge {
-  position:absolute; top:8px; left:8px;
-  padding:3px 8px; border-radius:6px; font-size:10px; font-weight:700;
-  backdrop-filter:blur(6px);
+  font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  padding:3px 7px; border-radius:5px; backdrop-filter:blur(8px);
+  display:flex; align-items:center; gap:4px;
 }
-.vd-type-yt { background:rgba(255,0,0,.85); color:#fff; }
-.vd-type-up { background:rgba(30,58,95,.85); color:#fff; }
-
-/* Status badge on thumb */
-.vd-status-badge { position:absolute; top:8px; right:8px; }
+.vd-type-badge svg { width:9px; height:9px; fill:currentColor; stroke:none; }
+.vd-badge-yt { background:rgba(220,38,38,.85); color:#fff; }
+.vd-badge-up { background:rgba(37,99,235,.8); color:#fff; }
+.vd-status-dot { width:8px; height:8px; border-radius:50%; border:1.5px solid rgba(255,255,255,.7); }
+.vd-status-dot.on { background:#4ade80; }
+.vd-status-dot.off { background:#94a3b8; }
 
 /* Drag handle */
-.vd-drag {
-  position:absolute; bottom:8px; left:8px;
-  width:26px; height:26px; border-radius:7px;
-  background:rgba(255,255,255,.85); display:flex; align-items:center; justify-content:center;
-  cursor:grab; opacity:0; transition:opacity .15s;
+.vd-drag-handle {
+  position:absolute; top:8px; right:8px; width:24px; height:24px;
+  background:rgba(255,255,255,.8); backdrop-filter:blur(4px);
+  border-radius:5px; display:flex; align-items:center; justify-content:center;
+  cursor:grab; opacity:0; transition:opacity var(--transition);
 }
-.vd-card:hover .vd-drag { opacity:1; }
-.vd-drag:active { cursor:grabbing; }
-.vd-drag svg { width:12px; height:12px; stroke:var(--text-2); fill:none; stroke-width:1.8; }
+.vd-card:hover .vd-drag-handle { opacity:1; }
+.vd-drag-handle:active { cursor:grabbing; }
+.vd-drag-handle svg { width:11px; height:11px; stroke:var(--text-2); fill:none; stroke-width:2; }
 
 /* Card body */
-.vd-card-body { padding:12px 14px 10px; flex:1; display:flex; flex-direction:column; gap:4px; }
-.vd-card-cat  { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); }
+.vd-card-body { padding:13px 14px 10px; flex:1; display:flex; flex-direction:column; gap:3px; }
+.vd-card-cat { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--accent); }
 .vd-card-title { font-size:13px; font-weight:600; color:var(--text); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.vd-card-desc  { font-size:11px; color:var(--text-2); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px; }
+.vd-card-desc { font-size:11px; color:var(--text-3); line-height:1.5; display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; margin-top:2px; }
 
 /* Card footer */
-.vd-card-foot { display:flex; gap:6px; padding:8px 10px; border-top:1px solid var(--border); background:var(--bg); }
-
-/* ── Empty state ── */
-.vd-empty { text-align:center; padding:56px 24px; }
-.vd-empty-icon { width:48px; height:48px; stroke:var(--text-3); fill:none; stroke-width:1; margin:0 auto 14px; opacity:.4; display:block; }
-.vd-empty h3 { font-size:16px; font-weight:600; margin-bottom:6px; }
-.vd-empty p { font-size:13px; color:var(--text-2); margin-bottom:18px; }
-
-/* ── Toast ── */
-#vd-toast { position:fixed; bottom:28px; right:28px; z-index:99999; background:#1c1917; color:#fff; padding:13px 18px; border-radius:10px; font-size:13px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,.2); opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none; display:flex; align-items:center; gap:8px; }
-#vd-toast.show { opacity:1; transform:translateY(0); }
-#vd-toast svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; }
-#vd-toast.ok svg { stroke:#4ade80; }
-#vd-toast.err svg { stroke:#f87171; }
-
-/* ── Modal backdrop + drawer ── */
-.vdm-bd { position:fixed; inset:0; background:rgba(28,25,23,.45); z-index:9990; opacity:0; pointer-events:none; transition:opacity .24s; backdrop-filter:blur(3px); }
-.vdm-bd.open { opacity:1; pointer-events:all; }
-.vdm-dr {
-  position:fixed; top:32px; right:0; bottom:0; width:660px; max-width:96vw;
-  background:var(--bg); z-index:9991;
-  transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1);
-  display:flex; flex-direction:column; overflow:hidden;
-  box-shadow:-12px 0 48px rgba(28,25,23,.18);
+.vd-card-foot {
+  padding:8px 12px; border-top:1px solid var(--surface-2);
+  display:flex; align-items:center; gap:6px;
 }
-.vdm-dr.open { transform:none; }
+.vd-card-actions { display:flex; gap:5px; }
 
-/* Drawer head */
-.vdm-head { display:flex; align-items:center; gap:12px; padding:13px 18px; border-bottom:1px solid var(--border); background:var(--surface); flex-shrink:0; }
-.vdm-head-icon { width:34px; height:34px; border-radius:8px; background:var(--surface-2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; }
-.vdm-head-icon svg { width:15px; height:15px; stroke:var(--text-2); fill:none; stroke-width:1.8; stroke-linecap:round; }
-.vdm-head-text { flex:1; min-width:0; }
-.vdm-head-title { font-size:13px; font-weight:700; color:var(--text); }
-.vdm-head-sub   { font-size:11px; color:var(--text-3); margin-top:1px; }
-.vdm-close { background:none; border:1px solid var(--border); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-2); transition:all .15s; }
-.vdm-close:hover { background:var(--surface-2); }
-.vdm-close svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+/* ── List view card ── */
+.vd-grid.list-view .vd-card { flex-direction:row; align-items:center; gap:0; }
+.vd-grid.list-view .vd-card-thumb { width:120px; flex-shrink:0; aspect-ratio:16/9; }
+.vd-grid.list-view .vd-card-body { flex-direction:row; align-items:center; gap:16px; padding:12px 16px; }
+.vd-grid.list-view .vd-card-title { flex:1; -webkit-line-clamp:1; }
+.vd-grid.list-view .vd-card-desc,
+.vd-grid.list-view .vd-card-cat { display:none; }
+.vd-grid.list-view .vd-card-foot { border-top:none; border-left:1px solid var(--surface-2); padding:8px 12px; flex-direction:column; gap:4px; }
+.vd-grid.list-view .vd-drag-handle { opacity:.5; position:static; background:var(--surface-2); }
+.vd-grid.list-view .vd-card:hover .vd-drag-handle { opacity:1; }
+.vd-grid.list-view .vd-play-overlay { opacity:.4; }
+
+/* ══ Empty state ════════════════════════════════════════════════════ */
+.vd-empty {
+  grid-column:1/-1; text-align:center; padding:80px 32px;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+}
+.vd-empty-art {
+  width:96px; height:96px; border-radius:50%;
+  background:linear-gradient(135deg,var(--surface-2),var(--surface-3));
+  border:2px dashed var(--border-2);
+  display:flex; align-items:center; justify-content:center; margin-bottom:4px;
+}
+.vd-empty-art svg { width:36px; height:36px; stroke:var(--text-3); fill:none; stroke-width:1.2; opacity:.6; }
+.vd-empty-title { font-size:18px; font-weight:700; color:var(--text); }
+.vd-empty-sub { font-size:13px; color:var(--text-3); max-width:280px; line-height:1.6; }
+
+/* ══ Toast ══════════════════════════════════════════════════════════ */
+#vd-toast {
+  position:fixed; bottom:28px; right:28px; z-index:99999;
+  display:flex; align-items:center; gap:10px;
+  background:#1c1917; color:#fff;
+  padding:12px 18px; border-radius:12px; font-size:13px; font-weight:500;
+  box-shadow:var(--shadow-lg); opacity:0; transform:translateY(10px) scale(.97);
+  transition:all .3s cubic-bezier(.34,1.56,.64,1); pointer-events:none;
+}
+#vd-toast.show { opacity:1; transform:translateY(0) scale(1); }
+#vd-toast-icon { width:16px; height:16px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+#vd-toast.ok #vd-toast-icon  { background:#22c55e; }
+#vd-toast.err #vd-toast-icon { background:#ef4444; }
+#vd-toast-icon svg { width:10px; height:10px; stroke:#fff; fill:none; stroke-width:2.5; stroke-linecap:round; }
+
+/* ══ Drawer ══════════════════════════════════════════════════════════ */
+.vd-backdrop {
+  position:fixed; inset:0; background:rgba(28,25,23,.5); z-index:9990;
+  opacity:0; pointer-events:none; transition:opacity .25s; backdrop-filter:blur(4px);
+}
+.vd-backdrop.open { opacity:1; pointer-events:all; }
+.vd-drawer {
+  position:fixed; top:0; right:0; bottom:0; width:680px; max-width:96vw;
+  background:var(--bg); z-index:9991; display:flex; flex-direction:column;
+  transform:translateX(100%); transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-20px 0 60px rgba(28,25,23,.2);
+}
+.vd-drawer.open { transform:none; }
+
+/* Drawer header */
+.vdw-head {
+  padding:0 24px;
+  height:64px; display:flex; align-items:center; gap:14px; flex-shrink:0;
+  background:var(--surface); border-bottom:1px solid var(--border);
+}
+.vdw-head-icon {
+  width:38px; height:38px; border-radius:10px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#e8845c);
+  display:flex; align-items:center; justify-content:center;
+}
+.vdw-head-icon svg { width:16px; height:16px; fill:#fff; }
+.vdw-head-info { flex:1; min-width:0; }
+.vdw-title { font-size:15px; font-weight:700; color:var(--text); letter-spacing:-.2px; }
+.vdw-sub { font-size:11px; color:var(--text-3); margin-top:1px; }
+.vdw-close {
+  width:34px; height:34px; border:1px solid var(--border); background:transparent;
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--text-3); transition:all var(--transition);
+}
+.vdw-close:hover { background:var(--surface-2); color:var(--text); border-color:var(--border-2); }
+.vdw-close svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
 
 /* Drawer body */
-.vdm-body { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+.vdw-body { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:14px; }
+.vdw-body::-webkit-scrollbar { width:4px; }
+.vdw-body::-webkit-scrollbar-track { background:transparent; }
+.vdw-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
 
 /* Drawer footer */
-.vdm-foot { padding:13px 18px; border-top:1px solid var(--border); background:var(--surface); display:flex; gap:8px; align-items:center; flex-shrink:0; }
-.vdm-foot-gap { flex:1; }
+.vdw-foot {
+  padding:14px 24px; border-top:1px solid var(--border);
+  background:var(--surface); display:flex; align-items:center; gap:10px; flex-shrink:0;
+}
+.vdw-foot-gap { flex:1; }
 
-/* ── Form elements (inside drawer) ── */
-.vdf-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--rl); overflow:hidden; }
-.vdf-sec-head { display:flex; align-items:center; gap:8px; padding:11px 16px; border-bottom:1px solid var(--border); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-2); }
-.vdf-sec-head svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:1.8; }
-.vdf-sec-body { padding:16px 18px; display:flex; flex-direction:column; gap:14px; }
-.vdf-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+/* ══ Form sections ═══════════════════════════════════════════════════ */
+.vdf-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--rl); overflow:hidden; }
+.vdf-head {
+  display:flex; align-items:center; gap:9px; padding:11px 16px;
+  border-bottom:1px solid var(--border); background:var(--surface-2);
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--text-2);
+}
+.vdf-head svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; }
+.vdf-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+.vdf-2col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.vdf-3col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+
 .vdf-field { display:flex; flex-direction:column; gap:5px; }
 .vdf-label { font-size:11px; font-weight:600; color:var(--text-2); display:flex; align-items:center; gap:4px; }
 .vdf-req { color:var(--accent); }
+.vdf-hint { font-size:11px; color:var(--text-3); line-height:1.5; }
 .vdf-input, .vdf-select, .vdf-textarea {
   width:100%; font-family:inherit; font-size:13px;
   border:1px solid var(--border); border-radius:var(--r);
-  background:var(--surface); color:var(--text); outline:none; transition:all .15s;
+  background:var(--surface); color:var(--text); outline:none;
+  transition:all var(--transition);
 }
 .vdf-input, .vdf-select { height:38px; padding:0 12px; }
-.vdf-textarea { padding:9px 12px; resize:vertical; min-height:80px; line-height:1.7; }
+.vdf-textarea { padding:9px 12px; resize:vertical; min-height:76px; line-height:1.7; }
 .vdf-input:focus, .vdf-select:focus, .vdf-textarea:focus {
   border-color:var(--accent); box-shadow:0 0 0 3px rgba(217,95,71,.1);
 }
-.vdf-hint { font-size:11px; color:var(--text-3); line-height:1.5; }
+.vdf-input-group { display:flex; gap:8px; align-items:center; }
+.vdf-input-group .vdf-input { flex:1; }
 
-/* ── Video source detected badge ── */
+/* ══ Source input + badge ════════════════════════════════════════════ */
 .vdf-src-badge {
-  display:inline-flex; align-items:center; gap:6px;
-  padding:4px 10px; border-radius:6px; font-size:11px; font-weight:700;
-  margin-bottom:4px;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 12px; border-radius:var(--r); font-size:12px; font-weight:600;
+  border:1px solid; transition:all var(--transition);
 }
-.vdf-src-badge.yt   { background:#fff5f5; color:var(--yt); border:1px solid #fecaca; }
-.vdf-src-badge.up   { background:var(--blue-bg); color:var(--blue); border:1px solid var(--blue-border); }
-.vdf-src-badge.none { background:var(--surface-2); color:var(--text-3); border:1px solid var(--border); }
+.vdf-src-badge.none { background:var(--surface-2); color:var(--text-3); border-color:var(--border); }
+.vdf-src-badge.yt   { background:var(--yt-bg); color:#dc2626; border-color:var(--yt-border); }
+.vdf-src-badge.up   { background:var(--up-bg); color:var(--up-color); border-color:var(--up-border); }
+.vdf-src-badge-dot { width:7px; height:7px; border-radius:50%; background:currentColor; opacity:.8; animation:pulse-dot 1.4s infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+.vdf-src-badge.none .vdf-src-badge-dot { animation:none; opacity:.3; }
 
-/* ── Status toggle ── */
-.vdf-status-group { display:flex; gap:8px; }
-.vdf-status-pill {
-  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
-  padding:8px 10px; border-radius:8px; border:1.5px solid var(--border);
-  background:var(--surface); cursor:pointer; font-size:12px; font-weight:600; color:var(--text-2);
-  transition:all .15s;
-}
-.vdf-status-pill input { display:none; }
-.vdf-status-pill.on-show { border-color:var(--green); background:var(--green-bg); color:var(--green); }
-.vdf-status-pill.on-hide { border-color:var(--border); background:var(--surface-2); color:var(--text-2); }
-.vdf-status-pill svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
-
-/* ── Thumbnail preview ── */
-.vdf-thumb-preview {
-  width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
-  background:linear-gradient(135deg,#2c2420,#3d3028);
+/* ══ Thumbnail preview ═══════════════════════════════════════════════ */
+.vdf-thumb-zone {
+  width:100%; aspect-ratio:16/9; border-radius:var(--rl); overflow:hidden;
   border:2px dashed var(--border); position:relative; cursor:pointer;
+  background:linear-gradient(135deg,#2a1f1a,#3d2d24);
   display:flex; align-items:center; justify-content:center;
-  transition:border-color .15s;
+  transition:border-color var(--transition);
 }
-.vdf-thumb-preview:hover { border-color:var(--text-3); }
-.vdf-thumb-preview img { width:100%; height:100%; object-fit:cover; display:block; }
-.vdf-thumb-placeholder { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--text-3); }
-.vdf-thumb-placeholder svg { width:28px; height:28px; stroke:currentColor; fill:none; stroke-width:1.5; }
-.vdf-thumb-placeholder span { font-size:12px; font-weight:500; }
+.vdf-thumb-zone:hover { border-color:var(--accent); }
+.vdf-thumb-zone img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; transition:transform .4s; }
+.vdf-thumb-zone:hover img { transform:scale(1.03); }
+.vdf-thumb-zone .vdf-thumb-ph {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  color:var(--text-4); text-align:center; pointer-events:none;
+}
+.vdf-thumb-zone .vdf-thumb-ph svg { width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:1.3; opacity:.6; }
+.vdf-thumb-zone .vdf-thumb-ph span { font-size:11px; font-weight:500; }
+.vdf-thumb-overlay {
+  position:absolute; inset:0; background:rgba(0,0,0,.45);
+  display:none; align-items:center; justify-content:center;
+  color:#fff; font-size:12px; font-weight:600; gap:6px;
+  border-radius:calc(var(--rl) - 2px);
+}
+.vdf-thumb-zone:hover .vdf-thumb-overlay { display:flex; }
+.vdf-thumb-overlay svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:1.8; }
+.vdf-thumb-hint { font-size:10px; color:var(--text-3); text-align:center; padding:4px 0 0; }
 
-/* ── YouTube ID preview box ── */
-.vdf-yt-preview { display:none; border-radius:10px; overflow:hidden; aspect-ratio:16/9; background:#000; margin-top:6px; }
-.vdf-yt-preview iframe { width:100%; height:100%; border:none; }
+/* ══ Status toggle ═══════════════════════════════════════════════════ */
+.vdf-toggle-group { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.vdf-toggle {
+  padding:10px 14px; border-radius:var(--r); border:1.5px solid var(--border);
+  cursor:pointer; display:flex; align-items:center; gap:9px;
+  font-size:12px; font-weight:600; color:var(--text-2); background:var(--surface);
+  transition:all var(--transition); user-select:none;
+}
+.vdf-toggle input { display:none; }
+.vdf-toggle-icon { width:28px; height:28px; border-radius:7px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all var(--transition); }
+.vdf-toggle-icon svg { width:13px; height:13px; stroke:var(--text-3); fill:none; stroke-width:1.8; stroke-linecap:round; }
+.vdf-toggle:hover { border-color:var(--border-2); background:var(--surface-2); }
+.vdf-toggle.active-show { border-color:var(--green); background:var(--green-bg); color:var(--green); }
+.vdf-toggle.active-show .vdf-toggle-icon { background:rgba(22,163,74,.12); }
+.vdf-toggle.active-show .vdf-toggle-icon svg { stroke:var(--green); }
+.vdf-toggle.active-hide { border-color:var(--border-2); background:var(--surface-2); color:var(--text-2); }
 
-/* ── Loading spinner ── */
-.vdf-spinner { display:none; width:18px; height:18px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; }
+/* ══ Spinner ═════════════════════════════════════════════════════════ */
+.vdf-spinner { width:16px; height:16px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .6s linear infinite; display:none; flex-shrink:0; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
-/* ── Category table ── */
-.vd-table { width:100%; border-collapse:collapse; }
-.vd-table th { background:var(--surface-2); color:var(--text-2); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
-.vd-table td { padding:12px 14px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
-.vd-table tr:last-child td { border-bottom:none; }
-.vd-table tr:hover td { background:var(--surface-2); }
-.vd-row-drag { cursor:grab; color:var(--text-3); }
-.vd-row-drag:active { cursor:grabbing; }
-';
-        wp_register_style( 'bacera-video-admin', false );
-        wp_enqueue_style( 'bacera-video-admin' );
-        wp_add_inline_style( 'bacera-video-admin', $css );
-    }
+/* ══ OR divider ══════════════════════════════════════════════════════ */
+.vdf-or { display:flex; align-items:center; gap:10px; }
+.vdf-or-line { flex:1; height:1px; background:var(--border); }
+.vdf-or-text { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-4); }
 
-    /* ── AJAX: Video Save ───────────────────────────────────────── */
+/* ══ Category table ══════════════════════════════════════════════════ */
+.vd-table-wrap { overflow:hidden; }
+.vd-table { width:100%; border-collapse:collapse; }
+.vd-table thead tr { background:var(--surface-2); }
+.vd-table th { padding:10px 16px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-3); border-bottom:1px solid var(--border); white-space:nowrap; }
+.vd-table td { padding:13px 16px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:13px; color:var(--text); }
+.vd-table tbody tr { transition:background var(--transition); }
+.vd-table tbody tr:hover td { background:var(--surface-2); }
+.vd-table tbody tr:last-child td { border-bottom:none; }
+.vd-row-drag { cursor:grab; color:var(--text-4); width:28px; text-align:center; }
+.vd-row-drag:active { cursor:grabbing; }
+
+/* ══ Badges ══════════════════════════════════════════════════════════ */
+.vd-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; border:1px solid; }
+.vd-badge-green { background:var(--green-bg); color:var(--green); border-color:var(--green-border); }
+.vd-badge-gray  { background:var(--surface-2); color:var(--text-3); border-color:var(--border); }
+.vd-badge-red   { background:var(--red-bg); color:var(--red); border-color:var(--red-border); }
+.vd-badge-yt    { background:var(--yt-bg); color:var(--yt); border-color:var(--yt-border); }
+.vd-badge-up    { background:var(--up-bg); color:var(--up-color); border-color:var(--up-border); }
+.vd-badge-dot   { width:6px; height:6px; border-radius:50%; background:currentColor; }
+
+/* ══ Section card wrapper ════════════════════════════════════════════ */
+.vd-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--rl); overflow:hidden; }
+.vd-section-head { display:flex; align-items:center; justify-content:space-between; padding:13px 20px; border-bottom:1px solid var(--border); }
+.vd-section-title { font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:8px; }
+.vd-section-title svg { width:14px; height:14px; stroke:var(--text-3); fill:none; stroke-width:1.8; stroke-linecap:round; }
+
+'; }
+
+    /* ── AJAX ─────────────────────────────────────────────────────── */
 
     public function ajax_video_save(): void {
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error( [ 'message' => 'Không có quyền.' ] );
         check_ajax_referer( self::NONCE, '_nonce' );
-
         global $wpdb;
         $t = $wpdb->prefix . self::TABLE_VIDEOS;
 
         $id          = intval( $_POST['id'] ?? 0 );
-        $cat_id      = intval( $_POST['category_id'] ?? 0 );
         $title       = sanitize_text_field( $_POST['title'] ?? '' );
         $description = sanitize_textarea_field( $_POST['description'] ?? '' );
         $type        = in_array( $_POST['type'] ?? '', ['upload','youtube'] ) ? $_POST['type'] : 'upload';
@@ -347,19 +480,12 @@ class AdminVideoController {
         $thumb_url   = esc_url_raw( $_POST['thumbnail_url'] ?? '' );
         $youtube_id  = sanitize_text_field( $_POST['youtube_id'] ?? '' );
         $duration    = sanitize_text_field( $_POST['duration'] ?? '' );
+        $cat_id      = intval( $_POST['category_id'] ?? 0 );
         $is_active   = intval( $_POST['is_active'] ?? 1 );
 
         if ( empty( $title ) ) wp_send_json_error( [ 'message' => 'Tiêu đề không được để trống.' ] );
-        if ( $type === 'youtube' && empty( $youtube_id ) ) wp_send_json_error( [ 'message' => 'Vui lòng nhập YouTube URL.' ] );
-        if ( $type === 'upload' && empty( $video_url ) ) wp_send_json_error( [ 'message' => 'Vui lòng chọn file video.' ] );
+        if ( empty( $video_url ) ) wp_send_json_error( [ 'message' => 'Vui lòng nhập link hoặc chọn file video.' ] );
 
-        // Auto-extract YT ID from URL if user pasted full URL
-        if ( $type === 'youtube' && empty( $youtube_id ) && ! empty( $video_url ) ) {
-            preg_match('/(?:v=|\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{11})/', $video_url, $m);
-            $youtube_id = $m[1] ?? '';
-        }
-
-        $data = compact( 'cat_id', 'title', 'description', 'type', 'video_url', 'thumb_url', 'youtube_id', 'duration', 'is_active' );
         $data = [ 'category_id' => $cat_id, 'title' => $title, 'description' => $description, 'type' => $type, 'video_url' => $video_url, 'thumbnail_url' => $thumb_url, 'youtube_id' => $youtube_id, 'duration' => $duration, 'is_active' => $is_active ];
 
         if ( $id > 0 ) {
@@ -390,38 +516,26 @@ class AdminVideoController {
         global $wpdb;
         $t   = $wpdb->prefix . self::TABLE_VIDEOS;
         $ids = array_map( 'intval', (array)( $_POST['ids'] ?? [] ) );
-        foreach ( $ids as $pos => $vid_id ) {
-            $wpdb->update( $t, [ 'order_index' => $pos ], [ 'id' => $vid_id ] );
-        }
+        foreach ( $ids as $pos => $vid ) { $wpdb->update( $t, [ 'order_index' => $pos ], [ 'id' => $vid ] ); }
         wp_send_json_success();
     }
-
-    /* ── AJAX: Category Save/Delete/Order ───────────────────────── */
 
     public function ajax_cat_save(): void {
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error();
         check_ajax_referer( self::NONCE, '_nonce' );
-
         global $wpdb;
         $t    = $wpdb->prefix . self::TABLE_CATS;
         $id   = intval( $_POST['id'] ?? 0 );
         $name = sanitize_text_field( $_POST['name'] ?? '' );
         $desc = sanitize_textarea_field( $_POST['description'] ?? '' );
         $active = intval( $_POST['is_active'] ?? 1 );
-
         if ( empty( $name ) ) wp_send_json_error( [ 'message' => 'Tên danh mục không được để trống.' ] );
-
         $slug = sanitize_title( $name );
-        // Ensure unique slug
         if ( $id === 0 ) {
             $base = $slug; $i = 1;
-            while ( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t} WHERE slug=%s", $slug ) ) ) {
-                $slug = $base . '-' . $i++;
-            }
+            while ( $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$t} WHERE slug=%s", $slug ) ) ) { $slug = $base . '-' . $i++; }
         }
-
         $data = [ 'name' => $name, 'slug' => $slug, 'description' => $desc, 'is_active' => $active ];
-
         if ( $id > 0 ) {
             $wpdb->update( $t, $data, [ 'id' => $id ] );
             wp_send_json_success( [ 'message' => 'Đã cập nhật danh mục.', 'id' => $id ] );
@@ -438,10 +552,9 @@ class AdminVideoController {
         check_ajax_referer( self::NONCE, '_nonce' );
         global $wpdb;
         $id = intval( $_POST['id'] ?? 0 );
-        // Move videos to uncategorized (0)
         $wpdb->update( $wpdb->prefix . self::TABLE_VIDEOS, [ 'category_id' => 0 ], [ 'category_id' => $id ] );
         $wpdb->delete( $wpdb->prefix . self::TABLE_CATS, [ 'id' => $id ] );
-        wp_send_json_success( [ 'message' => 'Đã xóa danh mục. Video đã được chuyển sang Chưa phân loại.' ] );
+        wp_send_json_success( [ 'message' => 'Đã xóa danh mục.' ] );
     }
 
     public function ajax_cat_order(): void {
@@ -450,866 +563,803 @@ class AdminVideoController {
         global $wpdb;
         $t   = $wpdb->prefix . self::TABLE_CATS;
         $ids = array_map( 'intval', (array)( $_POST['ids'] ?? [] ) );
-        foreach ( $ids as $pos => $cid ) {
-            $wpdb->update( $t, [ 'order_index' => $pos ], [ 'id' => $cid ] );
-        }
+        foreach ( $ids as $pos => $cid ) { $wpdb->update( $t, [ 'order_index' => $pos ], [ 'id' => $cid ] ); }
         wp_send_json_success();
     }
-
-    /* ── AJAX: Fetch YouTube metadata ───────────────────────────── */
 
     public function ajax_yt_info(): void {
         if ( ! current_user_can( 'manage_options' ) ) wp_send_json_error();
         check_ajax_referer( self::NONCE, '_nonce' );
-
         $url = sanitize_text_field( $_POST['url'] ?? '' );
         preg_match( '/(?:v=|\/embed\/|youtu\.be\/|shorts\/)([A-Za-z0-9_-]{11})/', $url, $m );
         $yt_id = $m[1] ?? '';
-
-        if ( ! $yt_id ) wp_send_json_error( [ 'message' => 'Không tìm thấy YouTube ID từ URL này.' ] );
-
-        // YouTube's oEmbed (no API key needed)
-        $oembed_url = 'https://www.youtube.com/oembed?url=' . urlencode( "https://youtu.be/{$yt_id}" ) . '&format=json';
-        $response   = wp_remote_get( $oembed_url, [ 'timeout' => 6 ] );
-
+        if ( ! $yt_id ) wp_send_json_error( [ 'message' => 'Không tìm thấy YouTube ID.' ] );
+        $oembed = wp_remote_get( 'https://www.youtube.com/oembed?url=' . urlencode( "https://youtu.be/{$yt_id}" ) . '&format=json', [ 'timeout' => 6 ] );
         $thumb = "https://img.youtube.com/vi/{$yt_id}/hqdefault.jpg";
         $title = '';
-
-        if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
-            $body  = json_decode( wp_remote_retrieve_body( $response ), true );
+        if ( ! is_wp_error( $oembed ) && wp_remote_retrieve_response_code( $oembed ) === 200 ) {
+            $body  = json_decode( wp_remote_retrieve_body( $oembed ), true );
             $title = $body['title'] ?? '';
             $thumb = $body['thumbnail_url'] ?? $thumb;
         }
-
-        wp_send_json_success( [
-            'yt_id'     => $yt_id,
-            'title'     => $title,
-            'thumbnail' => $thumb,
-        ] );
+        wp_send_json_success( [ 'yt_id' => $yt_id, 'title' => $title, 'thumbnail' => $thumb ] );
     }
 
     /* ── Render: Videos Page ─────────────────────────────────────── */
 
     public function render_videos_page(): void {
         global $wpdb;
-        $tv   = $wpdb->prefix . self::TABLE_VIDEOS;
-        $tc   = $wpdb->prefix . self::TABLE_CATS;
+        $tv    = $wpdb->prefix . self::TABLE_VIDEOS;
+        $tc    = $wpdb->prefix . self::TABLE_CATS;
         $nonce = wp_create_nonce( self::NONCE );
-
-        $videos = $wpdb->get_results(
-            "SELECT v.*, c.name as cat_name FROM {$tv} v
-             LEFT JOIN {$tc} c ON v.category_id = c.id
-             ORDER BY v.order_index ASC, v.id ASC",
-            ARRAY_A
-        ) ?: [];
-
-        $cats = $wpdb->get_results(
-            "SELECT * FROM {$tc} ORDER BY order_index ASC, id ASC",
-            ARRAY_A
-        ) ?: [];
-
-        // Metrics
-        $total   = count( $videos );
-        $active  = count( array_filter( $videos, fn($v) => $v['is_active'] ) );
-        $yt_cnt  = count( array_filter( $videos, fn($v) => $v['type'] === 'youtube' ) );
-        $up_cnt  = $total - $yt_cnt;
+        $videos = $wpdb->get_results( "SELECT v.*, c.name as cat_name FROM {$tv} v LEFT JOIN {$tc} c ON v.category_id=c.id ORDER BY v.order_index ASC, v.id ASC", ARRAY_A ) ?: [];
+        $cats   = $wpdb->get_results( "SELECT * FROM {$tc} ORDER BY order_index ASC, id ASC", ARRAY_A ) ?: [];
+        $total  = count($videos);
+        $active = count( array_filter( $videos, fn($v) => $v['is_active'] ) );
+        $yt_cnt = count( array_filter( $videos, fn($v) => $v['type']==='youtube' ) );
+        $up_cnt = $total - $yt_cnt;
         ?>
+<div id="vd-toast"><div id="vd-toast-icon"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></div><span id="vd-toast-msg"></span></div>
 
-        <div id="vd-toast">
-            <svg viewBox="0 0 14 14" id="vd-toast-icon"><polyline points="2,7 5.5,10.5 12,3"/></svg>
-            <span id="vd-toast-msg"></span>
+<div class="vd-app">
+
+  <!-- Topbar -->
+  <div class="vd-topbar">
+    <div class="vd-topbar-left">
+      <div class="vd-topbar-logo">
+        <svg viewBox="0 0 20 20"><polygon points="5,3 17,10 5,17"/></svg>
+      </div>
+      <div>
+        <div class="vd-topbar-title">Video Library</div>
+        <div class="vd-topbar-sub">Bacera · <?php echo $total; ?> videos</div>
+      </div>
+      <nav class="vd-topbar-nav">
+        <a href="<?php echo esc_url(admin_url('admin.php?page='.self::PAGE_VIDEOS)); ?>" class="vd-nav-link active">
+          <svg viewBox="0 0 14 14"><polygon points="4,2 12,7 4,12"/><line x1="2" y1="2" x2="2" y2="12"/></svg>Videos
+        </a>
+        <a href="<?php echo esc_url(admin_url('admin.php?page='.self::PAGE_CATS)); ?>" class="vd-nav-link">
+          <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>Danh mục
+        </a>
+      </nav>
+    </div>
+    <button class="vd-btn vd-btn-primary" id="vd-add-btn">
+      <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>Thêm Video
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="vd-stats">
+    <div class="vd-stat">
+      <div class="vd-stat-accent" style="background:var(--accent)"></div>
+      <div class="vd-stat-label">Tổng Video</div>
+      <div class="vd-stat-value"><?php echo $total; ?></div>
+      <div class="vd-stat-sub"><?php echo $active; ?> đang hiển thị</div>
+      <div class="vd-stat-icon"><svg viewBox="0 0 48 48" fill="currentColor" style="color:var(--accent)"><polygon points="10,6 42,24 10,42"/></svg></div>
+    </div>
+    <div class="vd-stat">
+      <div class="vd-stat-accent" style="background:#FF0000"></div>
+      <div class="vd-stat-label">YouTube</div>
+      <div class="vd-stat-value"><?php echo $yt_cnt; ?></div>
+      <div class="vd-stat-sub">Videos nhúng YT</div>
+    </div>
+    <div class="vd-stat">
+      <div class="vd-stat-accent" style="background:var(--up-color)"></div>
+      <div class="vd-stat-label">Upload</div>
+      <div class="vd-stat-value"><?php echo $up_cnt; ?></div>
+      <div class="vd-stat-sub">Self-hosted videos</div>
+    </div>
+    <div class="vd-stat">
+      <div class="vd-stat-accent" style="background:var(--green)"></div>
+      <div class="vd-stat-label">Danh mục</div>
+      <div class="vd-stat-value"><?php echo count($cats); ?></div>
+      <div class="vd-stat-sub"><?php echo $total - $active; ?> đang ẩn</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="vd-toolbar">
+    <div class="vd-search-wrap">
+      <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4"/><path d="M10.5 10.5l3 3" stroke-linecap="round"/></svg>
+      <input class="vd-search-input" type="text" id="vd-search" placeholder="Tìm tiêu đề video…" autocomplete="off">
+    </div>
+    <div class="vd-filter-group">
+      <select class="vd-select" id="vd-cat-filter">
+        <option value="">Tất cả danh mục</option>
+        <?php foreach ($cats as $c): ?>
+        <option value="<?php echo esc_attr($c['id']); ?>"><?php echo esc_html($c['name']); ?></option>
+        <?php endforeach; ?>
+        <option value="0">Chưa phân loại</option>
+      </select>
+      <select class="vd-select" id="vd-type-filter">
+        <option value="">Tất cả loại</option>
+        <option value="youtube">YouTube</option>
+        <option value="upload">Upload</option>
+      </select>
+      <select class="vd-select" id="vd-status-filter">
+        <option value="">Tất cả trạng thái</option>
+        <option value="1">Hiển thị</option>
+        <option value="0">Đang ẩn</option>
+      </select>
+    </div>
+    <div class="vd-toolbar-gap"></div>
+    <span class="vd-count-badge" id="vd-count-badge"><?php echo $total; ?> videos</span>
+    <div class="vd-view-toggle">
+      <button class="vd-view-btn active" id="vd-view-grid" title="Grid view">
+        <svg viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1"/><rect x="8" y="1" width="5" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
+      </button>
+      <button class="vd-view-btn" id="vd-view-list" title="List view">
+        <svg viewBox="0 0 14 14"><line x1="1" y1="3" x2="13" y2="3"/><line x1="1" y1="7" x2="13" y2="7"/><line x1="1" y1="11" x2="13" y2="11"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="vd-body">
+    <div class="vd-grid" id="vd-grid">
+      <?php if ( empty($videos) ): ?>
+      <div class="vd-empty">
+        <div class="vd-empty-art">
+          <svg viewBox="0 0 48 48"><rect x="4" y="8" width="40" height="32" rx="4"/><polygon points="19,18 33,24 19,30"/></svg>
+        </div>
+        <div class="vd-empty-title">Chưa có video nào</div>
+        <div class="vd-empty-sub">Thêm video đầu tiên vào thư viện để bắt đầu.</div>
+        <button class="vd-btn vd-btn-primary" id="vd-add-btn-2" style="margin-top:4px;">
+          <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>Thêm video đầu tiên
+        </button>
+      </div>
+      <?php else: foreach ($videos as $idx => $v):
+        $thumb = $v['thumbnail_url'] ?: ( $v['type']==='youtube' && $v['youtube_id'] ? "https://img.youtube.com/vi/{$v['youtube_id']}/hqdefault.jpg" : '' );
+        $is_yt = $v['type'] === 'youtube';
+      ?>
+      <div class="vd-card <?php echo $v['is_active'] ? '' : 'is-hidden'; ?>"
+           data-id="<?php echo esc_attr($v['id']); ?>"
+           data-cat="<?php echo esc_attr($v['category_id']??0); ?>"
+           data-type="<?php echo esc_attr($v['type']); ?>"
+           data-status="<?php echo $v['is_active']?'1':'0'; ?>"
+           data-search="<?php echo esc_attr(strtolower($v['title'])); ?>">
+
+        <div class="vd-drag-handle">
+          <svg viewBox="0 0 12 12"><circle cx="4" cy="3" r=".9"/><circle cx="8" cy="3" r=".9"/><circle cx="4" cy="6.5" r=".9"/><circle cx="8" cy="6.5" r=".9"/><circle cx="4" cy="10" r=".9"/><circle cx="8" cy="10" r=".9"/></svg>
         </div>
 
-        <div class="vd-wrap">
-
-            <!-- Header -->
-            <div class="vd-header">
-                <div>
-                    <div class="vd-title">Quản lý Video</div>
-                    <div class="vd-sub">Danh sách tất cả video — kéo để sắp xếp thứ tự hiển thị</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::PAGE_CATS ) ); ?>" class="vd-btn vd-btn-outline">
-                        <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
-                        Danh mục
-                    </a>
-                    <button class="vd-btn vd-btn-solid" id="vd-add-btn">
-                        <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>
-                        Thêm video
-                    </button>
-                </div>
+        <div class="vd-card-thumb">
+          <?php if ($thumb): ?>
+          <img src="<?php echo esc_url($thumb); ?>" alt="<?php echo esc_attr($v['title']); ?>" loading="lazy">
+          <?php else: ?>
+          <div class="vd-thumb-skeleton" style="position:relative;">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+              <svg width="36" height="36" viewBox="0 0 24 24" style="opacity:.2;fill:#fff;"><polygon points="8,5 21,12 8,19"/></svg>
             </div>
-
-            <!-- Metrics -->
-            <div class="vd-metrics">
-                <div class="vd-mc">
-                    <div class="vd-ml">Tổng Video</div>
-                    <div class="vd-mv"><?php echo $total; ?></div>
-                    <div class="vd-ms">Trong thư viện</div>
-                </div>
-                <div class="vd-mc">
-                    <div class="vd-ml">YouTube</div>
-                    <div class="vd-mv"><?php echo $yt_cnt; ?></div>
-                    <div class="vd-ms">Video nhúng YT</div>
-                </div>
-                <div class="vd-mc">
-                    <div class="vd-ml">Upload</div>
-                    <div class="vd-mv"><?php echo $up_cnt; ?></div>
-                    <div class="vd-ms">Video tự host</div>
-                </div>
-                <div class="vd-mc">
-                    <div class="vd-ml">Đang hiển thị</div>
-                    <div class="vd-mv"><?php echo $active; ?></div>
-                    <div class="vd-ms"><?php echo $total - $active; ?> đang ẩn</div>
-                </div>
-            </div>
-
-            <!-- Filter -->
-            <div class="vd-filter">
-                <div class="vd-search-wrap">
-                    <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4"/><path d="M10.5 10.5l3 3" stroke-linecap="round"/></svg>
-                    <input class="vd-inp" type="text" id="vd-search" placeholder="Tìm tiêu đề video...">
-                </div>
-                <select class="vd-sel" id="vd-cat-filter">
-                    <option value="">Tất cả danh mục</option>
-                    <?php foreach ( $cats as $cat ): ?>
-                    <option value="<?php echo esc_attr( $cat['id'] ); ?>"><?php echo esc_html( $cat['name'] ); ?></option>
-                    <?php endforeach; ?>
-                    <option value="0">Chưa phân loại</option>
-                </select>
-                <select class="vd-sel" id="vd-type-filter">
-                    <option value="">Tất cả loại</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="upload">Upload</option>
-                </select>
-                <select class="vd-sel" id="vd-status-filter">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="1">Hiển thị</option>
-                    <option value="0">Ẩn</option>
-                </select>
-            </div>
-
-            <!-- Video grid -->
-            <div class="vd-sc">
-                <div class="vd-sh">
-                    <span class="vd-stitle">
-                        <svg viewBox="0 0 16 16"><polygon points="6,4 14,8 6,12"/><line x1="2" y1="4" x2="2" y2="12"/></svg>
-                        Danh sách Video
-                    </span>
-                    <span style="font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px;">
-                        <svg style="width:12px;height:12px;stroke:var(--text-3);fill:none;stroke-width:1.8;" viewBox="0 0 12 12"><circle cx="4" cy="2.5" r=".9"/><circle cx="8" cy="2.5" r=".9"/><circle cx="4" cy="6" r=".9"/><circle cx="8" cy="6" r=".9"/><circle cx="4" cy="9.5" r=".9"/><circle cx="8" cy="9.5" r=".9"/></svg>
-                        Kéo thẻ để sắp xếp thứ tự
-                    </span>
-                </div>
-
-                <?php if ( empty( $videos ) ): ?>
-                <div class="vd-empty">
-                    <svg class="vd-empty-icon" viewBox="0 0 48 48"><rect x="4" y="8" width="40" height="32" rx="4"/><polygon points="19,18 33,24 19,30"/></svg>
-                    <h3>Chưa có video nào</h3>
-                    <p>Thêm video đầu tiên vào thư viện của bạn.</p>
-                    <button class="vd-btn vd-btn-solid" id="vd-add-btn-2">
-                        <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>
-                        Thêm video đầu tiên
-                    </button>
-                </div>
-                <?php else: ?>
-                <div class="vd-grid" id="vd-sortable">
-                    <?php foreach ( $videos as $v ):
-                        $thumb = $v['thumbnail_url'] ?: ( $v['type'] === 'youtube' && $v['youtube_id']
-                            ? "https://img.youtube.com/vi/{$v['youtube_id']}/hqdefault.jpg"
-                            : '' );
-                    ?>
-                    <div class="vd-card <?php echo $v['is_active'] ? '' : 'hidden-video'; ?>"
-                         data-id="<?php echo esc_attr( $v['id'] ); ?>"
-                         data-cat="<?php echo esc_attr( $v['category_id'] ); ?>"
-                         data-type="<?php echo esc_attr( $v['type'] ); ?>"
-                         data-status="<?php echo $v['is_active'] ? '1' : '0'; ?>"
-                         data-search="<?php echo esc_attr( strtolower( $v['title'] ) ); ?>">
-
-                        <!-- Drag -->
-                        <div class="vd-drag" title="Kéo để sắp xếp">
-                            <svg viewBox="0 0 14 14"><circle cx="5" cy="3.5" r="1"/><circle cx="9" cy="3.5" r="1"/><circle cx="5" cy="7" r="1"/><circle cx="9" cy="7" r="1"/><circle cx="5" cy="10.5" r="1"/><circle cx="9" cy="10.5" r="1"/></svg>
-                        </div>
-
-                        <!-- Thumbnail -->
-                        <div class="vd-card-thumb">
-                            <?php if ( $thumb ): ?>
-                            <img src="<?php echo esc_url( $thumb ); ?>" alt="<?php echo esc_attr( $v['title'] ); ?>" loading="lazy">
-                            <?php else: ?>
-                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#6b5344;">
-                                <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polygon points="10,9 17,12 10,15" fill="currentColor"/></svg>
-                            </div>
-                            <?php endif; ?>
-                            <div class="vd-play-btn">
-                                <div class="vd-play-circle">
-                                    <svg viewBox="0 0 16 16"><polygon points="4,2 14,8 4,14" fill="#3d2f26"/></svg>
-                                </div>
-                            </div>
-                            <!-- Type badge -->
-                            <div class="vd-type-badge <?php echo $v['type'] === 'youtube' ? 'vd-type-yt' : 'vd-type-up'; ?>">
-                                <?php echo $v['type'] === 'youtube' ? '▶ YouTube' : '⬆ Upload'; ?>
-                            </div>
-                            <!-- Status -->
-                            <div class="vd-status-badge">
-                                <?php if ( $v['is_active'] ): ?>
-                                <span class="vd-badge vd-badge-green" style="backdrop-filter:blur(4px);background:rgba(240,253,244,.9);">
-                                    <span class="vd-badge-dot" style="background:var(--green)"></span>Hiển thị
-                                </span>
-                                <?php else: ?>
-                                <span class="vd-badge vd-badge-gray" style="backdrop-filter:blur(4px);background:rgba(241,238,225,.9);">
-                                    <span class="vd-badge-dot" style="background:var(--text-3)"></span>Ẩn
-                                </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <!-- Info -->
-                        <div class="vd-card-body">
-                            <?php if ( $v['cat_name'] ): ?>
-                            <div class="vd-card-cat"><?php echo esc_html( $v['cat_name'] ); ?></div>
-                            <?php endif; ?>
-                            <div class="vd-card-title"><?php echo esc_html( $v['title'] ); ?></div>
-                            <?php if ( $v['description'] ): ?>
-                            <div class="vd-card-desc"><?php echo esc_html( $v['description'] ); ?></div>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="vd-card-foot">
-                            <button class="vd-btn vd-btn-outline vd-btn-sm vd-edit-btn" data-id="<?php echo esc_attr( $v['id'] ); ?>">
-                                <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z"/></svg>
-                                Sửa
-                            </button>
-                            <button class="vd-btn vd-btn-danger vd-btn-sm vd-del-btn" data-id="<?php echo esc_attr( $v['id'] ); ?>">
-                                <svg viewBox="0 0 14 14"><polyline points="1,3 13,3"/><path d="M5,3V1h4v2"/><path d="M2,3l1,9h8l1-9"/></svg>
-                                Xóa
-                            </button>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-            </div>
-
-        </div><!-- /vd-wrap -->
-
-        <!-- ══ EDIT/ADD DRAWER ══ -->
-        <div id="vdm-bd" class="vdm-bd"></div>
-        <div id="vdm-dr" class="vdm-dr" role="dialog" aria-modal="true">
-            <div class="vdm-head">
-                <div class="vdm-head-icon">
-                    <svg viewBox="0 0 16 16"><polygon points="6,4 14,8 6,12"/><line x1="2" y1="4" x2="2" y2="12" stroke-linecap="round"/></svg>
-                </div>
-                <div class="vdm-head-text">
-                    <div class="vdm-head-title" id="vdm-title">Thêm Video</div>
-                    <div class="vdm-head-sub" id="vdm-sub">Điền thông tin video bên dưới</div>
-                </div>
-                <button class="vdm-close" id="vdm-close">
-                    <svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12" stroke-linecap="round"/></svg>
-                </button>
-            </div>
-
-            <div class="vdm-body">
-
-                <!-- Smart source input -->
-                <div class="vdf-section">
-                    <div class="vdf-sec-head">
-                        <svg viewBox="0 0 12 12"><polygon points="4,2 10,6 4,10"/></svg>
-                        Nguồn Video
-                    </div>
-                    <div class="vdf-sec-body">
-
-                        <!-- Detected badge -->
-                        <div id="vd-src-badge" class="vdf-src-badge none">
-                            <span id="vd-src-badge-icon">○</span>
-                            <span id="vd-src-badge-text">Chưa có nguồn video</span>
-                        </div>
-
-                        <!-- Single smart URL input -->
-                        <div class="vdf-field">
-                            <label class="vdf-label">Link YouTube hoặc URL video <span class="vdf-req">*</span></label>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <input class="vdf-input" type="text" id="vd-src-url"
-                                       placeholder="Dán link YouTube hoặc URL video...">
-                                <div class="vdf-spinner" id="vd-src-spinner"></div>
-                            </div>
-                            <div id="vd-src-hint" class="vdf-hint">Hỗ trợ: youtube.com/watch?v=... · youtu.be/... · shorts/... · hoặc URL file .mp4</div>
-                        </div>
-
-                        <!-- OR divider -->
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="flex:1;height:1px;background:var(--border);"></div>
-                            <span style="font-size:11px;color:var(--text-3);font-weight:600;">HOẶC</span>
-                            <div style="flex:1;height:1px;background:var(--border);"></div>
-                        </div>
-
-                        <!-- WP Media picker button -->
-                        <button type="button" class="vd-btn vd-btn-outline" id="vd-pick-video"
-                                style="width:100%;justify-content:center;height:42px;">
-                            <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1"/><path d="M1 6h12"/><path d="M5 2v4M9 2v4"/></svg>
-                            Chọn video từ Thư viện WordPress
-                        </button>
-
-                        <input type="hidden" id="vd-yt-id">
-                        <input type="hidden" id="vd-detected-type" value="">
-
-                    </div>
-                </div>
-
-                <!-- Thumbnail — always shown -->
-                <div class="vdf-section">
-                    <div class="vdf-sec-head">
-                        <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5"/><circle cx="4" cy="4" r="1"/><path d="M1 8l3-3 2.5 2.5L9 5l3 3"/></svg>
-                        Ảnh Thumbnail <span style="font-weight:400;color:var(--text-3);font-size:10px;"> — tự động lấy từ YouTube nếu không chọn</span>
-                    </div>
-                    <div class="vdf-sec-body">
-                        <div class="vdf-thumb-preview" id="vd-thumb-zone">
-                            <img id="vd-thumb-img" src="" alt="" style="display:none;">
-                            <div class="vdf-thumb-placeholder" id="vd-thumb-placeholder">
-                                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                                <span>Nhấp để chọn ảnh bìa</span>
-                            </div>
-                        </div>
-                        <input type="hidden" id="vd-thumb-url">
-                        <div class="vdf-hint" id="vd-thumb-hint" style="display:none;">Thumbnail đã được tự động lấy từ YouTube — nhấp vào ảnh để thay thế.</div>
-                    </div>
-                </div>
-
-                <!-- Video info -->
-                <div class="vdf-section">
-                    <div class="vdf-sec-head">
-                        <svg viewBox="0 0 12 12"><path d="M2 2h8M2 5h8M2 8h5"/></svg>
-                        Thông tin Video
-                    </div>
-                    <div class="vdf-sec-body">
-                        <div class="vdf-field">
-                            <label class="vdf-label">Tiêu đề <span class="vdf-req">*</span></label>
-                            <input class="vdf-input" type="text" id="vd-title" placeholder="Tiêu đề video...">
-                        </div>
-                        <div class="vdf-field">
-                            <label class="vdf-label">Mô tả ngắn</label>
-                            <textarea class="vdf-textarea" id="vd-desc" placeholder="Mô tả ngắn về nội dung video..."></textarea>
-                        </div>
-                        <div class="vdf-row2">
-                            <div class="vdf-field">
-                                <label class="vdf-label">Danh mục</label>
-                                <select class="vdf-select" id="vd-cat">
-                                    <option value="0">— Chưa phân loại —</option>
-                                    <?php foreach ( $cats as $cat ): ?>
-                                    <option value="<?php echo esc_attr( $cat['id'] ); ?>"><?php echo esc_html( $cat['name'] ); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="vdf-field">
-                                <label class="vdf-label">Thời lượng</label>
-                                <input class="vdf-input" type="text" id="vd-duration" placeholder="vd: 12:34">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Status -->
-                <div class="vdf-section">
-                    <div class="vdf-sec-head">
-                        <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 4"/></svg>
-                        Trạng thái hiển thị
-                    </div>
-                    <div class="vdf-sec-body">
-                        <div class="vdf-status-group">
-                            <label class="vdf-status-pill on-show" id="spill-show">
-                                <input type="radio" name="vd_status" value="1" checked>
-                                <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M3.5 6l2 2 3-3" stroke-linecap="round"/></svg>
-                                Hiển thị
-                            </label>
-                            <label class="vdf-status-pill" id="spill-hide">
-                                <input type="radio" name="vd_status" value="0">
-                                <svg viewBox="0 0 12 12"><path d="M2 6s1.5-3 4-3 4 3 4 3-1.5 3-4 3-4-3-4-3z"/><path d="M10 2L2 10" stroke-linecap="round"/></svg>
-                                Ẩn
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <input type="hidden" id="vdm-id" value="0">
-
-            </div><!-- /body -->
-
-            <div class="vdm-foot">
-                <button class="vd-btn vd-btn-danger vd-btn-sm" id="vdm-del-btn" style="display:none;">
-                    <svg viewBox="0 0 14 14"><polyline points="1,3 13,3"/><path d="M5,3V1h4v2"/><path d="M2,3l1,9h8l1-9"/></svg>
-                    Xóa video
-                </button>
-                <span class="vdm-foot-gap"></span>
-                <button class="vd-btn vd-btn-ghost" id="vdm-cancel">Hủy</button>
-                <button class="vd-btn vd-btn-solid" id="vdm-save">
-                    <svg viewBox="0 0 14 14"><path d="M2 8l4 4L12 3"/></svg>
-                    Lưu Video
-                </button>
-            </div>
+          </div>
+          <?php endif; ?>
+          <div class="vd-play-overlay">
+            <div class="vd-play-circle"><svg viewBox="0 0 14 14"><polygon points="3.5,1.5 12.5,7 3.5,12.5" fill="#3d2f26"/></svg></div>
+          </div>
+          <div class="vd-thumb-badges">
+            <span class="vd-type-badge <?php echo $is_yt ? 'vd-badge-yt' : 'vd-badge-up'; ?>">
+              <?php if ($is_yt): ?>
+              <svg viewBox="0 0 16 16"><path d="M14.5 5s-.2-1.2-.7-1.7c-.7-.7-1.5-.7-1.8-.7C10 2.5 8 2.5 8 2.5s-2 0-4 .1c-.4 0-1.2 0-1.8.7C1.7 3.8 1.5 5 1.5 5S1.3 6.4 1.3 7.8v1.3c0 1.4.2 2.7.2 2.7s.2 1.2.7 1.7c.7.7 1.6.7 2 .8C5.5 14 8 14 8 14s2 0 4-.2c.4 0 1.2-.1 1.8-.7.5-.5.7-1.7.7-1.7s.2-1.4.2-2.7V7.8C14.7 6.4 14.5 5 14.5 5zM6.5 10V6l4 2-4 2z"/></svg>
+              YT<?php else: ?>↑ File<?php endif; ?>
+            </span>
+            <div class="vd-status-dot <?php echo $v['is_active'] ? 'on' : 'off'; ?>" title="<?php echo $v['is_active'] ? 'Hiển thị' : 'Đang ẩn'; ?>"></div>
+          </div>
         </div>
 
-        <?php $this->render_videos_script( $nonce, $cats ); ?>
-        <?php
+        <div class="vd-card-body">
+          <?php if ($v['cat_name']): ?><div class="vd-card-cat"><?php echo esc_html($v['cat_name']); ?></div><?php endif; ?>
+          <div class="vd-card-title"><?php echo esc_html($v['title']); ?></div>
+          <?php if ($v['description']): ?><div class="vd-card-desc"><?php echo esc_html($v['description']); ?></div><?php endif; ?>
+        </div>
+
+        <div class="vd-card-foot">
+          <button class="vd-btn vd-btn-secondary vd-btn-xs vd-edit-btn" data-id="<?php echo esc_attr($v['id']); ?>">
+            <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z" stroke-linecap="round"/></svg>Sửa
+          </button>
+          <button class="vd-btn vd-btn-danger vd-btn-xs vd-del-btn" data-id="<?php echo esc_attr($v['id']); ?>">
+            <svg viewBox="0 0 14 14"><polyline points="1,3 13,3"/><path d="M5,3V1h4v2"/><path d="M2,3l1,9h8l1-9"/></svg>Xóa
+          </button>
+          <?php if ($v['is_active']): ?>
+          <span class="vd-badge vd-badge-green" style="margin-left:auto;font-size:10px;padding:2px 7px;"><span class="vd-badge-dot"></span>Active</span>
+          <?php else: ?>
+          <span class="vd-badge vd-badge-gray" style="margin-left:auto;font-size:10px;padding:2px 7px;"><span class="vd-badge-dot"></span>Hidden</span>
+          <?php endif; ?>
+        </div>
+      </div>
+      <?php endforeach; endif; ?>
+    </div>
+  </div>
+
+</div><!-- /vd-app -->
+
+<!-- ══ DRAWER ══ -->
+<div id="vd-backdrop" class="vd-backdrop"></div>
+<div id="vd-drawer" class="vd-drawer" role="dialog" aria-modal="true" aria-label="Video form">
+
+  <div class="vdw-head">
+    <div class="vdw-head-icon"><svg viewBox="0 0 20 20"><polygon points="5,3 17,10 5,17"/></svg></div>
+    <div class="vdw-head-info">
+      <div class="vdw-title" id="vdw-title">Thêm Video mới</div>
+      <div class="vdw-sub" id="vdw-sub">Nhập link YouTube hoặc chọn file từ thư viện</div>
+    </div>
+    <button class="vdw-close" id="vdw-close"><svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke-linecap="round"/></svg></button>
+  </div>
+
+  <div class="vdw-body">
+
+    <!-- Source -->
+    <div class="vdf-card">
+      <div class="vdf-head">
+        <svg viewBox="0 0 12 12"><polygon points="4,2 10,6 4,10"/></svg>Nguồn Video
+      </div>
+      <div class="vdf-body">
+        <div id="vd-src-badge" class="vdf-src-badge none">
+          <span class="vdf-src-badge-dot"></span>
+          <span id="vd-src-badge-text">Chưa có nguồn video</span>
+        </div>
+        <div class="vdf-field">
+          <label class="vdf-label">Link YouTube hoặc URL video <span class="vdf-req">*</span></label>
+          <div class="vdf-input-group">
+            <input class="vdf-input" type="text" id="vd-src-url" placeholder="Dán link YouTube hoặc URL file video…" autocomplete="off">
+            <div class="vdf-spinner" id="vd-src-spinner"></div>
+          </div>
+          <div class="vdf-hint">youtube.com/watch?v=… · youtu.be/… · shorts/… · file .mp4</div>
+        </div>
+        <div class="vdf-or"><div class="vdf-or-line"></div><div class="vdf-or-text">Hoặc</div><div class="vdf-or-line"></div></div>
+        <button type="button" class="vd-btn vd-btn-secondary" id="vd-pick-video" style="width:100%;justify-content:center;height:40px;">
+          <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1.2"/><path d="M1 6h12M5 2v4M9 2v4"/></svg>
+          Chọn file video từ Thư viện WordPress
+        </button>
+        <input type="hidden" id="vd-yt-id">
+        <input type="hidden" id="vd-detected-type" value="">
+      </div>
+    </div>
+
+    <!-- Thumbnail -->
+    <div class="vdf-card">
+      <div class="vdf-head">
+        <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5"/><circle cx="4" cy="4" r="1"/><path d="M1 8.5l3-3 2.5 2L9 5l3 3.5"/></svg>
+        Ảnh Thumbnail
+        <span style="font-size:10px;color:var(--text-4);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;">— Tự động lấy từ YouTube nếu bỏ trống</span>
+      </div>
+      <div class="vdf-body">
+        <div class="vdf-thumb-zone" id="vd-thumb-zone">
+          <img id="vd-thumb-img" alt="">
+          <div class="vdf-thumb-ph">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>Nhấp để chọn ảnh bìa</span>
+          </div>
+          <div class="vdf-thumb-overlay">
+            <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z"/></svg>Thay đổi ảnh
+          </div>
+        </div>
+        <div class="vdf-thumb-hint" id="vd-thumb-hint">Thumbnail lấy tự động từ YouTube — nhấp để thay thế.</div>
+        <input type="hidden" id="vd-thumb-url">
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="vdf-card">
+      <div class="vdf-head">
+        <svg viewBox="0 0 12 12"><path d="M2 3h8M2 6h8M2 9h5"/></svg>Thông tin Video
+      </div>
+      <div class="vdf-body">
+        <div class="vdf-field">
+          <label class="vdf-label">Tiêu đề <span class="vdf-req">*</span></label>
+          <input class="vdf-input" type="text" id="vd-title" placeholder="Tiêu đề video…">
+        </div>
+        <div class="vdf-field">
+          <label class="vdf-label">Mô tả ngắn</label>
+          <textarea class="vdf-textarea" id="vd-desc" placeholder="Mô tả ngắn về nội dung video…"></textarea>
+        </div>
+        <div class="vdf-2col">
+          <div class="vdf-field">
+            <label class="vdf-label">Danh mục</label>
+            <select class="vdf-select" id="vd-cat">
+              <option value="0">— Chưa phân loại —</option>
+              <?php foreach ($cats as $c): ?>
+              <option value="<?php echo esc_attr($c['id']); ?>"><?php echo esc_html($c['name']); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="vdf-field">
+            <label class="vdf-label">Thời lượng</label>
+            <input class="vdf-input" type="text" id="vd-duration" placeholder="12:34">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visibility -->
+    <div class="vdf-card">
+      <div class="vdf-head">
+        <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 4"/></svg>Trạng thái hiển thị
+      </div>
+      <div class="vdf-body">
+        <div class="vdf-toggle-group">
+          <label class="vdf-toggle active-show" id="vtog-show">
+            <input type="radio" name="vd_status" value="1" checked>
+            <div class="vdf-toggle-icon"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M4.5 7l2 2 3-3" stroke-linecap="round"/></svg></div>
+            Hiển thị trên website
+          </label>
+          <label class="vdf-toggle" id="vtog-hide">
+            <input type="radio" name="vd_status" value="0">
+            <div class="vdf-toggle-icon"><svg viewBox="0 0 14 14"><path d="M2 7s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><path d="M12 2L2 12" stroke-linecap="round"/></svg></div>
+            Ẩn (không hiển thị)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="vdw-id" value="0">
+  </div><!-- /body -->
+
+  <div class="vdw-foot">
+    <button class="vd-btn vd-btn-danger vd-btn-sm" id="vdw-del-btn" style="display:none;">
+      <svg viewBox="0 0 14 14"><polyline points="1,3 13,3"/><path d="M5,3V1h4v2"/><path d="M2,3l1,9h8l1-9"/></svg>Xóa video
+    </button>
+    <span class="vdw-foot-gap"></span>
+    <button class="vd-btn vd-btn-ghost" id="vdw-cancel">Hủy</button>
+    <button class="vd-btn vd-btn-primary" id="vdw-save">
+      <svg viewBox="0 0 14 14"><path d="M2 8l4 4L12 3" stroke-linecap="round"/></svg>Lưu Video
+    </button>
+  </div>
+</div><!-- /drawer -->
+
+<?php $this->render_videos_script( $nonce, $cats ); ?>
+<?php
     }
 
     /* ── Render: Categories Page ─────────────────────────────────── */
 
     public function render_cats_page(): void {
         global $wpdb;
-        $tc   = $wpdb->prefix . self::TABLE_CATS;
-        $tv   = $wpdb->prefix . self::TABLE_VIDEOS;
+        $tv    = $wpdb->prefix . self::TABLE_VIDEOS;
+        $tc    = $wpdb->prefix . self::TABLE_CATS;
         $nonce = wp_create_nonce( self::NONCE );
-
-        $cats = $wpdb->get_results(
-            "SELECT c.*, (SELECT COUNT(*) FROM {$tv} WHERE category_id = c.id) as video_count
-             FROM {$tc} c ORDER BY c.order_index ASC, c.id ASC",
-            ARRAY_A
-        ) ?: [];
+        $cats  = $wpdb->get_results( "SELECT c.*,(SELECT COUNT(*) FROM {$tv} WHERE category_id=c.id) as video_count FROM {$tc} c ORDER BY c.order_index ASC, c.id ASC", ARRAY_A ) ?: [];
         ?>
+<div id="vd-toast"><div id="vd-toast-icon"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2"/></svg></div><span id="vd-toast-msg"></span></div>
 
-        <div id="vd-toast">
-            <svg viewBox="0 0 14 14" id="vd-toast-icon"><polyline points="2,7 5.5,10.5 12,3"/></svg>
-            <span id="vd-toast-msg"></span>
-        </div>
+<div class="vd-app">
 
-        <div class="vd-wrap">
-            <div class="vd-header">
-                <div>
-                    <div class="vd-title">Danh mục Video</div>
-                    <div class="vd-sub"><?php echo count($cats); ?> danh mục — kéo để sắp xếp thứ tự tab trên frontend</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::PAGE_VIDEOS ) ); ?>" class="vd-btn vd-btn-outline">
-                        <svg viewBox="0 0 14 14"><polygon points="5,3 12,7 5,11"/><line x1="2" y1="3" x2="2" y2="11" stroke-linecap="round"/></svg>
-                        Về danh sách Video
-                    </a>
-                    <button class="vd-btn vd-btn-solid" id="vc-add-btn">
-                        <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>
-                        Thêm danh mục
-                    </button>
-                </div>
-            </div>
+  <!-- Topbar -->
+  <div class="vd-topbar">
+    <div class="vd-topbar-left">
+      <div class="vd-topbar-logo">
+        <svg viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="6" rx="2"/><rect x="2" y="11" width="7" height="7" rx="2"/><rect x="11" y="11" width="7" height="7" rx="2"/></svg>
+      </div>
+      <div>
+        <div class="vd-topbar-title">Danh mục Video</div>
+        <div class="vd-topbar-sub">Bacera · <?php echo count($cats); ?> danh mục</div>
+      </div>
+      <nav class="vd-topbar-nav">
+        <a href="<?php echo esc_url(admin_url('admin.php?page='.self::PAGE_VIDEOS)); ?>" class="vd-nav-link">
+          <svg viewBox="0 0 14 14"><polygon points="4,2 12,7 4,12"/><line x1="2" y1="2" x2="2" y2="12"/></svg>Videos
+        </a>
+        <a href="<?php echo esc_url(admin_url('admin.php?page='.self::PAGE_CATS)); ?>" class="vd-nav-link active">
+          <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>Danh mục
+        </a>
+      </nav>
+    </div>
+    <button class="vd-btn vd-btn-primary" id="vc-add-btn">
+      <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>Thêm danh mục
+    </button>
+  </div>
 
-            <div class="vd-sc">
-                <div class="vd-sh">
-                    <span class="vd-stitle">
-                        <svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="5" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
-                        Tất cả danh mục
-                    </span>
-                    <span style="font-size:11px;color:var(--text-3);">Kéo hàng để sắp xếp thứ tự</span>
-                </div>
-
-                <?php if ( empty( $cats ) ): ?>
-                <div class="vd-empty">
-                    <svg class="vd-empty-icon" viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="18" rx="4"/><rect x="4" y="28" width="18" height="18" rx="4"/><rect x="26" y="28" width="18" height="18" rx="4"/></svg>
-                    <h3>Chưa có danh mục nào</h3>
-                    <p>Tạo danh mục để phân loại video theo chủ đề.</p>
-                </div>
+  <!-- Content -->
+  <div style="padding:28px 32px 48px;">
+    <div class="vd-section">
+      <div class="vd-section-head">
+        <span class="vd-section-title">
+          <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="5" rx="1"/><rect x="1" y="8" width="5" height="5" rx="1"/><rect x="8" y="8" width="5" height="5" rx="1"/></svg>
+          Tất cả danh mục
+        </span>
+        <span style="font-size:11px;color:var(--text-3);">Kéo hàng để sắp xếp thứ tự hiển thị trên website</span>
+      </div>
+      <?php if (empty($cats)): ?>
+      <div class="vd-empty">
+        <div class="vd-empty-art"><svg viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="16" rx="4"/><rect x="4" y="28" width="18" height="18" rx="4"/><rect x="26" y="28" width="18" height="18" rx="4"/></svg></div>
+        <div class="vd-empty-title">Chưa có danh mục nào</div>
+        <div class="vd-empty-sub">Tạo danh mục để phân loại video theo chủ đề.</div>
+      </div>
+      <?php else: ?>
+      <div class="vd-table-wrap">
+        <table class="vd-table" id="vc-table">
+          <thead>
+            <tr>
+              <th style="width:36px;"></th>
+              <th>Tên danh mục</th>
+              <th>Slug</th>
+              <th>Số video</th>
+              <th>Trạng thái</th>
+              <th style="width:120px;"></th>
+            </tr>
+          </thead>
+          <tbody id="vc-tbody">
+            <?php foreach ($cats as $cat): ?>
+            <tr data-id="<?php echo esc_attr($cat['id']); ?>">
+              <td class="vd-row-drag" title="Kéo để sắp xếp">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="4" cy="2.5" r=".8"/><circle cx="8" cy="2.5" r=".8"/><circle cx="4" cy="6" r=".8"/><circle cx="8" cy="6" r=".8"/><circle cx="4" cy="9.5" r=".8"/><circle cx="8" cy="9.5" r=".8"/></svg>
+              </td>
+              <td>
+                <strong style="font-size:13px;"><?php echo esc_html($cat['name']); ?></strong>
+                <?php if ($cat['description']): ?><div style="font-size:11px;color:var(--text-3);margin-top:2px;"><?php echo esc_html($cat['description']); ?></div><?php endif; ?>
+              </td>
+              <td><code style="font-size:11px;background:var(--surface-2);padding:2px 7px;border-radius:5px;border:1px solid var(--border);"><?php echo esc_html($cat['slug']); ?></code></td>
+              <td>
+                <span class="vd-badge <?php echo $cat['video_count']>0?'vd-badge-up':'vd-badge-gray'; ?>">
+                  <?php echo (int)$cat['video_count']; ?> video
+                </span>
+              </td>
+              <td>
+                <?php if ($cat['is_active']): ?>
+                <span class="vd-badge vd-badge-green"><span class="vd-badge-dot"></span>Hiển thị</span>
                 <?php else: ?>
-                <table class="vd-table" id="vc-table">
-                    <thead>
-                        <tr>
-                            <th style="width:30px;"></th>
-                            <th>Tên danh mục</th>
-                            <th>Slug</th>
-                            <th>Số video</th>
-                            <th>Trạng thái</th>
-                            <th style="width:130px;"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="vc-tbody">
-                        <?php foreach ( $cats as $cat ): ?>
-                        <tr data-id="<?php echo esc_attr( $cat['id'] ); ?>">
-                            <td class="vd-row-drag" title="Kéo để sắp xếp">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="4" cy="3" r=".8"/><circle cx="8" cy="3" r=".8"/><circle cx="4" cy="6" r=".8"/><circle cx="8" cy="6" r=".8"/><circle cx="4" cy="9" r=".8"/><circle cx="8" cy="9" r=".8"/></svg>
-                            </td>
-                            <td>
-                                <strong><?php echo esc_html( $cat['name'] ); ?></strong>
-                                <?php if ( $cat['description'] ): ?>
-                                <div style="font-size:11px;color:var(--text-3);margin-top:2px;"><?php echo esc_html( $cat['description'] ); ?></div>
-                                <?php endif; ?>
-                            </td>
-                            <td><code style="font-size:11px;background:var(--surface-2);padding:2px 6px;border-radius:4px;"><?php echo esc_html( $cat['slug'] ); ?></code></td>
-                            <td>
-                                <span class="vd-badge <?php echo $cat['video_count'] > 0 ? 'vd-badge-upload' : 'vd-badge-gray'; ?>">
-                                    <?php echo (int)$cat['video_count']; ?> video
-                                </span>
-                            </td>
-                            <td>
-                                <?php if ( $cat['is_active'] ): ?>
-                                <span class="vd-badge vd-badge-green"><span class="vd-badge-dot" style="background:var(--green)"></span>Hiển thị</span>
-                                <?php else: ?>
-                                <span class="vd-badge vd-badge-gray"><span class="vd-badge-dot" style="background:var(--text-3)"></span>Ẩn</span>
-                                <?php endif; ?>
-                            </td>
-                            <td style="display:flex;gap:6px;">
-                                <button class="vd-btn vd-btn-outline vd-btn-sm vc-edit-btn"
-                                        data-id="<?php echo esc_attr($cat['id']); ?>"
-                                        data-name="<?php echo esc_attr($cat['name']); ?>"
-                                        data-desc="<?php echo esc_attr($cat['description']); ?>"
-                                        data-active="<?php echo $cat['is_active']; ?>">
-                                    <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z"/></svg>
-                                    Sửa
-                                </button>
-                                <button class="vd-btn vd-btn-danger vd-btn-sm vc-del-btn"
-                                        data-id="<?php echo esc_attr($cat['id']); ?>"
-                                        data-count="<?php echo esc_attr($cat['video_count']); ?>">
-                                    <svg viewBox="0 0 14 14"><polyline points="1,3 13,3"/><path d="M5,3V1h4v2"/><path d="M2,3l1,9h8l1-9"/></svg>
-                                </button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <span class="vd-badge vd-badge-gray"><span class="vd-badge-dot"></span>Ẩn</span>
                 <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Category Modal -->
-        <div id="vcm-bd" class="vdm-bd"></div>
-        <div id="vcm-dr" class="vdm-dr" style="width:460px;" role="dialog">
-            <div class="vdm-head">
-                <div class="vdm-head-icon">
-                    <svg viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="5" rx="1.5"/></svg>
-                </div>
-                <div class="vdm-head-text">
-                    <div class="vdm-head-title" id="vcm-title">Thêm danh mục</div>
-                    <div class="vdm-head-sub">Điền thông tin danh mục</div>
-                </div>
-                <button class="vdm-close" id="vcm-close">
-                    <svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12" stroke-linecap="round"/></svg>
+              </td>
+              <td style="display:flex;gap:6px;align-items:center;">
+                <button class="vd-btn vd-btn-secondary vd-btn-xs vc-edit-btn"
+                        data-id="<?php echo esc_attr($cat['id']); ?>"
+                        data-name="<?php echo esc_attr($cat['name']); ?>"
+                        data-desc="<?php echo esc_attr($cat['description']); ?>"
+                        data-active="<?php echo $cat['is_active']; ?>">
+                  <svg viewBox="0 0 14 14"><path d="M9.5 2.5l2 2-7 7H2.5V9l7-6.5z" stroke-linecap="round"/></svg>Sửa
                 </button>
-            </div>
-            <div class="vdm-body">
-                <div class="vdf-section">
-                    <div class="vdf-sec-body">
-                        <div class="vdf-field">
-                            <label class="vdf-label">Tên danh mục <span class="vdf-req">*</span></label>
-                            <input class="vdf-input" type="text" id="vc-name" placeholder="vd: Pottery Wheel Throwing">
-                        </div>
-                        <div class="vdf-field">
-                            <label class="vdf-label">Mô tả ngắn</label>
-                            <textarea class="vdf-textarea" id="vc-desc" placeholder="Mô tả về danh mục này..." style="min-height:60px;"></textarea>
-                        </div>
-                        <div class="vdf-field">
-                            <label class="vdf-label">Trạng thái</label>
-                            <div class="vdf-status-group">
-                                <label class="vdf-status-pill on-show" id="vcspill-show">
-                                    <input type="radio" name="vc_status" value="1" checked>
-                                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M3.5 6l2 2 3-3"/></svg>
-                                    Hiển thị
-                                </label>
-                                <label class="vdf-status-pill" id="vcspill-hide">
-                                    <input type="radio" name="vc_status" value="0">
-                                    <svg viewBox="0 0 12 12"><path d="M2 6s1.5-3 4-3 4 3 4 3-1.5 3-4 3-4-3-4-3z"/><path d="M10 2L2 10"/></svg>
-                                    Ẩn
-                                </label>
-                            </div>
-                        </div>
-                        <input type="hidden" id="vcm-id" value="0">
-                    </div>
-                </div>
-            </div>
-            <div class="vdm-foot">
-                <span class="vdm-foot-gap"></span>
-                <button class="vd-btn vd-btn-ghost" id="vcm-cancel">Hủy</button>
-                <button class="vd-btn vd-btn-solid" id="vcm-save">
-                    <svg viewBox="0 0 14 14"><path d="M2 8l4 4L12 3"/></svg>
-                    Lưu danh mục
+                <button class="vd-btn vd-btn-danger vd-btn-xs vc-del-btn"
+                        data-id="<?php echo esc_attr($cat['id']); ?>"
+                        data-count="<?php echo esc_attr($cat['video_count']); ?>">
+                  <svg viewBox="0 0 14 14"><polyline points="1,3 13,3"/><path d="M5,3V1h4v2"/><path d="M2,3l1,9h8l1-9"/></svg>
                 </button>
-            </div>
-        </div>
+              </td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+      <?php endif; ?>
+    </div>
+  </div>
+</div><!-- /vd-app -->
 
-        <?php $this->render_cats_script( $nonce ); ?>
-        <?php
+<!-- Category Drawer -->
+<div id="vcbd" class="vd-backdrop"></div>
+<div id="vcdr" class="vd-drawer" style="width:440px;" role="dialog">
+  <div class="vdw-head">
+    <div class="vdw-head-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+      <svg viewBox="0 0 20 20" style="fill:#fff;"><rect x="2" y="2" width="16" height="6" rx="2"/><rect x="2" y="11" width="7" height="7" rx="2"/><rect x="11" y="11" width="7" height="7" rx="2"/></svg>
+    </div>
+    <div class="vdw-head-info">
+      <div class="vdw-title" id="vcdr-title">Thêm danh mục</div>
+      <div class="vdw-sub">Điền thông tin danh mục bên dưới</div>
+    </div>
+    <button class="vdw-close" id="vcdr-close"><svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="vdw-body">
+    <div class="vdf-card">
+      <div class="vdf-body">
+        <div class="vdf-field">
+          <label class="vdf-label">Tên danh mục <span class="vdf-req">*</span></label>
+          <input class="vdf-input" type="text" id="vc-name" placeholder="vd: Pottery Wheel Throwing">
+        </div>
+        <div class="vdf-field">
+          <label class="vdf-label">Mô tả ngắn</label>
+          <textarea class="vdf-textarea" id="vc-desc" placeholder="Mô tả về danh mục này…" style="min-height:64px;"></textarea>
+        </div>
+        <div class="vdf-field">
+          <label class="vdf-label">Trạng thái</label>
+          <div class="vdf-toggle-group">
+            <label class="vdf-toggle active-show" id="vcpill-show">
+              <input type="radio" name="vc_status" value="1" checked>
+              <div class="vdf-toggle-icon"><svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="5"/><path d="M4.5 7l2 2 3-3" stroke-linecap="round"/></svg></div>
+              Hiển thị
+            </label>
+            <label class="vdf-toggle" id="vcpill-hide">
+              <input type="radio" name="vc_status" value="0">
+              <div class="vdf-toggle-icon"><svg viewBox="0 0 14 14"><path d="M2 7s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><path d="M12 2L2 12" stroke-linecap="round"/></svg></div>
+              Ẩn
+            </label>
+          </div>
+        </div>
+        <input type="hidden" id="vc-id" value="0">
+      </div>
+    </div>
+  </div>
+  <div class="vdw-foot">
+    <span class="vdw-foot-gap"></span>
+    <button class="vd-btn vd-btn-ghost" id="vcdr-cancel">Hủy</button>
+    <button class="vd-btn vd-btn-primary" id="vcdr-save">
+      <svg viewBox="0 0 14 14"><path d="M2 8l4 4L12 3" stroke-linecap="round"/></svg>Lưu danh mục
+    </button>
+  </div>
+</div>
+
+<?php $this->render_cats_script( $nonce ); ?>
+<?php
     }
 
     /* ── JS: Videos page ─────────────────────────────────────────── */
 
     private function render_videos_script( string $nonce, array $cats ): void {
-        $cats_json = wp_json_encode( array_column( $cats, null, 'id' ) );
+        global $wpdb;
+        $vd_map = [];
+        foreach ( $wpdb->get_results( "SELECT * FROM " . $wpdb->prefix . self::TABLE_VIDEOS, ARRAY_A ) ?: [] as $v ) {
+            $vd_map[ $v['id'] ] = $v;
+        }
         ?>
 <script>
+window._vd_data = <?php echo wp_json_encode( $vd_map ); ?>;
 (function(){
 'use strict';
-var AJAX='<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
-var NONCE='<?php echo esc_js($nonce); ?>';
+var AJAX  = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+var NONCE = '<?php echo esc_js($nonce); ?>';
 
-/* ── Toast ── */
+/* ─ Toast ─ */
 function toast(msg,ok){
-    var t=document.getElementById('vd-toast'),i=document.getElementById('vd-toast-icon'),m=document.getElementById('vd-toast-msg');
-    t.className='show '+(ok===false?'err':'ok');
-    i.innerHTML=ok===false?'<path d="M2 2l10 10M12 2L2 12" stroke-linecap="round"/>':'<polyline points="2,7 5.5,10.5 12,3"/>';
-    m.textContent=msg; clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
+  var t=document.getElementById('vd-toast'),m=document.getElementById('vd-toast-msg');
+  var icon=document.getElementById('vd-toast-icon');
+  t.className='show '+(ok===false?'err':'ok');
+  icon.innerHTML=ok===false?'<svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>':'<svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+  m.textContent=msg; clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3200);
 }
 
-/* ── Drawer ── */
-var bd=document.getElementById('vdm-bd'), dr=document.getElementById('vdm-dr');
-function openDrawer(){ bd.classList.add('open'); dr.classList.add('open'); document.body.style.overflow='hidden'; }
-function closeDrawer(){ bd.classList.remove('open'); dr.classList.remove('open'); document.body.style.overflow=''; }
-bd.addEventListener('click',closeDrawer);
-document.getElementById('vdm-close').addEventListener('click',closeDrawer);
-document.getElementById('vdm-cancel').addEventListener('click',closeDrawer);
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
+/* ─ Drawer ─ */
+var bd=document.getElementById('vd-backdrop'), dr=document.getElementById('vd-drawer');
+function openDr(){  bd.classList.add('open'); dr.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeDr(){ bd.classList.remove('open'); dr.classList.remove('open'); document.body.style.overflow=''; }
+bd.addEventListener('click',closeDr);
+document.getElementById('vdw-close').addEventListener('click',closeDr);
+document.getElementById('vdw-cancel').addEventListener('click',closeDr);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDr(); });
 
-/* ── Status toggle ── */
-var radiosStatus=document.querySelectorAll('[name="vd_status"]');
-var spillShow=document.getElementById('spill-show'), spillHide=document.getElementById('spill-hide');
-function updateStatusUI(val){
-    spillShow.className='vdf-status-pill '+(val==='1'?'on-show':'');
-    spillHide.className='vdf-status-pill '+(val==='0'?'on-hide':'');
+/* ─ Status toggle ─ */
+var radSt=document.querySelectorAll('[name="vd_status"]');
+function updateStatus(val){
+  document.getElementById('vtog-show').className='vdf-toggle '+(val==='1'?'active-show':'');
+  document.getElementById('vtog-hide').className='vdf-toggle '+(val==='0'?'active-hide':'');
 }
-radiosStatus.forEach(function(r){ r.addEventListener('change',function(){ updateStatusUI(r.value); }); });
+radSt.forEach(function(r){ r.addEventListener('change',function(){ updateStatus(r.value); }); });
 
-/* ── Helpers ── */
+/* ─ Helpers ─ */
 function extractYtId(url){
-    var m=url.match(/(?:v=|\/embed\/|youtu\.be\/|shorts\/|\/v\/)([A-Za-z0-9_-]{11})/);
-    return m ? m[1] : '';
+  var m=url.match(/(?:v=|\/embed\/|youtu\.be\/|shorts\/|\/v\/)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:'';
 }
 
-/* ── Source badge ── */
-var srcBadge=document.getElementById('vd-src-badge');
-var srcBadgeText=document.getElementById('vd-src-badge-text');
+/* ─ Source badge ─ */
 function setSrcBadge(type,label){
-    srcBadge.className='vdf-src-badge '+type;
-    srcBadgeText.textContent=label;
+  var el=document.getElementById('vd-src-badge');
+  el.className='vdf-src-badge '+type;
+  document.getElementById('vd-src-badge-text').textContent=label;
 }
 
-/* ── Thumbnail ── */
+/* ─ Thumbnail ─ */
 function setThumb(url,auto){
-    var img=document.getElementById('vd-thumb-img');
-    var ph=document.getElementById('vd-thumb-placeholder');
-    var hint=document.getElementById('vd-thumb-hint');
-    document.getElementById('vd-thumb-url').value=url||'';
-    if(url){ img.src=url; img.style.display='block'; ph.style.display='none'; hint.style.display=auto?'':'none'; }
-    else   { img.style.display='none'; ph.style.display='flex'; hint.style.display='none'; }
+  var img=document.getElementById('vd-thumb-img');
+  var ph=document.querySelector('.vdf-thumb-ph');
+  var hint=document.getElementById('vd-thumb-hint');
+  document.getElementById('vd-thumb-url').value=url||'';
+  if(url){ img.src=url; img.style.display='block'; if(ph) ph.style.display='none'; hint.style.display=auto?'block':'none'; }
+  else   { img.style.display='none'; if(ph) ph.style.display='flex'; hint.style.display='none'; }
 }
 
-/* ── Thumb zone click: pick image ── */
+/* ─ Thumb zone click ─ */
 document.getElementById('vd-thumb-zone').addEventListener('click',function(){
-    var frame=wp.media({title:'Chọn ảnh thumbnail',button:{text:'Dùng ảnh này'},library:{type:'image'},multiple:false});
-    frame.on('select',function(){
-        var att=frame.state().get('selection').first().toJSON();
-        setThumb(att.url,false);
-    });
-    frame.open();
+  var frame=wp.media({title:'Chọn ảnh thumbnail',button:{text:'Dùng ảnh này'},library:{type:'image'},multiple:false});
+  frame.on('select',function(){
+    var att=frame.state().get('selection').first().toJSON();
+    setThumb(att.url,false);
+  });
+  frame.open();
 });
 
-/* ── WP Media picker: video file ── */
+/* ─ WP Media picker: video ─ */
 document.getElementById('vd-pick-video').addEventListener('click',function(){
-    var frame=wp.media({title:'Chọn file video',button:{text:'Chọn video này'},library:{type:'video'},multiple:false});
-    frame.on('select',function(){
-        var att=frame.state().get('selection').first().toJSON();
-        document.getElementById('vd-src-url').value=att.url;
-        document.getElementById('vd-yt-id').value='';
-        document.getElementById('vd-detected-type').value='upload';
-        setSrcBadge('up','Upload — '+(att.filename||att.url.split('/').pop()));
-        if(att.image&&att.image.src) setThumb(att.image.src,false);
-    });
-    frame.open();
+  var frame=wp.media({title:'Chọn file video',button:{text:'Chọn video này'},library:{type:'video'},multiple:false});
+  frame.on('select',function(){
+    var att=frame.state().get('selection').first().toJSON();
+    document.getElementById('vd-src-url').value=att.url;
+    document.getElementById('vd-yt-id').value='';
+    document.getElementById('vd-detected-type').value='upload';
+    setSrcBadge('up','Upload — '+(att.filename||att.url.split('/').pop()));
+    if(att.image&&att.image.src) setThumb(att.image.src,false);
+  });
+  frame.open();
 });
 
-/* ── Smart auto-detect on URL input (debounced 600ms) ── */
-var srcInput=document.getElementById('vd-src-url');
-var srcSpinner=document.getElementById('vd-src-spinner');
-var _ytTimer=null;
-
-srcInput.addEventListener('input',function(){
-    var url=this.value.trim();
-    clearTimeout(_ytTimer);
-    if(!url){ setSrcBadge('none','Chưa có nguồn video'); document.getElementById('vd-yt-id').value=''; document.getElementById('vd-detected-type').value=''; return; }
-    var ytId=extractYtId(url);
-    if(ytId){
-        document.getElementById('vd-yt-id').value=ytId;
-        document.getElementById('vd-detected-type').value='youtube';
-        setSrcBadge('yt','YouTube — đang tải thông tin...');
-        _ytTimer=setTimeout(function(){ fetchYtInfo(url,ytId); },600);
-    } else {
-        document.getElementById('vd-yt-id').value='';
-        document.getElementById('vd-detected-type').value='upload';
-        setSrcBadge('up','Upload — '+url.split('/').pop().split('?')[0]);
-    }
+/* ─ Smart URL detect ─ */
+var srcInp=document.getElementById('vd-src-url');
+var srcSpin=document.getElementById('vd-src-spinner');
+var _ytT=null;
+srcInp.addEventListener('input',function(){
+  var url=this.value.trim(); clearTimeout(_ytT);
+  if(!url){ setSrcBadge('none','Chưa có nguồn video'); document.getElementById('vd-yt-id').value=''; document.getElementById('vd-detected-type').value=''; return; }
+  var ytId=extractYtId(url);
+  if(ytId){
+    document.getElementById('vd-yt-id').value=ytId;
+    document.getElementById('vd-detected-type').value='youtube';
+    setSrcBadge('yt','YouTube — đang nhận diện…');
+    _ytT=setTimeout(function(){ fetchYtInfo(url,ytId); },650);
+  } else {
+    document.getElementById('vd-yt-id').value='';
+    document.getElementById('vd-detected-type').value='upload';
+    setSrcBadge('up','Upload — '+url.split('/').pop().split('?')[0]);
+  }
 });
 
 function fetchYtInfo(url,ytId){
-    srcSpinner.style.display='block';
-    var fd=new FormData();
-    fd.append('action','bacera_yt_info'); fd.append('_nonce',NONCE); fd.append('url',url);
-    fetch(AJAX,{method:'POST',body:fd})
-    .then(function(r){return r.json();})
-    .then(function(res){
-        srcSpinner.style.display='none';
-        if(!res.success){ setSrcBadge('yt','YouTube ID: '+ytId); return; }
-        setSrcBadge('yt','YouTube — '+(res.data.title||'ID: '+res.data.yt_id));
-        if(!document.getElementById('vd-title').value&&res.data.title) document.getElementById('vd-title').value=res.data.title;
-        if(res.data.thumbnail&&!document.getElementById('vd-thumb-url').value) setThumb(res.data.thumbnail,true);
-    })
-    .catch(function(){ srcSpinner.style.display='none'; setSrcBadge('yt','YouTube ID: '+ytId); });
+  srcSpin.style.display='block';
+  var fd=new FormData(); fd.append('action','bacera_yt_info'); fd.append('_nonce',NONCE); fd.append('url',url);
+  fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+    srcSpin.style.display='none';
+    if(!res.success){ setSrcBadge('yt','YouTube ID: '+ytId); return; }
+    setSrcBadge('yt','YouTube — '+(res.data.title||'ID: '+res.data.yt_id));
+    if(!document.getElementById('vd-title').value&&res.data.title) document.getElementById('vd-title').value=res.data.title;
+    if(res.data.thumbnail&&!document.getElementById('vd-thumb-url').value) setThumb(res.data.thumbnail,true);
+  }).catch(function(){ srcSpin.style.display='none'; setSrcBadge('yt','YouTube ID: '+ytId); });
 }
 
-/* ── Reset form ── */
-function resetDrawer(){
-    document.getElementById('vd-src-url').value='';
-    document.getElementById('vd-yt-id').value='';
-    document.getElementById('vd-detected-type').value='';
-    document.getElementById('vd-title').value='';
-    document.getElementById('vd-desc').value='';
-    document.getElementById('vd-cat').value='0';
-    document.getElementById('vd-duration').value='';
-    setSrcBadge('none','Chưa có nguồn video');
-    setThumb('', false);
+/* ─ Reset ─ */
+function resetDr(){
+  document.getElementById('vd-src-url').value='';
+  document.getElementById('vd-yt-id').value='';
+  document.getElementById('vd-detected-type').value='';
+  document.getElementById('vd-title').value='';
+  document.getElementById('vd-desc').value='';
+  document.getElementById('vd-cat').value='0';
+  document.getElementById('vd-duration').value='';
+  setSrcBadge('none','Chưa có nguồn video');
+  setThumb('',false);
 }
 
-/* ── Open ADD ── */
+/* ─ Open ADD ─ */
 function openAdd(){
-    document.getElementById('vdm-title').textContent='Thêm Video mới';
-    document.getElementById('vdm-sub').textContent='Nhập link YouTube hoặc chọn file từ thư viện';
-    document.getElementById('vdm-id').value='0';
-    resetDrawer();
-    document.querySelector('[name="vd_status"][value="1"]').checked=true; updateStatusUI('1');
-    document.getElementById('vdm-del-btn').style.display='none';
-    openDrawer();
+  document.getElementById('vdw-title').textContent='Thêm Video mới';
+  document.getElementById('vdw-sub').textContent='Nhập link YouTube hoặc chọn file từ thư viện';
+  document.getElementById('vdw-id').value='0';
+  document.getElementById('vdw-del-btn').style.display='none';
+  resetDr();
+  document.querySelector('[name="vd_status"][value="1"]').checked=true; updateStatus('1');
+  openDr();
 }
-var aBtn=document.getElementById('vd-add-btn');
-if(aBtn) aBtn.addEventListener('click',openAdd);
-var aBtn2=document.getElementById('vd-add-btn-2');
-if(aBtn2) aBtn2.addEventListener('click',openAdd);
+var ab=document.getElementById('vd-add-btn'); if(ab) ab.addEventListener('click',openAdd);
+var ab2=document.getElementById('vd-add-btn-2'); if(ab2) ab2.addEventListener('click',openAdd);
 
-/* ── Open EDIT ── */
+/* ─ Open EDIT ─ */
 document.querySelectorAll('.vd-edit-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-        var id=btn.getAttribute('data-id');
-        var data=window._vd_data && window._vd_data[id];
-        document.getElementById('vdm-title').textContent='Chỉnh sửa Video';
-        document.getElementById('vdm-sub').textContent='Cập nhật thông tin video';
-        document.getElementById('vdm-id').value=id;
-        document.getElementById('vdm-del-btn').style.display='';
-        resetDrawer();
-        if(data){
-            document.getElementById('vd-title').value=data.title||'';
-            document.getElementById('vd-desc').value=data.description||'';
-            document.getElementById('vd-cat').value=data.category_id||'0';
-            document.getElementById('vd-duration').value=data.duration||'';
-            var type=data.type==='youtube'?'youtube':'upload';
-            document.getElementById('vd-detected-type').value=type;
-            document.getElementById('vd-src-url').value=data.video_url||( type==='youtube' && data.youtube_id ? 'https://youtu.be/'+data.youtube_id : '' );
-            document.getElementById('vd-yt-id').value=data.youtube_id||'';
-            if(type==='youtube') setSrcBadge('yt','YouTube — '+(data.title||'ID: '+data.youtube_id));
-            else setSrcBadge('up','Upload — '+(data.video_url||'').split('/').pop());
-            var thumb=data.thumbnail_url||( data.youtube_id ? 'https://img.youtube.com/vi/'+data.youtube_id+'/hqdefault.jpg' : '');
-            setThumb(thumb, type==='youtube'&&!data.thumbnail_url);
-            var sv=( data.is_active==='1'||data.is_active===1 ) ? '1' : '0';
-            document.querySelector('[name="vd_status"][value="'+sv+'"]').checked=true; updateStatusUI(sv);
-        }
-        openDrawer();
-    });
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    var id=btn.getAttribute('data-id');
+    var data=window._vd_data&&window._vd_data[id];
+    document.getElementById('vdw-title').textContent='Chỉnh sửa Video';
+    document.getElementById('vdw-sub').textContent='ID #'+id;
+    document.getElementById('vdw-id').value=id;
+    document.getElementById('vdw-del-btn').style.display='';
+    resetDr();
+    if(data){
+      var type=data.type==='youtube'?'youtube':'upload';
+      document.getElementById('vd-detected-type').value=type;
+      document.getElementById('vd-src-url').value=data.video_url||(type==='youtube'&&data.youtube_id?'https://youtu.be/'+data.youtube_id:'');
+      document.getElementById('vd-yt-id').value=data.youtube_id||'';
+      if(type==='youtube') setSrcBadge('yt','YouTube — '+(data.title||'ID: '+data.youtube_id));
+      else setSrcBadge('up','Upload — '+(data.video_url||'').split('/').pop());
+      document.getElementById('vd-title').value=data.title||'';
+      document.getElementById('vd-desc').value=data.description||'';
+      document.getElementById('vd-cat').value=data.category_id||'0';
+      document.getElementById('vd-duration').value=data.duration||'';
+      var thumb=data.thumbnail_url||(data.youtube_id?'https://img.youtube.com/vi/'+data.youtube_id+'/hqdefault.jpg':'');
+      setThumb(thumb,type==='youtube'&&!data.thumbnail_url);
+      var sv=(data.is_active==='1'||data.is_active===1)?'1':'0';
+      document.querySelector('[name="vd_status"][value="'+sv+'"]').checked=true; updateStatus(sv);
+    }
+    openDr();
+  });
 });
 
-/* ── Save ── */
-document.getElementById('vdm-save').addEventListener('click',function(){
-    var detectedType=document.getElementById('vd-detected-type').value||'upload';
-    var status=document.querySelector('[name="vd_status"]:checked').value;
-    var srcUrl=document.getElementById('vd-src-url').value.trim();
-    var ytId=document.getElementById('vd-yt-id').value;
-    var thumbUrl=document.getElementById('vd-thumb-url').value;
-    if(!srcUrl){ toast('Vui lòng nhập link YouTube hoặc chọn file video.',false); return; }
-    if(!document.getElementById('vd-title').value.trim()){ toast('Tiêu đề không được để trống.',false); return; }
-    var fd=new FormData();
-    fd.append('action','bacera_video_save'); fd.append('_nonce',NONCE);
-    fd.append('id',document.getElementById('vdm-id').value);
-    fd.append('title',document.getElementById('vd-title').value.trim());
-    fd.append('description',document.getElementById('vd-desc').value.trim());
-    fd.append('category_id',document.getElementById('vd-cat').value);
-    fd.append('duration',document.getElementById('vd-duration').value.trim());
-    fd.append('type',detectedType);
-    fd.append('video_url',srcUrl);
-    fd.append('thumbnail_url',thumbUrl);
-    fd.append('youtube_id',ytId);
-    fd.append('is_active',status);
-    var btn=document.getElementById('vdm-save');
-    btn.disabled=true; btn.textContent='Đang lưu...';
-    fetch(AJAX,{method:'POST',body:fd})
-    .then(function(r){return r.json();})
-    .then(function(res){
-        btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 14 14" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;"><path d="M2 8l4 4L12 3"/></svg> Lưu Video';
-        if(res.success){ toast(res.data.message,true); closeDrawer(); setTimeout(function(){location.reload();},800); }
-        else toast(res.data.message||'Lỗi',false);
-    })
-    .catch(function(){ btn.disabled=false; toast('Lỗi kết nối',false); });
+/* ─ Save ─ */
+document.getElementById('vdw-save').addEventListener('click',function(){
+  var type=document.getElementById('vd-detected-type').value||'upload';
+  var status=document.querySelector('[name="vd_status"]:checked').value;
+  var srcUrl=document.getElementById('vd-src-url').value.trim();
+  var ytId=document.getElementById('vd-yt-id').value;
+  var thumb=document.getElementById('vd-thumb-url').value;
+  if(!srcUrl){ toast('Vui lòng nhập link hoặc chọn file video.',false); return; }
+  if(!document.getElementById('vd-title').value.trim()){ toast('Tiêu đề không được để trống.',false); return; }
+  var fd=new FormData();
+  fd.append('action','bacera_video_save'); fd.append('_nonce',NONCE);
+  fd.append('id',document.getElementById('vdw-id').value);
+  fd.append('title',document.getElementById('vd-title').value.trim());
+  fd.append('description',document.getElementById('vd-desc').value.trim());
+  fd.append('category_id',document.getElementById('vd-cat').value);
+  fd.append('duration',document.getElementById('vd-duration').value.trim());
+  fd.append('type',type); fd.append('video_url',srcUrl);
+  fd.append('thumbnail_url',thumb); fd.append('youtube_id',ytId); fd.append('is_active',status);
+  var btn=this; btn.disabled=true; btn.textContent='Đang lưu…';
+  fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 14 14" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;"><path d="M2 8l4 4L12 3"/></svg> Lưu Video';
+    if(res.success){ toast(res.data.message,true); closeDr(); setTimeout(function(){location.reload();},700); }
+    else toast(res.data.message||'Lỗi không xác định.',false);
+  }).catch(function(){ btn.disabled=false; toast('Lỗi kết nối.',false); });
 });
 
-/* ── Delete (card & drawer) ── */
+/* ─ Delete (card) ─ */
 document.querySelectorAll('.vd-del-btn').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-        e.stopPropagation();
-        if(!confirm('Xóa video này? Hành động không thể hoàn tác.')) return;
-        var fd=new FormData();
-        fd.append('action','bacera_video_delete'); fd.append('_nonce',NONCE); fd.append('id',btn.getAttribute('data-id'));
-        fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
-            if(res.success){ toast(res.data.message,true); setTimeout(function(){location.reload();},800); }
-            else toast(res.data.message||'Lỗi',false);
-        });
-    });
-});
-document.getElementById('vdm-del-btn').addEventListener('click',function(){
-    var id=document.getElementById('vdm-id').value;
-    if(!id||id==='0') return;
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
     if(!confirm('Xóa video này? Hành động không thể hoàn tác.')) return;
-    var fd=new FormData();
-    fd.append('action','bacera_video_delete'); fd.append('_nonce',NONCE); fd.append('id',id);
+    var fd=new FormData(); fd.append('action','bacera_video_delete'); fd.append('_nonce',NONCE); fd.append('id',btn.getAttribute('data-id'));
     fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
-        if(res.success){ toast(res.data.message,true); closeDrawer(); setTimeout(function(){location.reload();},800); }
-        else toast(res.data.message||'Lỗi',false);
+      if(res.success){ toast(res.data.message,true); setTimeout(function(){location.reload();},700); }
+      else toast(res.data.message||'Lỗi',false);
     });
+  });
 });
 
-/* ── Filters ── */
+/* ─ Delete (drawer) ─ */
+document.getElementById('vdw-del-btn').addEventListener('click',function(){
+  var id=document.getElementById('vdw-id').value;
+  if(!id||id==='0') return;
+  if(!confirm('Xóa video này? Hành động không thể hoàn tác.')) return;
+  var fd=new FormData(); fd.append('action','bacera_video_delete'); fd.append('_nonce',NONCE); fd.append('id',id);
+  fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+    if(res.success){ toast(res.data.message,true); closeDr(); setTimeout(function(){location.reload();},700); }
+    else toast(res.data.message||'Lỗi',false);
+  });
+});
+
+/* ─ Filters + Live search highlight ─ */
 function applyFilters(){
-    var q=document.getElementById('vd-search').value.toLowerCase();
-    var catF=document.getElementById('vd-cat-filter').value;
-    var typeF=document.getElementById('vd-type-filter').value;
-    var stF=document.getElementById('vd-status-filter').value;
-    document.querySelectorAll('.vd-card').forEach(function(c){
-        var show=true;
-        if(q && c.getAttribute('data-search').indexOf(q)===-1) show=false;
-        if(catF && c.getAttribute('data-cat')!==catF) show=false;
-        if(typeF && c.getAttribute('data-type')!==typeF) show=false;
-        if(stF && c.getAttribute('data-status')!==stF) show=false;
-        c.style.display=show?'':'none';
-    });
+  var q=document.getElementById('vd-search').value.toLowerCase().trim();
+  var catF=document.getElementById('vd-cat-filter').value;
+  var typeF=document.getElementById('vd-type-filter').value;
+  var stF=document.getElementById('vd-status-filter').value;
+  var shown=0;
+  document.querySelectorAll('.vd-card').forEach(function(c){
+    var ok=true;
+    if(q&&c.getAttribute('data-search').indexOf(q)===-1) ok=false;
+    if(catF&&c.getAttribute('data-cat')!==catF) ok=false;
+    if(typeF&&c.getAttribute('data-type')!==typeF) ok=false;
+    if(stF&&c.getAttribute('data-status')!==stF) ok=false;
+    c.style.display=ok?'':'none';
+    if(ok) shown++;
+  });
+  var badge=document.getElementById('vd-count-badge');
+  if(badge) badge.textContent=shown+' video'+(shown!==1?'s':'');
 }
 ['vd-search','vd-cat-filter','vd-type-filter','vd-status-filter'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.addEventListener('input',applyFilters);
+  var el=document.getElementById(id); if(el) el.addEventListener('input',applyFilters);
 });
 
-/* ── Sortable ── */
-var sortEl=document.getElementById('vd-sortable');
-if(sortEl && typeof Sortable!=='undefined'){
-    Sortable.create(sortEl,{
-        handle:'.vd-drag', animation:150, ghostClass:'vd-card-ghost',
-        onEnd:function(){
-            var ids=[].map.call(sortEl.querySelectorAll('.vd-card'),function(c){ return c.getAttribute('data-id'); });
-            var fd=new FormData();
-            fd.append('action','bacera_video_order'); fd.append('_nonce',NONCE);
-            ids.forEach(function(id){ fd.append('ids[]',id); });
-            fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
-                if(res.success) toast('Đã lưu thứ tự.',true);
-            });
-        }
-    });
+/* ─ View toggle ─ */
+var grid=document.getElementById('vd-grid');
+document.getElementById('vd-view-grid').addEventListener('click',function(){
+  grid.classList.remove('list-view'); this.classList.add('active');
+  document.getElementById('vd-view-list').classList.remove('active');
+});
+document.getElementById('vd-view-list').addEventListener('click',function(){
+  grid.classList.add('list-view'); this.classList.add('active');
+  document.getElementById('vd-view-grid').classList.remove('active');
+});
+
+/* ─ Sortable ─ */
+var sortEl=document.getElementById('vd-grid');
+if(sortEl&&typeof Sortable!=='undefined'){
+  Sortable.create(sortEl,{
+    handle:'.vd-drag-handle', animation:180, ghostClass:'is-selected',
+    onEnd:function(){
+      var ids=[].map.call(sortEl.querySelectorAll('.vd-card'),function(c){return c.getAttribute('data-id');});
+      var fd=new FormData(); fd.append('action','bacera_video_order'); fd.append('_nonce',NONCE);
+      ids.forEach(function(id){fd.append('ids[]',id);});
+      fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+        if(res.success) toast('Đã lưu thứ tự.',true);
+      });
+    }
+  });
 }
 })();
 </script>
-
 <?php
-// Embed video data for edit prefill
-$tv_all = $GLOBALS['wpdb']->get_results(
-    "SELECT * FROM " . $GLOBALS['wpdb']->prefix . self::TABLE_VIDEOS . " ORDER BY id ASC",
-    ARRAY_A
-) ?: [];
-$vd_map = [];
-foreach ( $tv_all as $v ) { $vd_map[$v['id']] = $v; }
-echo '<script>window._vd_data=' . wp_json_encode( $vd_map ) . ';</script>';
     }
 
     /* ── JS: Categories page ─────────────────────────────────────── */
@@ -1319,111 +1369,107 @@ echo '<script>window._vd_data=' . wp_json_encode( $vd_map ) . ';</script>';
 <script>
 (function(){
 'use strict';
-var AJAX='<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
-var NONCE='<?php echo esc_js($nonce); ?>';
+var AJAX  = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+var NONCE = '<?php echo esc_js($nonce); ?>';
 
 function toast(msg,ok){
-    var t=document.getElementById('vd-toast'),i=document.getElementById('vd-toast-icon'),m=document.getElementById('vd-toast-msg');
-    t.className='show '+(ok===false?'err':'ok');
-    i.innerHTML=ok===false?'<path d="M2 2l10 10M12 2L2 12" stroke-linecap="round"/>':'<polyline points="2,7 5.5,10.5 12,3"/>';
-    m.textContent=msg; clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3000);
+  var t=document.getElementById('vd-toast'),m=document.getElementById('vd-toast-msg');
+  var icon=document.getElementById('vd-toast-icon');
+  t.className='show '+(ok===false?'err':'ok');
+  icon.innerHTML=ok===false?'<svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>':'<svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+  m.textContent=msg; clearTimeout(t._t); t._t=setTimeout(function(){t.className='';},3200);
 }
 
-/* ── Cat drawer ── */
-var bd=document.getElementById('vcm-bd'), dr=document.getElementById('vcm-dr');
-function openCatDrawer(){ bd.classList.add('open'); dr.classList.add('open'); document.body.style.overflow='hidden'; }
-function closeCatDrawer(){ bd.classList.remove('open'); dr.classList.remove('open'); document.body.style.overflow=''; }
-bd.addEventListener('click',closeCatDrawer);
-document.getElementById('vcm-close').addEventListener('click',closeCatDrawer);
-document.getElementById('vcm-cancel').addEventListener('click',closeCatDrawer);
+var bd=document.getElementById('vcbd'), dr=document.getElementById('vcdr');
+function openDr(){ bd.classList.add('open'); dr.classList.add('open'); document.body.style.overflow='hidden'; }
+function closeDr(){ bd.classList.remove('open'); dr.classList.remove('open'); document.body.style.overflow=''; }
+bd.addEventListener('click',closeDr);
+document.getElementById('vcdr-close').addEventListener('click',closeDr);
+document.getElementById('vcdr-cancel').addEventListener('click',closeDr);
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDr(); });
 
-/* Status pill */
-document.querySelectorAll('[name="vc_status"]').forEach(function(r){
-    r.addEventListener('change',function(){
-        document.getElementById('vcspill-show').className='vdf-status-pill '+(r.value==='1'?'on-show':'');
-        document.getElementById('vcspill-hide').className='vdf-status-pill '+(r.value==='0'?'on-hide':'');
-    });
-});
+/* Status toggle */
+var radVC=document.querySelectorAll('[name="vc_status"]');
+function updateVcStatus(val){
+  document.getElementById('vcpill-show').className='vdf-toggle '+(val==='1'?'active-show':'');
+  document.getElementById('vcpill-hide').className='vdf-toggle '+(val==='0'?'active-hide':'');
+}
+radVC.forEach(function(r){ r.addEventListener('change',function(){ updateVcStatus(r.value); }); });
 
-/* Add btn */
-document.getElementById('vc-add-btn').addEventListener('click',function(){
-    document.getElementById('vcm-title').textContent='Thêm danh mục';
-    document.getElementById('vcm-id').value='0';
-    document.getElementById('vc-name').value='';
-    document.getElementById('vc-desc').value='';
-    document.querySelector('[name="vc_status"][value="1"]').checked=true;
-    document.getElementById('vcspill-show').className='vdf-status-pill on-show';
-    document.getElementById('vcspill-hide').className='vdf-status-pill';
-    openCatDrawer();
-});
+/* Open ADD */
+function openAdd(){
+  document.getElementById('vcdr-title').textContent='Thêm danh mục';
+  document.getElementById('vc-id').value='0';
+  document.getElementById('vc-name').value='';
+  document.getElementById('vc-desc').value='';
+  document.querySelector('[name="vc_status"][value="1"]').checked=true; updateVcStatus('1');
+  openDr(); setTimeout(function(){ document.getElementById('vc-name').focus(); },300);
+}
+document.getElementById('vc-add-btn').addEventListener('click',openAdd);
 
-/* Edit btn */
+/* Open EDIT */
 document.querySelectorAll('.vc-edit-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-        document.getElementById('vcm-title').textContent='Chỉnh sửa danh mục';
-        document.getElementById('vcm-id').value=btn.getAttribute('data-id');
-        document.getElementById('vc-name').value=btn.getAttribute('data-name');
-        document.getElementById('vc-desc').value=btn.getAttribute('data-desc');
-        var active=btn.getAttribute('data-active');
-        document.querySelector('[name="vc_status"][value="'+active+'"]').checked=true;
-        document.getElementById('vcspill-show').className='vdf-status-pill '+(active==='1'?'on-show':'');
-        document.getElementById('vcspill-hide').className='vdf-status-pill '+(active==='0'?'on-hide':'');
-        openCatDrawer();
-    });
+  btn.addEventListener('click',function(){
+    document.getElementById('vcdr-title').textContent='Sửa danh mục';
+    document.getElementById('vc-id').value=btn.getAttribute('data-id');
+    document.getElementById('vc-name').value=btn.getAttribute('data-name')||'';
+    document.getElementById('vc-desc').value=btn.getAttribute('data-desc')||'';
+    var av=btn.getAttribute('data-active')||'1';
+    document.querySelector('[name="vc_status"][value="'+av+'"]').checked=true; updateVcStatus(av);
+    openDr();
+  });
 });
 
 /* Save */
-document.getElementById('vcm-save').addEventListener('click',function(){
-    var fd=new FormData();
-    fd.append('action','bacera_vcat_save'); fd.append('_nonce',NONCE);
-    fd.append('id',document.getElementById('vcm-id').value);
-    fd.append('name',document.getElementById('vc-name').value.trim());
-    fd.append('description',document.getElementById('vc-desc').value.trim());
-    fd.append('is_active',document.querySelector('[name="vc_status"]:checked').value);
-    var btn=document.getElementById('vcm-save');
-    btn.disabled=true; btn.textContent='Đang lưu...';
-    fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
-        btn.disabled=false; btn.textContent='Lưu danh mục';
-        if(res.success){ toast(res.data.message,true); closeCatDrawer(); setTimeout(function(){location.reload();},800); }
-        else toast(res.data.message||'Lỗi',false);
-    });
+document.getElementById('vcdr-save').addEventListener('click',function(){
+  var name=document.getElementById('vc-name').value.trim();
+  if(!name){ toast('Tên danh mục không được để trống.',false); return; }
+  var status=document.querySelector('[name="vc_status"]:checked').value;
+  var fd=new FormData();
+  fd.append('action','bacera_vcat_save'); fd.append('_nonce',NONCE);
+  fd.append('id',document.getElementById('vc-id').value);
+  fd.append('name',name); fd.append('description',document.getElementById('vc-desc').value.trim());
+  fd.append('is_active',status);
+  var btn=this; btn.disabled=true; btn.textContent='Đang lưu…';
+  fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 14 14" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;"><path d="M2 8l4 4L12 3"/></svg> Lưu danh mục';
+    if(res.success){ toast(res.data.message,true); closeDr(); setTimeout(function(){location.reload();},700); }
+    else toast(res.data.message||'Lỗi',false);
+  }).catch(function(){ btn.disabled=false; toast('Lỗi kết nối.',false); });
 });
 
 /* Delete */
 document.querySelectorAll('.vc-del-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-        var count=parseInt(btn.getAttribute('data-count')||'0',10);
-        var msg=count>0
-            ?('Danh mục này có '+count+' video. Các video sẽ được chuyển sang Chưa phân loại. Tiếp tục?')
-            :'Xóa danh mục này?';
-        if(!confirm(msg)) return;
-        var fd=new FormData();
-        fd.append('action','bacera_vcat_delete'); fd.append('_nonce',NONCE); fd.append('id',btn.getAttribute('data-id'));
-        fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
-            if(res.success){ toast(res.data.message,true); setTimeout(function(){location.reload();},800); }
-            else toast(res.data.message||'Lỗi',false);
-        });
+  btn.addEventListener('click',function(){
+    var count=parseInt(btn.getAttribute('data-count')||'0',10);
+    var msg='Xóa danh mục này?'+(count>0?' '+count+' video sẽ được chuyển sang Chưa phân loại.':'')+' Hành động không thể hoàn tác.';
+    if(!confirm(msg)) return;
+    var fd=new FormData(); fd.append('action','bacera_vcat_delete'); fd.append('_nonce',NONCE); fd.append('id',btn.getAttribute('data-id'));
+    fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+      if(res.success){ toast(res.data.message,true); setTimeout(function(){location.reload();},700); }
+      else toast(res.data.message||'Lỗi',false);
     });
+  });
 });
 
-/* Sortable rows */
+/* Sortable */
 var tbody=document.getElementById('vc-tbody');
-if(tbody && typeof Sortable!=='undefined'){
-    Sortable.create(tbody,{
-        handle:'.vd-row-drag', animation:120,
-        onEnd:function(){
-            var ids=[].map.call(tbody.querySelectorAll('tr'),function(r){ return r.getAttribute('data-id'); });
-            var fd=new FormData();
-            fd.append('action','bacera_vcat_order'); fd.append('_nonce',NONCE);
-            ids.forEach(function(id){ fd.append('ids[]',id); });
-            fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
-                if(res.success) toast('Đã cập nhật thứ tự.',true);
-            });
-        }
-    });
+if(tbody&&typeof Sortable!=='undefined'){
+  Sortable.create(tbody,{
+    handle:'.vd-row-drag', animation:150,
+    onEnd:function(){
+      var ids=[].map.call(tbody.querySelectorAll('tr'),function(r){return r.getAttribute('data-id');});
+      var fd=new FormData(); fd.append('action','bacera_vcat_order'); fd.append('_nonce',NONCE);
+      ids.forEach(function(id){fd.append('ids[]',id);});
+      fetch(AJAX,{method:'POST',body:fd}).then(function(r){return r.json();}).then(function(res){
+        if(res.success) toast('Đã lưu thứ tự.',true);
+      });
+    }
+  });
 }
 })();
 </script>
-        <?php
+<?php
     }
 }
