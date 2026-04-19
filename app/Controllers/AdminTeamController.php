@@ -921,7 +921,7 @@ class AdminTeamController {
                                     <input type="url" id="tmm-x_twitter" class="tmf-input" placeholder="https://x.com/...">
                                 </div>
                                 <div class="tmf-field">
-                                    <label class="tmf-label"><span class="dsi"><svg width="24" height="24" viewBox="0 0 92 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="92" height="92" rx="15" fill="#010101"/><path d="M63.3 28.5c-2.8-1.9-4.8-4.9-5.5-8.4H52v34.7c0 3.5-2.8 6.3-6.3 6.3-3.5 0-6.3-2.8-6.3-6.3 0-3.5 2.8-6.3 6.3-6.3.6 0 1.2.1 1.8.2V43c-.6-.1-1.2-.1-1.8-.1-7 0-12.7 5.7-12.7 12.7 0 7 5.7 12.7 12.7 12.7 7 0 12.7-5.7 12.7-12.7V36.5c2.8 1.8 6 2.9 9.6 2.9v-6c-2.1 0-4.1-.6-4.7-4.9z" fill="white"/><path d="M65.1 36.5v-6c-2.1 0-4.1-.6-5.8-1.6 1.5 2.5 3.8 4.5 5.8 7.6z" fill="#69C9D0"/><path d="M57.8 20.1c-.1-.6-.2-1.2-.2-1.9H52v34.7c0 3.5-2.8 6.3-6.3 6.3-1 0-2-.3-2.8-.7 1.2 2.4 3.7 4.1 6.6 4.1 3.5 0 6.3-2.8 6.3-6.3V20.1z" fill="#EE1D52"/></svg></span>TikTok</label>
+                                    <label class="tmf-label"><span class="dsi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#010101"/><path d="M16.6 7.8c-.7-.5-1.3-1.3-1.5-2.3H13v9.5c0 1-.9 1.7-1.7 1.7-1 0-1.7-.8-1.7-1.7s.8-1.7 1.7-1.7c.2 0 .3 0 .5.1V11c-.2 0-.3 0-.5 0-1.9 0-3.5 1.6-3.5 3.5S9.4 18 11.3 18s3.5-1.6 3.5-3.5V9.7c.8.5 1.7.8 2.6.8V8c-.3 0-.6-.1-.8-.2z" fill="white"/></svg></span>TikTok</label>
                                     <input type="url" id="tmm-tiktok" class="tmf-input" placeholder="https://tiktok.com/...">
                                 </div>
                             </div>
