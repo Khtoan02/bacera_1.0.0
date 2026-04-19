@@ -58,6 +58,28 @@ $bacera_hdr_cart_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_ca
 $bacera_hdr_workshop_url = get_post_type_archive_link( 'workshop' ) ?: home_url( '/workshop/' );
 $bacera_hdr_blog_url     = get_post_type_archive_link( 'post' ) ?: home_url( '/blog/' );
 $bacera_hdr_contact_url  = home_url( '/contact/' );
+
+// Find Our Process page
+$proc_page_id = $wpdb->get_var(
+    "SELECT p.ID FROM {$wpdb->posts} p
+     INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+     WHERE p.post_type = 'page' AND p.post_status = 'publish'
+       AND pm.meta_key = '_wp_page_template'
+       AND pm.meta_value IN ('templates/template-our-process.php','template-our-process.php')
+     LIMIT 1"
+);
+$proc_page = $proc_page_id ? get_permalink( (int) $proc_page_id ) : home_url( '/our-process/' );
+
+// Find Sustainability page
+$sustain_page_id = $wpdb->get_var(
+    "SELECT p.ID FROM {$wpdb->posts} p
+     INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+     WHERE p.post_type = 'page' AND p.post_status = 'publish'
+       AND pm.meta_key = '_wp_page_template'
+       AND pm.meta_value IN ('templates/template-sustainability.php','template-sustainability.php')
+     LIMIT 1"
+);
+$sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : home_url( '/sustainability/' );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -580,11 +602,11 @@ $bacera_hdr_contact_url  = home_url( '/contact/' );
             <nav class="flex-1 grid grid-cols-3 gap-x-8 gap-y-1 content-start py-1">
                 <?php
                 $about_links = [
-                    ['label'=>'About us',      'desc'=>'Our story & values',    'url'=>$about_page],
-                    ['label'=>'Our team',      'desc'=>'Meet the craftspeople',  'url'=>$about_page . '#au-story'],
-                    ['label'=>'Our video',     'desc'=>'Behind the wheel',       'url'=>'#'],
-                    ['label'=>'Our process',   'desc'=>'From clay to ceramic',   'url'=>$about_page . '#au-commits'],
-                    ['label'=>'Sustainability','desc'=>'Earth-conscious craft',   'url'=>$about_page . '#au-goals'],
+                    ['label'=>'About us',      'desc'=>'Our story & values',     'url'=>$about_page],
+                    ['label'=>'Our team',      'desc'=>'Meet the craftspeople',  'url'=>home_url('/our-team/')],
+                    ['label'=>'Our video',     'desc'=>'Behind the wheel',       'url'=>home_url('/our-video/')],
+                    ['label'=>'Our process',   'desc'=>'From clay to ceramic',   'url'=>$proc_page],
+                    ['label'=>'Sustainability','desc'=>'Earth-conscious craft',  'url'=>$sustain_page],
                 ];
                 foreach ($about_links as $al): ?>
                 <a href="<?php echo esc_url($al['url']); ?>"
