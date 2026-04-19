@@ -6,201 +6,13 @@
 
 get_header();
 
-// ── If ?member_id is set → render member detail and stop ─────────────────────
+// ── If ?member_id is set (Legacy fallback) → Route to Detail Template ───────
 if ( ! empty( $_GET['member_id'] ) ) {
-    $member_id = intval( $_GET['member_id'] );
-    global $wpdb;
-    $team_table = $wpdb->prefix . 'bacera_team_members';
-
-    $member = null;
-    if ( $wpdb->get_var( "SHOW TABLES LIKE '{$team_table}'" ) === $team_table ) {
-        $member = $wpdb->get_row(
-            $wpdb->prepare( "SELECT * FROM {$team_table} WHERE id = %d AND is_active = 1", $member_id ),
-            ARRAY_A
-        );
+    $template = locate_template('templates/template-member-detail.php');
+    if ( $template ) {
+        include $template;
+        exit;
     }
-
-    // Fetch same-dept companions
-    $companions = [];
-    if ( $member && $wpdb->get_var( "SHOW TABLES LIKE '{$team_table}'" ) === $team_table ) {
-        $companions = $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT id, name, role, department, photo_url FROM {$team_table}
-                 WHERE is_active = 1 AND department = %s AND id != %d
-                 ORDER BY order_index ASC LIMIT 4",
-                $member['department'], $member['id']
-            ),
-            ARRAY_A
-        ) ?: [];
-    }
-
-    $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80';
-    $team_url       = get_permalink();
-    $home_url       = home_url( '/' );
-
-    // ── Render detail or 404 ──────────────────────────────────────────────────
-    if ( ! $member ): ?>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={theme:{extend:{colors:{bgtheme:'#f8f7f3',textmain:'#3d2f26',textmuted:'#6b5344',accent:'#c0a28e',terracotta:'#d95f47'},fontFamily:{serif:['"Gowun Batang"','serif'],sans:['"Bricolage Grotesque"','sans-serif']}}}}</script>
-    <div class="font-sans antialiased min-h-[60vh] flex items-center justify-center" style="background:#f8f7f3;">
-        <div class="text-center px-6 py-20">
-            <p style="font-size:56px;">👤</p>
-            <h1 style="font-family:'Gowun Batang',serif;font-size:2.5rem;color:#3d2f26;margin:16px 0 12px;">Không tìm thấy thành viên</h1>
-            <p style="color:#6b5344;margin-bottom:28px;">Thành viên này không tồn tại hoặc đã bị ẩn.</p>
-            <a href="<?php echo esc_url( $team_url ); ?>" style="display:inline-flex;align-items:center;gap:10px;background:#d95f47;color:#fff;padding:12px 28px;border-radius:50px;font-size:13px;font-weight:600;text-decoration:none;">
-                ← Về trang Our Team
-            </a>
-        </div>
-    </div>
-
-    <?php else:
-        $name  = $member['name'];
-        $role  = $member['role'];
-        $dept  = $member['department'];
-        $bio   = $member['bio'];
-        $photo = $member['photo_url'] ?: $fallback_photo;
-    ?>
-
-    <!-- ════════════════════════════════ MEMBER DETAIL ════════════════════════ -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    tailwind.config = { theme: { extend: { colors: { bgtheme:'#f8f7f3', textmain:'#3d2f26', textmuted:'#6b5344', accent:'#c0a28e', accentdark:'#8d6a54', terracotta:'#d95f47' }, fontFamily: { serif:['"Gowun Batang"','serif'], sans:['"Bricolage Grotesque"','sans-serif'] } } } }
-    </script>
-    <style>
-    .bg-texture { background-color:#F7F6F0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"); }
-    .divider-art { background-image:linear-gradient(to right,#D0BCA0 50%,transparent 50%); background-size:10px 1px; background-repeat:repeat-x; }
-    </style>
-
-    <div class="font-sans antialiased bg-texture text-textmain selection:bg-accentdark selection:text-white w-full overflow-hidden">
-
-        <!-- Breadcrumb -->
-        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-0">
-            <nav class="flex items-center gap-2 text-xs text-textmuted mb-10 tracking-wide flex-wrap">
-                <a href="<?php echo esc_url($home_url); ?>" class="text-textmain font-medium hover:text-terracotta transition-colors">Homepage</a>
-                <span class="text-accent/60">/</span>
-                <a href="<?php echo esc_url($team_url); ?>" class="hover:text-terracotta transition-colors">Our Team</a>
-                <span class="text-accent/60">/</span>
-                <span><?php echo esc_html($name); ?></span>
-            </nav>
-        </div>
-
-        <!-- ═══ HERO: Photo + Info ═══════════════════════════════════════════ -->
-        <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-24">
-            <div class="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
-
-                <!-- Portrait -->
-                <div class="w-full lg:w-5/12 relative group">
-                    <div class="absolute -inset-4 bg-[#EBE7DF] rounded-tl-[80px] rounded-br-[80px] -z-10 opacity-60 transform -rotate-2 group-hover:rotate-0 transition-transform duration-700"></div>
-                    <div class="overflow-hidden rounded-tl-[80px] rounded-br-[80px] aspect-[3/4] shadow-2xl bg-[#EBE7DF]">
-                        <img src="<?php echo esc_url($photo); ?>"
-                             alt="<?php echo esc_attr($name); ?>"
-                             class="w-full h-full object-cover object-top transition-transform duration-[2s] group-hover:scale-105"
-                             onerror="this.src='<?php echo esc_js($fallback_photo); ?>'">
-                    </div>
-                    <?php if ($dept): ?>
-                    <div class="absolute -bottom-4 left-8 bg-white/90 backdrop-blur-md px-5 py-2 rounded-full shadow-lg border border-white/20">
-                        <span class="text-xs uppercase tracking-[0.25em] text-accentdark font-semibold"><?php echo esc_html($dept); ?></span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Text content -->
-                <div class="w-full lg:w-7/12 lg:pt-6">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="w-8 h-[1px] bg-accentdark"></span>
-                        <span class="text-[10px] uppercase tracking-[0.35em] text-accentdark font-medium">Team member</span>
-                    </div>
-
-                    <h1 class="font-serif text-5xl lg:text-6xl text-textmain leading-tight mb-3">
-                        <?php echo esc_html($name); ?>
-                    </h1>
-                    <?php if ($role): ?>
-                    <p class="text-base text-terracotta font-semibold tracking-wide mb-8"><?php echo esc_html($role); ?></p>
-                    <?php endif; ?>
-
-                    <div class="w-full h-[1px] divider-art opacity-50 mb-8"></div>
-
-                    <?php if ($bio): ?>
-                    <div class="space-y-4 text-[15px] leading-[1.9] text-textmuted font-light pl-5 border-l-2 border-accent/30 mb-10">
-                        <?php foreach (array_filter(array_map('trim', explode("\n", $bio))) as $p): ?>
-                        <p><?php echo nl2br(esc_html($p)); ?></p>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php else: ?>
-                    <p class="text-textmuted text-sm italic mb-10 pl-5">Chưa có thông tin giới thiệu.</p>
-                    <?php endif; ?>
-
-                    <a href="<?php echo esc_url($team_url); ?>"
-                       class="inline-flex items-center gap-3 group text-xs uppercase tracking-[0.2em] text-textmain hover:text-terracotta transition-colors">
-                        <span class="w-10 h-10 rounded-full border border-accent flex items-center justify-center group-hover:border-terracotta transition-colors">
-                            <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                        </span>
-                        Meet the full team
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══ COMPANIONS (same dept) ══════════════════════════════════════ -->
-        <?php if (!empty($companions)): ?>
-        <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-24">
-            <div class="w-full h-[1px] divider-art opacity-40 mb-16"></div>
-            <div class="flex items-center gap-4 mb-10">
-                <span class="w-8 h-[1px] bg-accentdark"></span>
-                <h2 class="text-xs uppercase tracking-[0.3em] text-accentdark font-semibold">
-                    Cùng phòng ban · <?php echo esc_html($dept); ?>
-                </h2>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
-                <?php foreach ($companions as $c):
-                    $c_url = add_query_arg('member_id', $c['id'], $team_url);
-                ?>
-                <a href="<?php echo esc_url($c_url); ?>" class="group flex flex-col text-left">
-                    <div class="overflow-hidden rounded-xl aspect-[3/4] bg-[#EBE7DF] mb-3 shadow-sm">
-                        <img src="<?php echo esc_url($c['photo_url'] ?: $fallback_photo); ?>"
-                             alt="<?php echo esc_attr($c['name']); ?>"
-                             class="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                             onerror="this.src='<?php echo esc_js($fallback_photo); ?>'">
-                    </div>
-                    <h3 class="text-[13px] font-semibold text-textmain mb-0.5 group-hover:text-terracotta transition-colors leading-snug">
-                        <?php echo esc_html($c['name']); ?>
-                    </h3>
-                    <p class="text-[11px] text-textmuted tracking-wide uppercase"><?php echo esc_html($c['role'] ?: '–'); ?></p>
-                </a>
-                <?php endforeach; ?>
-            </div>
-        </section>
-        <?php endif; ?>
-
-        <!-- ═══ CTA BANNER ═══════════════════════════════════════════════════ -->
-        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-20">
-            <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
-                <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>
-                <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10 pointer-events-none"></div>
-                <div class="relative z-10 text-center lg:text-left">
-                    <p class="text-[10px] uppercase tracking-[0.35em] text-accent mb-3">Join the family</p>
-                    <h2 class="font-serif text-3xl lg:text-4xl text-bgtheme leading-snug">
-                        Shaped by hands, <span class="italic text-accent">bound by clay.</span>
-                    </h2>
-                </div>
-                <a href="<?php echo esc_url(home_url('/workshop/')); ?>"
-                   class="relative z-10 shrink-0 inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-textmain bg-bgtheme hover:bg-accent hover:text-white px-7 py-4 rounded-full transition-all duration-300 font-medium shadow-md">
-                    Explore Workshops
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-
-    </div><!-- /wrapper -->
-
-    <?php endif; // end member found/not-found
-    get_footer();
-    return; // ← Stop here, don't render the team listing
 }
 
 // ── NO member_id → render full team listing below ────────────────────────────
@@ -224,7 +36,7 @@ if ( $db_exists ) {
         $dept_map = [];
         foreach ( $db_members as $m ) {
             $member_ids[ $m['name'] ] = $m['id'];
-            $entry = [ 'name' => $m['name'], 'role' => $m['role'], 'img' => $m['photo_url'], 'id' => $m['id'] ];
+            $entry = [ 'name' => $m['name'], 'role' => $m['role'], 'img' => $m['photo_url'], 'id' => $m['id'], 'seo_slug' => $m['seo_slug'] ?? '' ];
             $dept  = $m['department'] ?: '';
 
             if ( strpos( strtolower( $dept ), 'giám đốc' ) !== false || $dept === 'Ban Giám đốc' ) {
@@ -382,7 +194,11 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 lg:gap-8">
             <?php foreach ($board as $member):
-                $m_url = $member['id'] > 0 ? add_query_arg('member_id', $member['id'], $detail_base) : '';
+                if ( !empty($member['seo_slug']) ) {
+                    $m_url = home_url( '/our-team/' . $member['seo_slug'] . '/' );
+                } else {
+                    $m_url = $member['id'] > 0 ? add_query_arg('member_id', $member['id'], $detail_base) : '';
+                }
             ?>
             <?php if ($m_url): ?><a href="<?php echo esc_url($m_url); ?>" class="member-card group"><?php else: ?><div class="member-card group"><?php endif; ?>
                 <!-- Portrait -->
@@ -424,7 +240,11 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6 row-gap-10">
             <?php foreach ($dept['members'] as $member):
-                $m_url = !empty($member['id']) ? add_query_arg('member_id', $member['id'], $detail_base) : '';
+                if ( !empty($member['seo_slug']) ) {
+                    $m_url = home_url( '/our-team/' . $member['seo_slug'] . '/' );
+                } else {
+                    $m_url = !empty($member['id']) ? add_query_arg('member_id', $member['id'], $detail_base) : '';
+                }
             ?>
             <?php if ($m_url): ?><a href="<?php echo esc_url($m_url); ?>" class="member-card group"><?php else: ?><div class="member-card group"><?php endif; ?>
                 <!-- Portrait -->

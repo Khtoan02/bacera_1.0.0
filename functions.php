@@ -34,10 +34,29 @@ add_action( 'template_redirect', function() {
     if ( get_query_var( 'bacera_img_slug' ) ) {
         // Gọi hàm xử lý từ Utils để đẩy dữ liệu ảnh về trình duyệt 
         Bacera_Utils::handle_image_streaming();
+        exit;
+    }
+
+    // 4. Bắt route /our-team/{slug}
+    $member_slug = get_query_var('bacera_member_slug');
+    if ( $member_slug ) {
+        $template = locate_template('templates/template-member-detail.php');
+        if ( $template ) {
+            $_GET['member_slug'] = $member_slug;
+            include $template;
+            exit;
+        }
     }
 });
 
 add_action( 'init', function() {
+    add_rewrite_tag('%bacera_member_slug%', '([^/]+)');
+    add_rewrite_rule(
+        '^our-team/([^/]+)/?$',
+        'index.php?bacera_member_slug=$matches[1]',
+        'top'
+    );
+    
     register_post_type( 'pancake_product', [
         'labels'      => [ 'name' => 'Pancake Products' ],
         'public'      => true, // Quan trọng để get_page_by_path hoạt động
@@ -132,7 +151,7 @@ add_action('after_switch_theme', function() {
 add_action('init', function() {
     $rules = get_option('rewrite_rules');
     // Kiểm tra xem rule workshop có tồn tại chưa
-    if ( empty($rules) || ! isset($rules['^workshop/([^/]+)/?$']) ) {
+    if ( empty($rules) || ! isset($rules['^workshop/([^/]+)/?$']) || ! isset($rules['^our-team/([^/]+)/?$']) ) {
         // Flush vào cuối request này (an toàn và được lưu vào DB ngay)
         add_action('shutdown', function() {
             flush_rewrite_rules(true);
