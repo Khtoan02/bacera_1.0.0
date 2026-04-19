@@ -20,6 +20,9 @@ class MainController {
         // Init DB tables (payment)
         \Bacera\Database\PaymentTables::init();
 
+        // Init DB tables (video)
+        \Bacera\Database\VideoTables::init();
+
         // Bảng bacera_customers — tạo ngay khi theme boot (không chỉ admin_init), tránh deploy chỉ frontend / WP Pusher không vào admin.
         $this->ensureBaceraCustomerSchema();
 
@@ -42,6 +45,7 @@ class MainController {
             new AdminWorkshopController();  // Workshop DB + 4 trang quản lý
             new AdminPaymentController();   // Payment methods + promo codes
             new AdminTeamController();      // Our Team member management
+            new AdminVideoController();     // Video library & categories
         }
     }
 
