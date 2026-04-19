@@ -1202,15 +1202,148 @@ class AdminTeamController {
                         <div class="tmf-sec-body">
                             <style>
                                 .social-icon-label { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--text); margin-bottom:6px; }
-                                .social-icon-wrapper { width:32px; height:32px; flex-shrink:0; display:flex; items-center; justify-content:center; border-radius:8px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.05); border:1px solid var(--border); }
-                                .social-icon-wrapper svg { width:20px; height:20px; }
+                                .social-icon-wrapper { width:32px; height:32px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:8px; overflow:hidden; }
+                                .social-icon-wrapper svg,.social-icon-wrapper img { width:32px; height:32px; display:block; }
                             </style>
+
                             <div class="tmf-row2">
                                 <div class="tmf-field">
                                     <label class="social-icon-label">
-                                        <div class="social-icon-wrapper">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="#6b5344" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 .84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                        </div>
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 93 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="93" height="92" rx="12" fill="#4CAF50"/><path d="M62 57.7c-.1-1.1-.9-2.5-2.2-3.9-1.3-1.4-2.9-2.7-4.4-3.5-1.5-.8-2.9-.7-3.9.3l-2.2 2.2c-.3.3-.7.5-1 .4-.3-.1-1.5-.6-4-3.1-2.5-2.5-3-3.7-3.1-4-.1-.3.1-.7.4-1l2.2-2.2c1-1 1.1-2.4.3-3.9-.8-1.5-2.1-3.1-3.5-4.4-1.4-1.3-2.8-2.1-3.9-2.2-1.1-.1-2 .3-2.7 1l-2 2c-1.5 1.5-2.2 3.6-2 5.7.2 2.1 1.2 5.4 4.5 8.7 3.3 3.3 6.6 4.3 8.7 4.5 2.1.2 4.2-.5 5.7-2l2-2c.7-.7 1.1-1.6 1-2.7z" fill="white"/></svg></div>
+                                        Điện thoại
+                                    </label>
+                                    <input type="text" name="phone" class="tmf-input" placeholder="090..." value="<?php echo esc_attr($m['phone'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 92 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.638672" y="0.5" width="90.5618" height="90.5618" rx="11.5" fill="white" stroke="#C4CFE3"/><path d="M22.0065 66.1236H30.4893V45.5227L18.3711 36.4341V62.4881C18.3711 64.4997 20.001 66.1236 22.0065 66.1236Z" fill="#4285F4"/><path d="M59.5732 66.1236H68.056C70.0676 66.1236 71.6914 64.4937 71.6914 62.4881V36.4341L59.5732 45.5227" fill="#34A853"/><path d="M59.5732 29.7693V45.5229L71.6914 36.4343V31.587C71.6914 27.0912 66.5594 24.5282 62.9663 27.2245" fill="#FBBC04"/><path d="M30.4893 45.5227V29.769L45.0311 40.6754L59.5729 29.769V45.5227L45.0311 56.429" fill="#EA4335"/><path d="M18.3711 31.587V36.4343L30.4893 45.5229V29.7693L27.0962 27.2245C23.4971 24.5282 18.3711 27.0912 18.3711 31.587Z" fill="#C5221F"/></svg></div>
+                                        Email
+                                    </label>
+                                    <input type="email" name="email" class="tmf-input" placeholder="admin@domain.com" value="<?php echo esc_attr($m['email'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#337FFF"/><path d="M57.4233 48.6403L58.7279 40.3588H50.6917V34.9759C50.6917 32.7114 51.8137 30.4987 55.4013 30.4987H59.1063V23.4465C56.9486 23.1028 54.7685 22.9168 52.5834 22.8901C45.9692 22.8901 41.651 26.8626 41.651 34.0442V40.3588H34.3193V48.6403H41.651V68.671H50.6917V48.6403H57.4233Z" fill="white"/></svg></div>
+                                        Facebook
+                                    </label>
+                                    <input type="url" name="facebook" class="tmf-input" placeholder="https://facebook.com/..." value="<?php echo esc_attr($m['facebook'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="url(#ig_exp)"/><path d="M38.3762 45.7808C38.3762 41.1786 42.1083 37.4468 46.7132 37.4468C51.3182 37.4468 55.0522 41.1786 55.0522 45.7808C55.0522 50.383 51.3182 54.1148 46.7132 54.1148C42.1083 54.1148 38.3762 50.383 38.3762 45.7808ZM33.8683 45.7808C33.8683 52.8708 39.619 58.618 46.7132 58.618C53.8075 58.618 59.5581 52.8708 59.5581 45.7808C59.5581 38.6908 53.8075 32.9436 46.7132 32.9436C39.619 32.9436 33.8683 38.6908 33.8683 45.7808ZM36.4001 20.9322C33.7371 21.0534 31.9174 21.4754 30.3282 22.0934C28.6824 22.7316 27.2892 23.5878 25.897 24.977C24.5047 26.3662 23.6502 27.7608 23.0116 29.4056C22.3933 30.9948 21.971 32.8124 21.8497 35.4738C21.7265 38.1394 21.6982 38.9916 21.6982 45.7808C21.6982 52.57 21.7265 53.4222 21.8497 56.0878C21.971 58.7494 22.3933 60.5668 23.0116 62.156C23.6502 63.7998 24.5049 65.196 25.897 66.5846C27.289 67.9732 28.6824 68.8282 30.3282 69.4682C31.9204 70.0862 33.7371 70.5082 36.4001 70.6294C39.0687 70.7506 39.92 70.7808 46.7132 70.7808C53.5065 70.7808 54.3592 70.7526 57.0264 70.6294C59.6896 70.5082 61.5081 70.0862 63.0983 69.4682C64.7431 68.8282 66.1373 67.9738 67.5295 66.5846C68.9218 65.1954 69.7745 63.7998 70.4149 62.156C71.0332 60.5668 71.4575 58.7492 71.5768 56.0878C71.698 53.4202 71.7262 52.57 71.7262 45.7808C71.7262 38.9916 71.698 38.1394 71.5768 35.4738C71.4555 32.8122 71.0332 30.9938 70.4149 29.4056C69.7745 27.7618 68.9196 26.3684 67.5295 24.977C66.1395 23.5856 64.7431 22.7316 63.1003 22.0934C61.5081 21.4754 59.6894 21.0514 57.0284 20.9322C54.3612 20.811 53.5085 20.7808 46.7152 20.7808C39.922 20.7808 39.0687 20.809 36.4001 20.9322Z" fill="white"/><defs><linearGradient id="ig_exp" x1="90.9407" y1="91.5618" x2="-0.621143" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#FBE18A"/><stop offset="0.21" stop-color="#FCBB45"/><stop offset="0.38" stop-color="#F75274"/><stop offset="0.52" stop-color="#D53692"/><stop offset="0.74" stop-color="#8F39CE"/><stop offset="1" stop-color="#5B4FE9"/></linearGradient></defs></svg></div>
+                                        Instagram
+                                    </label>
+                                    <input type="url" name="instagram" class="tmf-input" placeholder="https://instagram.com/..." value="<?php echo esc_attr($m['instagram'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="0.138672" width="91.5618" height="91.5618" rx="12" fill="black"/><path d="M50.7568 42.1716L69.3704 21H64.9596L48.7974 39.383L35.8887 21H21L40.5205 48.7983L21 71H25.4111L42.4788 51.5869L56.1113 71H71L50.7557 42.1716H50.7568ZM44.7152 49.0433L42.7374 46.2752L27.0005 24.2492H33.7756L46.4755 42.0249L48.4533 44.7929L64.9617 67.8986H58.1865L44.7152 49.0443V49.0433Z" fill="white"/></svg></div>
+                                        X / Twitter
+                                    </label>
+                                    <input type="url" name="x_twitter" class="tmf-input" placeholder="https://x.com/..." value="<?php echo esc_attr($m['x_twitter'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#010101"/><path d="M16.6 7.8c-.7-.5-1.3-1.3-1.5-2.3H13v9.5c0 1-.9 1.7-1.7 1.7-1 0-1.7-.8-1.7-1.7s.8-1.7 1.7-1.7c.2 0 .3 0 .5.1V11c-.2 0-.3 0-.5 0-1.9 0-3.5 1.6-3.5 3.5S9.4 18 11.3 18s3.5-1.6 3.5-3.5V9.7c.8.5 1.7.8 2.6.8V8c-.3 0-.6-.1-.8-.2z" fill="white"/></svg></div>
+                                        TikTok
+                                    </label>
+                                    <input type="url" name="tiktok" class="tmf-input" placeholder="https://tiktok.com/@..." value="<?php echo esc_attr($m['tiktok'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#006699"/><path d="M37.1339 63.4304V40.9068H29.6473V63.4304H37.1346H37.1339ZM33.3922 37.8321C36.0023 37.8321 37.6273 36.1025 37.6273 33.9411C37.5785 31.7304 36.0023 30.0491 33.4418 30.0491C30.8795 30.0491 29.2061 31.7304 29.2061 33.9409C29.2061 36.1023 30.8305 37.8319 33.3431 37.8319H33.3916L33.3922 37.8321ZM41.2777 63.4304H48.7637V50.8535C48.7637 50.1813 48.8125 49.5072 49.0103 49.0271C49.5513 47.6815 50.7831 46.2887 52.8517 46.2887C55.5599 46.2887 56.644 48.354 56.644 51.3822V63.4304H64.1297V50.516C64.1297 43.598 60.4369 40.3787 55.5115 40.3787C51.4733 40.3787 49.6998 42.6357 48.7144 44.173H48.7643V40.9075H41.2781C41.3759 43.0205 41.2775 63.4312 41.2775 63.4312L41.2777 63.4304Z" fill="white"/></svg></div>
+                                        LinkedIn
+                                    </label>
+                                    <input type="url" name="linkedin" class="tmf-input" placeholder="https://linkedin.com/in/..." value="<?php echo esc_attr($m['linkedin'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#FF0000"/><path fill-rule="evenodd" clip-rule="evenodd" d="M67.5615 29.2428C69.8115 29.8504 71.58 31.6234 72.1778 33.8708C73.2654 37.9495 73.2654 46.4647 73.2654 46.4647C73.2654 46.4647 73.2654 54.98 72.1778 59.0586C71.5717 61.3144 69.8032 63.0873 67.5615 63.6866C63.4932 64.7771 47.1703 64.7771 47.1703 64.7771C47.1703 64.7771 30.8557 64.7771 26.7791 63.6866C24.5291 63.079 22.7606 61.306 22.1628 59.0586C21.0752 54.98 21.0752 46.4647 21.0752 46.4647C21.0752 46.4647 21.0752 37.9495 22.1628 33.8708C22.7689 31.615 24.5374 29.8421 26.7791 29.2428C30.8557 28.1523 47.1703 28.1523 47.1703 28.1523C47.1703 28.1523 63.4932 28.1523 67.5615 29.2428ZM55.5142 46.4647L41.9561 54.314V38.6154L55.5142 46.4647Z" fill="white"/></svg></div>
+                                        YouTube
+                                    </label>
+                                    <input type="url" name="youtube" class="tmf-input" placeholder="https://youtube.com/..." value="<?php echo esc_attr($m['youtube'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#E60023"/><path d="M44.2808 23.0437C36.8492 23.893 29.4439 30.0479 29.1382 38.84C28.9461 44.2083 30.435 48.2356 35.4258 49.3664C37.5915 45.4553 34.7272 44.5927 34.2818 41.7633C32.4523 30.1686 47.346 22.2615 55.14 30.3563C60.5324 35.9615 56.9826 53.206 48.2848 51.4136C39.9537 49.7017 52.3629 35.9749 45.713 33.2796C40.3074 31.0894 37.4343 39.9798 39.9974 44.396C38.4953 51.9902 35.2599 59.1464 36.5698 68.6715C40.8183 65.5158 42.2504 59.4727 43.425 53.1702C45.5601 54.4978 46.6998 55.8789 49.4244 56.0935C59.4714 56.8891 65.0822 45.8263 63.7112 35.6218C62.4929 26.5749 53.6729 21.971 44.2808 23.0437Z" fill="white"/></svg></div>
+                                        Pinterest
+                                    </label>
+                                    <input type="url" name="pinterest" class="tmf-input" placeholder="https://pinterest.com/..." value="<?php echo esc_attr($m['pinterest'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="url(#msg_exp)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M46.4114 21C32.0561 21 20.9307 31.317 20.9307 45.2508C20.9307 52.5396 23.9761 58.8375 28.9338 63.1887C29.3491 63.5559 29.6003 64.0639 29.6208 64.6122L29.7592 69.059C29.8054 70.4775 31.2973 71.398 32.62 70.8296L37.6752 68.6414C38.1058 68.4553 38.5826 68.4201 39.0338 68.5408C41.3563 69.1696 43.8326 69.5016 46.4114 69.5016C60.7668 69.5016 71.8922 59.1846 71.8922 45.2508C71.8922 31.317 60.7668 21 46.4114 21ZM61.7102 39.6572L54.2249 51.3072C53.0354 53.1584 50.4822 53.6211 48.698 52.3082L42.7457 47.9269C42.1971 47.5245 41.4486 47.5295 40.9051 47.9319L32.8661 53.9179C31.7946 54.7177 30.3898 53.4551 31.1127 52.3384L38.598 40.6884C39.7875 38.8372 42.3407 38.3745 44.1248 39.6874L50.0772 44.0687C50.6258 44.4711 51.3743 44.4661 51.9177 44.0637L59.9567 38.0777C61.0283 37.2779 62.433 38.5405 61.7102 39.6572Z" fill="white"/><defs><radialGradient id="msg_exp" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(15.4753 92.5593) scale(100.718 100.715)"><stop stop-color="#0099FF"/><stop offset="0.6" stop-color="#A033FF"/><stop offset="0.9" stop-color="#FF5280"/><stop offset="1" stop-color="#FF7061"/></radialGradient></defs></svg></div>
+                                        Messenger
+                                    </label>
+                                    <input type="url" name="messenger" class="tmf-input" placeholder="https://m.me/..." value="<?php echo esc_attr($m['messenger'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#00D95F"/><path d="M23.5068 66.8405L26.7915 54.6381C24.1425 49.8847 23.3009 44.3378 24.4211 39.0154C25.5413 33.693 28.5482 28.952 32.89 25.6624C37.2319 22.3729 42.6173 20.7554 48.0583 21.1068C53.4992 21.4582 58.6306 23.755 62.5108 27.5756C66.3911 31.3962 68.7599 36.4844 69.1826 41.9065C69.6053 47.3286 68.0535 52.7208 64.812 57.0938C61.5705 61.4668 56.8568 64.5271 51.5357 65.7133C46.2146 66.8994 40.6432 66.1318 35.8438 63.5513L23.5068 66.8405ZM36.4386 58.985L37.2016 59.4365C40.6779 61.4918 44.7382 62.3423 48.7498 61.8555C52.7613 61.3687 56.4987 59.5719 59.3796 56.7452C62.2605 53.9185 64.123 50.2206 64.6769 46.2279C65.2308 42.2351 64.445 38.1717 62.4419 34.6709C60.4388 31.1701 57.331 28.4285 53.6027 26.8734C49.8745 25.3184 45.7352 25.0372 41.8299 26.0736C37.9247 27.11 34.4729 29.4059 32.0124 32.6035C29.5519 35.801 28.2209 39.7206 28.2269 43.7514C28.2237 47.0937 29.1503 50.3712 30.9038 53.2192L31.3823 54.0061L29.546 60.8167L36.4386 58.985Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M54.9566 46.8847C54.0759 47.4007 52.2714 48.0327 52.0387 49.1033C51.9416 49.6269 52.0093 50.1675 52.2326 50.6512C52.6125 51.4518 53.184 52.1469 53.8965 52.6755C54.609 53.2041 55.4409 53.5499 56.319 53.6824C57.86 53.8568 59.4196 53.6117 60.8322 52.973C62.192 52.5086 63.4937 51.8897 64.7117 51.1284C67.139 49.6305 69.2514 47.6767 70.932 45.3755C71.449 44.6749 71.9282 43.9473 72.3673 43.1956C72.976 42.2144 73.4379 41.1497 73.7381 40.0354C73.8563 39.5716 73.9172 39.0951 73.9192 38.6165C73.9489 37.7643 73.7865 36.9163 73.4441 36.135C73.1016 35.3537 72.5879 34.6589 71.9406 34.1019C71.5677 33.7709 71.1068 33.5546 70.6135 33.4791C70.1202 33.4036 69.6155 33.472 69.1602 33.6762C68.2777 34.42 67.627 35.4002 67.2851 36.5011C66.8429 37.2863 66.6364 38.1818 66.6903 39.0809C66.9329 39.8959 67.3777 40.6368 67.9834 41.235C68.1565 41.3827 68.2653 41.5916 68.287 41.8178C68.3088 42.044 68.2416 42.2697 68.0998 42.4475C66.4372 45.2965 63.8578 47.5012 60.7804 48.7034C60.6092 48.797 60.4097 48.8251 60.2192 48.7823C60.0287 48.7396 59.8604 48.629 59.7459 48.4713C59.2028 47.8134 58.6596 46.4977 57.8191 46.1495C57.2596 46.0186 56.6776 46.0168 56.1173 46.1442C55.5571 46.2716 55.0334 46.5249 54.9566 46.8847Z" fill="white"/></svg></div>
+                                        WhatsApp
+                                    </label>
+                                    <input type="text" name="whatsapp" class="tmf-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['whatsapp'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 92 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="#34AADF"/><path d="M25.0881 43.5652C25.0881 43.5652 43.716 35.7194 50.1765 32.9567C52.6532 31.8518 61.0518 28.3155 61.0518 28.3155C61.0518 28.3155 64.9282 26.7685 64.6052 30.5256C64.4974 32.0728 63.6361 37.4874 62.7747 43.3442C61.4825 51.6322 60.0827 60.6935 60.0827 60.6935C60.0827 60.6935 59.8674 63.2352 58.0369 63.6772C56.2065 64.1192 53.1914 62.1302 52.6532 61.6881C52.2223 61.3566 44.5774 56.3838 41.7778 53.9527C41.0241 53.2897 40.1627 51.9637 41.8854 50.4166C45.7618 46.7699 50.3919 42.2392 53.1914 39.3661C54.4836 38.04 55.7757 34.9459 50.3919 38.703C42.7469 44.1178 35.2096 49.201 35.2096 49.201C35.2096 49.201 33.4868 50.306 30.2565 49.3115C27.0261 48.317 23.2575 46.9909 23.2575 46.9909C23.2575 46.9909 20.6734 45.3334 25.0881 43.5652Z" fill="white"/></svg></div>
+                                        Telegram
+                                    </label>
+                                    <input type="url" name="telegram" class="tmf-input" placeholder="https://t.me/..." value="<?php echo esc_attr($m['telegram'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/250px-Icon_of_Zalo.svg.png" alt="Zalo" width="32" height="32" style="border-radius:8px;object-fit:contain;"></div>
+                                        Zalo
+                                    </label>
+                                    <input type="text" name="zalo" class="tmf-input" placeholder="SĐT hoặc link Zalo" value="<?php echo esc_attr($m['zalo'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 92 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="#754A91"/><path d="M35.396 62.5C33.27 61.96 31.5 60.99 30.01 59.68c-1.09-.98-1.99-2.14-2.67-3.43-.96-1.86-1.6-3.87-1.89-5.94-.36-2.6-.49-5.22-.38-7.84.03-1.22.09-2.43.23-3.65.22-2.32.82-4.59 1.75-6.73 1.16-2.63 3.26-4.74 5.9-5.93 1.8-.81 3.69-1.41 5.63-1.77 1.91-.36 3.83-.58 5.77-.66 1.75-.06 3.5-.04 5.24.07 2.5.1 4.97.52 7.36 1.22 1.77.51 3.46 1.27 5.01 2.27 1.51 1.02 2.72 2.41 3.54 4.03.96 1.89 1.61 3.92 1.93 5.01.21 1.24.35 2.49.41 3.75.09 1.56.08 3.12.02 4.67-.06 1.55-.19 3.06-.39 4.58-.24 2.28-.95 4.49-2.08 6.49-1.47 2.53-3.83 4.44-6.62 5.38-1.91.66-3.89 1.13-5.9 1.41-1.47.2-2.94.35-4.42.41-1.13.05-2.26.04-3.39.02-.64 0-1.28-.06-1.92-.12-.13-.01-.27.01-.39.05-.58.23-1.1.65-1.47 1.22-1.29 1.53-2.63 3.02-3.98 4.51-.25.27-.53.51-.85.69-.41.27-.91.28-1.35.06-.44-.22-.78-.63-.93-1.12-.14-.42-.2-.85-.2-1.29V62.5z" fill="white"/><path d="M34.5 37.5c.8-.76 1.3-1.31 2.19-1.8.74-.47 1.62-.39 2.12.28.95.99 1.81 2.07 2.55 3.22.37.52.64 1.1.82 1.71.06.48-.23.97-.44 1.37-.4.39-.83.76-1.28 1.09-.53.38-.62 1.03-.44 1.46.28 1.31.92 2.52 1.84 3.5 1.12 1.36 2.56 2.41 4.2 3.08.7.3 1.47.16 1.9-.24.25-.31.52-.61.74-.93.49-.71 1.32-.81 2.16-.54 1.68.68 2.8 1.47 3.84 2.36.66.54 1.14 1.22 1.3 1.5.1.35.07.72-.07 1.05-.22.56-.53 1.08-.93 1.54-.5.68-1.13 1.26-1.86 1.69-.73.43-1.55.38-2.32.15-2.84-1.13-5.49-2.67-7.86-4.57-2.32-1.89-4.35-4.11-6.02-6.59-1.41-2.05-2.53-4.28-3.33-6.63-.16-.58-.28-1.17-.33-1.76z" fill="white"/></svg></div>
+                                        Viber
+                                    </label>
+                                    <input type="text" name="viber" class="tmf-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['viber'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 92 92" fill="none"><rect x="0.138672" width="91.5618" height="91.5618" rx="12" fill="#00B7F0"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.0659 43.0286C37.6308 43.9944 38.4114 44.8169 39.3468 45.4319C40.5861 46.2419 41.9036 46.9259 43.2795 47.4736C44.8179 48.1158 46.0114 48.6602 46.8601 49.1069C47.5778 49.4595 48.2292 49.9331 48.7856 50.5069C49.4397 52.1569 48.3952 54.4169 47.4835 55.0297C46.3928 55.3201 45.2967 55.2419 43.453 55.0519C42.0181 54.5986 40.3546 53.8086 39.1599 53.3456C38.5192 53.3369 36.9491 53.8902 36.3401 55.4236C36.49 56.4915 36.8039 56.9302 37.1821 57.409C37.6711 57.7888 38.2289 58.0369 40.4105 58.9814C42.7753 59.4283 45.1516 59.3452 48.6018 59.0998C50.2305 58.5186 53.6093 56.0136 54.8679 53.3425C54.8173 51.8669 53.9447 48.4269 52.5071 46.5875C51.5286 45.9502 47.6043 43.9352 47.1504 43.7536C45.7455 43.1736 43.9803 42.3569 42.29 41.1486C41.6627 39.5602 41.9574 38.266 42.8707 37.3019C43.7839 36.7581 44.8349 36.4895 45.8974 36.5286C48.3134 36.8286 51.874 37.9819 53.2906 37.3919C53.7271 36.6721 53.8546 35.8402 53.319 34.3519C52.8388 33.848 51.5837 33.2452 49.3662 32.6736C47.24 32.4185 41.364 33.2369 38.6787 34.5607C36.285 39.7069 37.0659 43.0286 37.0659 43.0286Z" fill="white"/></svg></div>
+                                        Skype
+                                    </label>
+                                    <input type="text" name="skype" class="tmf-input" placeholder="Skype ID" value="<?php echo esc_attr($m['skype'] ?? ''); ?>">
+                                </div>
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#51C332"/><path d="M55.8615 36.5403C56.8503 36.5403 57.8161 36.6225 58.769 36.74C57.0463 29.1747 49.1004 23.4524 39.5457 23.4524C28.7309 23.4524 19.9658 30.7781 19.9658 39.8123C19.9658 45.021 22.8964 49.6421 27.4419 52.6322L24.8606 57.8086L31.8926 54.7884C33.4005 55.3254 34.9674 55.7676 36.6411 55.9734C36.4124 54.975 36.2824 53.9515 36.2824 52.901C36.2824 43.8797 45.0634 36.5403 55.8615 36.5403ZM46.0722 30.8139C47.4235 30.8139 48.5194 31.9132 48.5194 33.2682C48.5194 34.6237 47.4236 35.7222 46.0722 35.7222C44.7201 35.7222 43.6247 34.6237 43.6247 33.2682C43.6247 31.9131 44.7201 30.8139 46.0722 30.8139ZM33.0189 35.7222C31.6674 35.7222 30.5715 34.6237 30.5715 33.2682C30.5715 31.9132 31.6675 30.8139 33.0189 30.8139C34.3703 30.8139 35.4664 31.9132 35.4664 33.2682C35.4663 34.6237 34.3702 35.7222 33.0189 35.7222Z" fill="white"/><path d="M72.1779 52.9008C72.1779 45.6724 64.8709 39.8123 55.8615 39.8123C46.8517 39.8123 39.5457 45.6724 39.5457 52.9008C39.5457 60.1287 46.8517 65.9889 55.8615 65.9889C57.3432 65.9889 58.7525 65.7794 60.12 65.4821L68.9148 69.2608L65.8731 63.1654C69.6849 60.7698 72.1779 57.0859 72.1779 52.9008ZM50.9668 52.0827C49.6154 52.0827 48.5193 50.9838 48.5193 49.6281C48.5193 48.2731 49.6153 47.1746 50.9668 47.1746C52.3186 47.1746 53.4141 48.2736 53.4141 49.6281C53.4141 50.9839 52.3184 52.0827 50.9668 52.0827ZM60.7564 52.0827C59.4043 52.0827 58.3091 50.9838 58.3091 49.6281C58.3091 48.2731 59.4042 47.1746 60.7564 47.1746C62.1083 47.1746 63.2039 48.2736 63.2039 49.6281C63.2039 50.9839 62.1083 52.0827 60.7564 52.0827Z" fill="white"/></svg></div>
+                                        WeChat
+                                    </label>
+                                    <input type="text" name="wechat" class="tmf-input" placeholder="WeChat ID" value="<?php echo esc_attr($m['wechat'] ?? ''); ?>">
+                                </div>
+                            </div>
+                            <div class="tmf-row2" style="margin-top:12px;">
+                                <div class="tmf-field">
+                                    <label class="social-icon-label">
+                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 93 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="93" height="92" rx="12" fill="#06C755"/><path d="M78 40.2C78 25.5 63.2 13.5 46.3 13.5 29.4 13.5 14.6 25.5 14.6 40.2c0 13.2 11.7 24.3 27.6 26.4 1.1.2 2.5.7 2.9 1.7.4 1 .3 2.4 0 3.3l-.5 2.7c-.1 1-.9 3.8 1.5 2.7 2.4-1.1 13.3-7.8 18.2-13.4C69.1 59 78 50.2 78 40.2zM35.8 48.2H29v-14h3.1v11h3.7v3zm4.6 0h-3.1V34.2h3.1v14zm14 0h-3l-5.3-9.4v9.4H43V34.2h3l5.3 9.3v-9.3h3.1v14zm12.6-11h-6.2v2.5h6.2v3.1h-6.2v2.5h6.2v3H57.7V34.2H67v3z" fill="white"/></svg></div>
+                                        LINE App
+                                    </label>
+                                    <input type="text" name="line_app" class="tmf-input" placeholder="Line ID" value="<?php echo esc_attr($m['line_app'] ?? ''); ?>">
+                                </div>
+                            </div>
+                        </div>
                                         Số điện thoại
                                     </label>
                                     <input type="text" name="phone" class="tmf-input" placeholder="090..." value="<?php echo esc_attr($m['phone'] ?? ''); ?>">
