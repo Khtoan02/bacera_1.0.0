@@ -28,6 +28,7 @@ if ( is_singular('post') ) {
 get_header();
 
 $blog_url    = get_post_type_archive_link('post') ?: home_url('/blog/');
+$blog_cat_base = home_url('/blog/category/');
 $home_url    = home_url('/');
 $post_id     = get_the_ID();
 $post_url    = get_permalink($post_id);
@@ -180,7 +181,7 @@ tailwind.config = {
                 <a href="<?php echo esc_url($blog_url); ?>" class="hover:text-white transition-colors">Blog</a>
                 <?php if ($post_cats): ?>
                 <span>/</span>
-                <a href="<?php echo esc_url(get_category_link($post_cats[0]->term_id)); ?>" class="hover:text-white transition-colors"><?php echo esc_html($post_cats[0]->name); ?></a>
+                <a href="<?php echo esc_url($blog_cat_base . $post_cats[0]->slug . '/'); ?>" class="hover:text-white transition-colors"><?php echo esc_html($post_cats[0]->name); ?></a>
                 <?php endif; ?>
             </nav>
 
@@ -213,7 +214,7 @@ tailwind.config = {
 <!-- ═══════════════════════════════════════════════════
      2. ARTICLE BODY
 ═══════════════════════════════════════════════════ -->
-<div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 py-14">
+<div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-14">
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-16" id="article-grid">
 
         <!-- Main content -->
@@ -341,7 +342,7 @@ tailwind.config = {
                     <h4 class="text-[11px] uppercase tracking-[0.25em] text-accentdark font-semibold mb-4">Categories</h4>
                     <div class="flex flex-col gap-2">
                         <?php foreach ($post_cats as $pcat): ?>
-                        <a href="<?php echo esc_url(get_category_link($pcat->term_id)); ?>"
+                        <a href="<?php echo esc_url($blog_cat_base . $pcat->slug . '/'); ?>"
                            class="flex items-center justify-between text-[13px] text-textmuted hover:text-terracotta transition-colors group">
                             <span class="group-hover:underline"><?php echo esc_html($pcat->name); ?></span>
                             <span class="text-[11px] text-accent/60"><?php echo $pcat->count; ?></span>
@@ -367,7 +368,7 @@ tailwind.config = {
      3. RELATED POSTS
 ═══════════════════════════════════════════════════ -->
 <?php if ($related_query->have_posts()): ?>
-<section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-20">
+<section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
     <div class="w-full h-[1px] divider-art opacity-40 mb-14"></div>
     <div class="flex items-center gap-4 mb-8">
         <span class="w-8 h-[1px] bg-accentdark"></span>
@@ -405,7 +406,7 @@ tailwind.config = {
 <!-- ═══════════════════════════════════════════════════
      4. CTA FOOTER
 ═══════════════════════════════════════════════════ -->
-<div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-20">
+<div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
     <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
         <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>
         <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10 pointer-events-none"></div>

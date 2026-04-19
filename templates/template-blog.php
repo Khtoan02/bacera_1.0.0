@@ -32,6 +32,7 @@ $total_pages = $query->max_num_pages;
 
 $home_url = home_url('/');
 $blog_url = get_permalink();
+$blog_cat_base = home_url('/blog/category/');
 ?>
 
 <!-- Tailwind -->
@@ -83,7 +84,7 @@ tailwind.config = {
 
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
 
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-0">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-0">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-4 tracking-wide">
@@ -121,7 +122,7 @@ tailwind.config = {
     ?>
 
     <!-- ═══ HERO POST ═══ -->
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-16">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-16">
         <a href="<?php echo esc_url($hero_url); ?>" class="hero-post group relative grid lg:grid-cols-[1fr_480px] gap-0 rounded-2xl overflow-hidden bg-textmain shadow-2xl min-h-[420px]">
             <!-- Image -->
             <div class="overflow-hidden relative order-2 lg:order-1 min-h-[260px] lg:min-h-0">
@@ -165,14 +166,14 @@ tailwind.config = {
 
     <!-- ═══ CATEGORY FILTER ═══ -->
     <?php if ($all_cats): ?>
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-12">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-12">
         <div class="flex items-center gap-2 flex-wrap">
             <a href="<?php echo esc_url($blog_url); ?>"
                class="cat-pill inline-flex items-center px-4 py-2 rounded-full border border-accent/30 text-[12px] font-medium tracking-wide text-textmuted <?php echo !$current_cat ? 'active' : ''; ?>">
                 All posts
             </a>
             <?php foreach ($all_cats as $cat): ?>
-            <a href="<?php echo esc_url(add_query_arg('cat', $cat->slug, $blog_url)); ?>"
+            <a href="<?php echo esc_url($blog_cat_base . $cat->slug . '/'); ?>"
                class="cat-pill inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-accent/30 text-[12px] font-medium tracking-wide text-textmuted <?php echo $current_cat === $cat->slug ? 'active' : ''; ?>">
                 <?php echo esc_html($cat->name); ?>
                 <span class="text-accent/60 text-[10px]"><?php echo $cat->count; ?></span>
@@ -183,7 +184,7 @@ tailwind.config = {
     <?php endif; ?>
 
     <!-- ═══ POST GRID ═══ -->
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-20">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
 
         <?php if ($query->have_posts()): ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -214,7 +215,7 @@ tailwind.config = {
                 <!-- Meta -->
                 <div class="flex items-center gap-3 mb-3">
                     <?php if ($p_cats): ?>
-                    <a href="<?php echo esc_url(add_query_arg('cat', $p_cats[0]->slug, $blog_url)); ?>"
+                    <a href="<?php echo esc_url($blog_cat_base . $p_cats[0]->slug . '/'); ?>"
                        class="text-[10px] uppercase tracking-[0.25em] text-terracotta font-semibold hover:underline">
                         <?php echo esc_html($p_cats[0]->name); ?>
                     </a>
@@ -263,8 +264,8 @@ tailwind.config = {
         <?php if ($total_pages > 1): ?>
         <nav class="flex items-center justify-center gap-2 mt-16">
             <?php for ($p = 1; $p <= $total_pages; $p++): 
-                $p_link = add_query_arg(['paged' => $p, 'cat' => $current_cat ?: false], $blog_url);
-                if (!$current_cat) $p_link = remove_query_arg('cat', $p_link);
+                $p_link = add_query_arg(['paged' => $p], $blog_url);
+                if ($current_cat) $p_link = $blog_cat_base . $current_cat . '/?paged=' . $p;
                 $is_cur = $p === $current_page;
             ?>
             <a href="<?php echo esc_url($p_link); ?>"
@@ -278,12 +279,12 @@ tailwind.config = {
     </section>
 
     <!-- ═══ DIVIDER ═══ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-16">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-16">
         <div class="w-full h-[1px] divider-art opacity-40"></div>
     </div>
 
     <!-- ═══ NEWSLETTER CTA ═══ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-20">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>
             <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10 pointer-events-none"></div>

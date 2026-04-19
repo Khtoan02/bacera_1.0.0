@@ -149,7 +149,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          1. BREADCRUMB + TITLE
     ═══════════════════════════════════════════════════════ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pt-14 pb-0">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-0">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-4 tracking-wide">
@@ -171,7 +171,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          2. HERO IMAGE
     ═══════════════════════════════════════════════════════ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-20">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
         <div class="w-full overflow-hidden rounded-2xl aspect-[21/9] bg-[#e2e2e2] shadow-md">
             <img src="<?php echo esc_url($hero_img); ?>"
                  alt="Our Team at Bacera"
@@ -182,7 +182,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          3. BOARD OF DIRECTORS
     ═══════════════════════════════════════════════════════ -->
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-24">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-24">
 
         <!-- Section label -->
         <div class="flex items-center gap-4 mb-8">
@@ -220,7 +220,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     </section>
 
     <!-- Dashed divider -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-20">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
         <div class="w-full h-[1px] divider-art opacity-50"></div>
     </div>
 
@@ -228,7 +228,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
          4. DEPARTMENTS
     ═══════════════════════════════════════════════════════ -->
     <?php foreach ($departments as $dept): ?>
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-20">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
 
         <!-- Department label -->
         <div class="flex items-center gap-4 mb-8">
@@ -267,7 +267,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
 
     <!-- Small divider between departments (skip after last) -->
     <?php if ($dept !== end($departments)): ?>
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 mb-20">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
         <div class="w-full h-[1px] divider-art opacity-30"></div>
     </div>
     <?php endif; ?>
@@ -277,7 +277,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          5. CLOSING CTA BANNER
     ═══════════════════════════════════════════════════════ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-20">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <!-- Decorative circle -->
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>

@@ -12,7 +12,7 @@ define( 'BACERA_THEME_DIR', trailingslashit( get_template_directory() ) );
 define( 'BACERA_THEME_URI', trailingslashit( get_template_directory_uri() ) );
 define( 'BACERA_THEME_VERSION', '1.0.0' );
 /** Tăng khi đổi rewrite theme (vd. /bacera-img/) — tự flush permalink một lần sau deploy. */
-define( 'BACERA_IMG_REWRITE_VERSION', '2' );
+define( 'BACERA_IMG_REWRITE_VERSION', '3' );
 
 /* ==========================================================================
    GIAI ĐOẠN 3 & 4: CẤU HÌNH ĐƯỜNG DẪN ẢO (REWRITE RULES)
@@ -77,7 +77,15 @@ add_action( 'init', function() {
         'index.php?bacera_member_slug=$matches[1]',
         'top'
     );
-    
+
+    // ── Blog category SEO-friendly route: /blog/category/{slug}/ ──────────
+    add_rewrite_tag( '%bacera_blog_cat_slug%', '([^/]+)' );
+    add_rewrite_rule(
+        '^blog/category/([^/]+)/?$',
+        'index.php?bacera_blog_cat_slug=$matches[1]',
+        'top'
+    );
+
     register_post_type( 'pancake_product', [
         'labels'      => [ 'name' => 'Pancake Products' ],
         'public'      => true, // Quan trọng để get_page_by_path hoạt động
@@ -223,8 +231,12 @@ add_action('after_switch_theme', function() {
 // Flush rewrite rules tự động nếu rule của workshop chưa tồn tại trong DB
 add_action('init', function() {
     $rules = get_option('rewrite_rules');
-    // Kiểm tra xem rule workshop có tồn tại chưa
-    if ( empty($rules) || ! isset($rules['^workshop/([^/]+)/?$']) || ! isset($rules['^our-team/([^/]+)/?$']) ) {
+    // Kiểm tra xem rule workshop / our-team / blog-category có tồn tại chưa
+    if ( empty($rules)
+        || ! isset($rules['^workshop/([^/]+)/?$'])
+        || ! isset($rules['^our-team/([^/]+)/?$'])
+        || ! array_key_exists( '^blog/category/([^/]+)/?$', (array) $rules )
+    ) {
         // Flush vào cuối request này (an toàn và được lưu vào DB ngay)
         add_action('shutdown', function() {
             flush_rewrite_rules(true);
@@ -291,3 +303,94 @@ add_filter(
     10,
     2
 );
+
+/* ==========================================================================
+   BLOG CATEGORY — SEO-FRIENDLY ROUTE & AJAX HANDLER
+   ========================================================================== */
+
+
+/**
+ * Template redirect cho route /blog/category/{slug}/:
+ * Serve template-blog-category.php và truyền slug qua query var.
+ */
+add_action( 'template_redirect', function() {
+    $cat_slug = get_query_var( 'bacera_blog_cat_slug' );
+    if ( ! $cat_slug ) return;
+
+    // Pass slug để template đọc
+    $_GET['cat_slug'] = sanitize_key( $cat_slug );
+
+    $template = locate_template( 'templates/template-blog-category.php' );
+    if ( $template ) {
+        include $template;
+        exit;
+    }
+} );
+
+/**
+ * AJAX handler: trả danh sách bài viết theo danh mục — dùng cho in-page filtering.
+ * Action: bacera_get_blog_posts
+ */
+function bacera_ajax_get_blog_posts(): void {
+    check_ajax_referer( 'bacera_blog_cat_nonce', 'nonce' );
+
+    $cat_slug = sanitize_key( $_POST['cat_slug'] ?? '' );
+    $page     = max( 1, (int) ( $_POST['page']     ?? 1 ) );
+    $per_page = min( 24, max( 1, (int) ( $_POST['per_page'] ?? 9 ) ) );
+
+    $args = [
+        'post_type'      => 'post',
+        'post_status'    => 'publish',
+        'posts_per_page' => $per_page,
+        'paged'          => $page,
+        'orderby'        => 'date',
+        'order'          => 'DESC',
+        'no_found_rows'  => false,
+    ];
+
+    if ( $cat_slug ) {
+        $cat_obj = get_category_by_slug( $cat_slug );
+        if ( $cat_obj ) {
+            $args['cat'] = $cat_obj->term_id;
+        } else {
+            wp_send_json_error( ['message' => 'Category not found'], 404 );
+        }
+    }
+
+    $query = new WP_Query( $args );
+
+    $posts = [];
+    if ( $query->have_posts() ) {
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $p_id    = get_the_ID();
+            $p_cats  = get_the_category( $p_id );
+            $p_thumb = get_the_post_thumbnail_url( $p_id, 'medium_large' )
+                ?: 'https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?auto=format&fit=crop&q=80&w=600';
+            $excerpt = get_the_excerpt()
+                ?: wp_trim_words( strip_tags( get_the_content() ), 18, '…' );
+
+            $posts[] = [
+                'id'       => $p_id,
+                'title'    => get_the_title(),
+                'url'      => get_permalink(),
+                'thumb'    => esc_url( $p_thumb ),
+                'excerpt'  => $excerpt,
+                'date'     => get_the_date( 'd M Y' ),
+                'author'   => get_the_author(),
+                'cat_name' => $p_cats ? $p_cats[0]->name : '',
+                'cat_slug' => $p_cats ? $p_cats[0]->slug : '',
+            ];
+        }
+        wp_reset_postdata();
+    }
+
+    wp_send_json_success( [
+        'posts'       => $posts,
+        'total'       => (int) $query->found_posts,
+        'total_pages' => (int) $query->max_num_pages,
+        'page'        => $page,
+    ] );
+}
+add_action( 'wp_ajax_bacera_get_blog_posts',        'bacera_ajax_get_blog_posts' );
+add_action( 'wp_ajax_nopriv_bacera_get_blog_posts', 'bacera_ajax_get_blog_posts' );

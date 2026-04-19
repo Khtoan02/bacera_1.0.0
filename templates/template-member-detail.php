@@ -135,7 +135,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
 <div class="font-sans antialiased bg-texture text-textmain selection:bg-accentdark selection:text-white w-full overflow-hidden">
 
     <!-- ═══ 1. BREADCRUMB ═══════════════════════════════════════ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pt-12 pb-0">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-12 pb-0">
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-10 tracking-wide">
             <a href="<?php echo esc_url( $home_url ); ?>" class="text-textmain font-medium hover:text-terracotta transition-colors">Homepage</a>
             <span class="text-accent/60">/</span>
@@ -146,7 +146,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
     </div>
 
     <!-- ═══ 2. HERO — Photo + Info ══════════════════════════════ -->
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-24">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-24">
         <div class="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
 
             <!-- Portrait -->
@@ -462,9 +462,9 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
         #glbClose:hover { opacity: 1; }
     </style>
 
-    <section class="max-w-[1400px] mx-auto pb-6">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-6">
         <!-- Header -->
-        <div class="text-center mb-2 px-4">
+        <div class="text-center mb-2">
             <p class="text-[10px] uppercase tracking-[.25em] text-textmuted mb-2">Gallery pictures</p>
             <h2 class="font-serif text-3xl md:text-4xl text-textmain">
                 Photo of <em><?php echo esc_html( $member['name'] ?? 'Member' ); ?></em>
@@ -554,7 +554,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
 
     <!-- ═══ 3. SAME DEPARTMENT ══════════════════════════════════ -->
     <?php if ( ! empty( $companions ) ): ?>
-    <section class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-24">
+    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-24">
         <div class="w-full h-[1px] divider-art opacity-40 mb-16"></div>
 
         <div class="flex items-center gap-4 mb-10">
@@ -592,7 +592,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
     <?php endif; ?>
 
     <!-- ═══ 4. CTA BANNER ═══════════════════════════════════════ -->
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-10 pb-20">
+    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14
                     flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>
