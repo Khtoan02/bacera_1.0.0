@@ -889,8 +889,6 @@ class AdminTeamController {
                     <div class="tmf-section" style="padding:16px; background:var(--surface-2); border-radius:12px; border:1px solid var(--border);">
                         <div style="font-size:12px; font-weight:700; color:var(--text); margin-bottom:12px;">Mạng xã hội &amp; Liên hệ</div>
                         <style>
-                            .dsi { width:24px; height:24px; flex-shrink:0; pointer-events:none; display:block; border-radius:6px; overflow:hidden; }
-                            .dsi svg { width:24px; height:24px; display:block; }
                             .drawer-si-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
                             .tmf-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:var(--text-2); margin-bottom:4px; }
                         </style>
@@ -900,14 +898,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#4CAF50"/><path d="M28 24.5c-1.2 0-2.4-.2-3.5-.6-.5-.2-1.1 0-1.5.4l-2.1 2.1a15.5 15.5 0 0 1-6.8-6.8l2.1-2.1c.4-.4.5-1 .3-1.5A11 11 0 0 1 16 12.5C16 11.7 15.3 11 14.5 11h-3C10.7 11 10 11.7 10 12.5 10 22.2 17.8 30 27.5 30c.8 0 1.5-.7 1.5-1.5v-2.5c0-.8-.7-1.5-1.5-1.5z" fill="white"/></svg></span>
                                         Điện thoại
                                     </label>
                                     <input type="text" id="tmm-phone" class="tmf-input" placeholder="090...">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#EA4335"/><path d="M10 13h20c.6 0 1 .4 1 1v12c0 .6-.4 1-1 1H10c-.6 0-1-.4-1-1V14c0-.6.4-1 1-1z" fill="white"/><path d="M9 14l11 8 11-8" stroke="#EA4335" stroke-width="1.5" fill="none"/></svg></span>
                                         Email
                                     </label>
                                     <input type="email" id="tmm-email" class="tmf-input" placeholder="admin@domain.com">
@@ -918,14 +914,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#1877F2"/><path d="M23 21h-2v9h-4v-9h-2v-4h2v-2c0-3 1.5-5 5-5h3v4h-2c-1 0-1 .3-1 1v2h3l-.5 4H23z" fill="white"/></svg></span>
                                         Facebook
                                     </label>
                                     <input type="url" id="tmm-facebook" class="tmf-input" placeholder="https://facebook.com/...">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ig_adm1" cx="30%" cy="107%" r="150%"><stop offset="0" stop-color="#fdf497"/><stop offset="0.05" stop-color="#fdf497"/><stop offset="0.45" stop-color="#fd5949"/><stop offset="0.6" stop-color="#d6249f"/><stop offset="0.9" stop-color="#285AEB"/></radialGradient></defs><rect width="40" height="40" rx="8" fill="url(#ig_adm1)"/><rect x="10" y="10" width="20" height="20" rx="6" stroke="white" stroke-width="2.5" fill="none"/><circle cx="20" cy="20" r="5" stroke="white" stroke-width="2" fill="none"/><circle cx="27" cy="13" r="1.5" fill="white"/></svg></span>
                                         Instagram
                                     </label>
                                     <input type="url" id="tmm-instagram" class="tmf-input" placeholder="https://instagram.com/...">
@@ -936,14 +930,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#000"/><path d="M21.8 19.2 28.5 11h-2l-5.7 6.6L16.4 11H10l7 10.2L10 30h2l6.1-7.1 4.9 7.1H29l-7.2-10.8zm-2.2 2.5L12 12h3.2l5.4 7.8 7.7 11H25l-5.4-7.8h.1-.1v-.3z" fill="white"/></svg></span>
                                         X / Twitter
                                     </label>
                                     <input type="url" id="tmm-x_twitter" class="tmf-input" placeholder="https://x.com/...">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#010101"/><path d="M27 11h-4v14.5a3.5 3.5 0 1 1-3.5-3.5v-4c-4.1 0-7.5 3.4-7.5 7.5S15.4 33 19.5 33c4.1 0 7.5-3.4 7.5-7.5V18c1.5 1 3.2 1.5 5 1.5v-4c-2.7 0-5-2.2-5-4.5z" fill="white"/></svg></span>
                                         TikTok
                                     </label>
                                     <input type="url" id="tmm-tiktok" class="tmf-input" placeholder="https://tiktok.com/...">
@@ -954,14 +946,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#0A66C2"/><path d="M13 16h4v13h-4V16zm2-5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm5 5h4v2c.6-1.2 2-2.2 4-2.2 4 0 5 2.8 5 6.4V29h-4v-6.3c0-1.7-.5-2.7-2-2.7-2 0-3 1.5-3 3V29h-4V16z" fill="white"/></svg></span>
                                         LinkedIn
                                     </label>
                                     <input type="url" id="tmm-linkedin" class="tmf-input" placeholder="https://linkedin.com/...">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#FF0000"/><path d="M31 15.5a3 3 0 0 0-2-2C27.2 13 20 13 20 13s-7.2 0-9 .5a3 3 0 0 0-2 2C8.5 17.3 8.5 20 8.5 20s0 2.7.5 4.5a3 3 0 0 0 2 2C12.8 27 20 27 20 27s7.2 0 9-.5a3 3 0 0 0 2-2c.5-1.8.5-4.5.5-4.5s0-2.7-.5-4.5zM17.5 23v-6l5.5 3-5.5 3z" fill="white"/></svg></span>
                                         YouTube
                                     </label>
                                     <input type="url" id="tmm-youtube" class="tmf-input" placeholder="https://youtube.com/...">
@@ -972,14 +962,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#E60023"/><path d="M20 9C13.9 9 9 13.9 9 20c0 4.7 2.8 8.7 6.9 10.5-.1-.9-.2-2.2.1-3.2l1.3-5.3s-.3-.7-.3-1.7c0-1.6.9-2.7 2-2.7.9 0 1.4.7 1.4 1.6 0 .9-.6 2.4-.9 3.7-.3 1.1.5 2 1.7 2 2 0 3.4-2.6 3.4-5.7 0-2.3-1.6-4-4-4-2.7 0-4.3 2-4.3 4.1 0 .8.3 1.7.7 2.2.1.2 0 .3 0 .3l-.3 1.1c-.1.2-.3.3-.5.2-1.5-.7-2.5-2.9-2.5-4.6 0-3.8 2.7-7.3 7.9-7.3 4.2 0 7.4 2.9 7.4 6.9 0 4.2-2.6 7.5-6.3 7.5-1.2 0-2.4-.6-2.8-1.4l-.7 2.8c-.3 1-.9 2.2-1.4 3 .9.3 1.8.4 2.8.4 6.1 0 11-4.9 11-11C31 13.9 26.1 9 20 9z" fill="white"/></svg></span>
                                         Pinterest
                                     </label>
                                     <input type="url" id="tmm-pinterest" class="tmf-input" placeholder="https://pinterest.com/...">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="msg_adm1" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#0099FF"/><stop offset="1" stop-color="#A033FF"/></linearGradient></defs><rect width="40" height="40" rx="8" fill="url(#msg_adm1)"/><path d="M20 9C13.4 9 8 14 8 20.2c0 3.2 1.4 6 3.8 8v4l3.6-2c1.1.3 2.3.5 3.6.5 6.6 0 12-5 12-11.3C31 14 25.6 9 20 9zm1.4 15.2L18 20.5l-5.8 3.7 6.5-6.9 3.4 3.7 5.7-3.7-6.4 6.9z" fill="white"/></svg></span>
                                         Messenger
                                     </label>
                                     <input type="url" id="tmm-messenger" class="tmf-input" placeholder="https://m.me/...">
@@ -990,14 +978,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#25D366"/><path d="M20 9C13.9 9 9 13.9 9 20c0 2 .5 3.8 1.4 5.4L9 31l5.8-1.5c1.5.8 3.3 1.3 5.2 1.3 6.1 0 11-4.9 11-11S26.1 9 20 9zm6 15.5c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-3.5-1-3-1.3-5-4-5.1-4.2-.1-.2-1.5-2-1.5-3.7s1-2.8 1.3-3.1c.3-.4.6-.5 1-.5h.6c.3 0 .5 0 .7.5.3.7.9 2.2.9 2.3.1.1.1.3 0 .5-.1.2-.2.3-.3.5-.2.2-.4.4-.5.5-.1.1-.3.3-.1.6.2.3.9 1.5 2 2.5 1.3 1.1 2.4 1.5 2.8 1.7.4.2.6.1.8-.1.2-.3.6-.8.8-1.1.2-.3.4-.2.7-.1l2.3 1.1c.3.1.5.3.6.4.1.2 0 .9-.3 1.5z" fill="white"/></svg></span>
                                         WhatsApp
                                     </label>
                                     <input type="text" id="tmm-whatsapp" class="tmf-input" placeholder="+84 9x...">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#229ED9"/><path d="M10 20.5s9.7-4 13-5.4c1.3-.6 5.6-2.4 5.6-2.4s2-.8 1.8 1.1c-.1.8-.5 3.5-.9 6.6-.7 4.3-1.4 9-1.4 9s-.1 1.3-1 1.5c-1 .2-2.5-.9-2.8-1.1-.2-.2-4.1-2.7-5.4-3.7 0 0-.8-.6-.7-1.4 0 0 .1-.7 4-4.2 0 0 2.1-2-.2-.4-.2.2-2.8 2.1-5 3.6-.5.3-1.6.4-1.6.4l-5.5-1.8s-1.4-.8.1-1.7z" fill="white"/></svg></span>
                                         Telegram
                                     </label>
                                     <input type="url" id="tmm-telegram" class="tmf-input" placeholder="https://t.me/...">
@@ -1008,14 +994,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#0068FF"/><text x="6" y="26" font-family="Arial,sans-serif" font-weight="900" font-size="16" fill="white">Za</text><text x="22" y="26" font-family="Arial,sans-serif" font-weight="900" font-size="16" fill="white">lo</text></svg></span>
                                         Zalo
                                     </label>
                                     <input type="text" id="tmm-zalo" class="tmf-input" placeholder="SĐT hoặc link Zalo">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#7360F2"/><path d="M27.5 12.5h-15A2.5 2.5 0 0 0 10 15v12.5A2.5 2.5 0 0 0 12.5 30H14l2.5 3.5L19 30h8.5a2.5 2.5 0 0 0 2.5-2.5V15a2.5 2.5 0 0 0-2.5-2.5zm-6.5 11c-.3.2-.6.3-.9.2-.3-.1-.6-.3-.9-.6-.9-.9-1.5-2-1.7-3.2 0-.5.1-.9.5-1.1.3-.3.7-.4 1-.2l.9 1.3c.1.2.1.4 0 .6l-.4.5c.4.7 1 1.2 1.8 1.5l.4-.5c.2-.2.4-.2.6 0l1.3.9c.3.3.2.7-.1 1-.2.2-.3.4-.5.6z" fill="white"/></svg></span>
                                         Viber
                                     </label>
                                     <input type="text" id="tmm-viber" class="tmf-input" placeholder="+84 9x...">
@@ -1026,14 +1010,12 @@ class AdminTeamController {
                             <div class="drawer-si-grid">
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#00AFF0"/><path d="M30 22c-.5 5.5-5 9.5-10.5 9.5A10.5 10.5 0 0 1 9 21c0-5.8 4.7-10.5 10.5-10.5 5.8 0 10.5 4.7 10.5 10.5zm-7-1.5c-.7-.2-1.3-.5-1.8-.8a3 3 0 0 1-.8-2.2c0-.6.2-1.1.7-1.5.4-.4 1.1-.6 1.9-.6.7 0 1.3.2 1.8.5.4.2.7.5.8.8l-1.3.9c-.1-.2-.3-.3-.5-.4-.3-.2-.5-.2-.8-.2-.4 0-.6.1-.8.2-.2.1-.3.3-.3.5 0 .2.1.4.3.4.3.2.6.3 1.3.5 1 .3 1.6.6 2 1 .5.5.7 1 .7 1.7 0 .7-.3 1.2-.8 1.6-.5.5-1.2.7-2.2.7-.8 0-1.6-.2-2.2-.6-.4-.3-.8-.6-1-.9l1.3-.9c.2.2.4.4.6.5.3.2.7.3 1.3.3.4 0 .7-.1.9-.2.2-.2.3-.4.3-.6 0-.2-.1-.4-.3-.5z" fill="white"/></svg></span>
                                         Skype
                                     </label>
                                     <input type="text" id="tmm-skype" class="tmf-input" placeholder="Skype ID">
                                 </div>
                                 <div class="tmf-field">
                                     <label class="tmf-label">
-                                        <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#07C160"/><path d="M16 11c-5 0-9 3.5-9 7.7 0 2.3 1.2 4.3 3.1 5.7l-.9 3 3.2-1.7c.9.3 1.8.4 2.6.4 2.5 0 4.8-1 6.4-2.5A7 7 0 0 1 29 24c7 0 7-4.3 7-6.3 0-4.2-4-7.7-9-7.7-.8 0-1.6.1-2.3.3C23.3 12.1 19.9 11 16 11zm-2 4.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm6 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm7 8.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="white"/></svg></span>
                                         WeChat
                                     </label>
                                     <input type="text" id="tmm-wechat" class="tmf-input" placeholder="WeChat ID">
@@ -1043,7 +1025,6 @@ class AdminTeamController {
                             <!-- Line App -->
                             <div class="tmf-field">
                                 <label class="tmf-label">
-                                    <span class="dsi"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#06C755"/><path d="M32 20c0-5.5-5.4-10-12-10S8 14.5 8 20c0 4.9 4.3 9.1 10.2 9.8.4.1.9.3 1 .6.1.3 0 .8 0 1.1l-.2 1c0 .3-.3 1.2.5.8.8-.4 4.9-2.9 6.7-5C29.5 26 32 23.2 32 20zM15 22h-2.5v-4.5h1v3.5H15V22zm1.5 0h-1v-4.5h1V22zm5 0h-1l-2-3.5V22h-1v-4.5h1l2 3.5v-3.5h1V22zm4-3.5h-2v.8h2v1h-2v.7h2V22h-3v-4.5h3v1z" fill="white"/></svg></span>
                                     Line App
                                 </label>
                                 <input type="text" id="tmm-line_app" class="tmf-input" placeholder="Line ID">
