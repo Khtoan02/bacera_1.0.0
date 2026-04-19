@@ -1954,6 +1954,55 @@ class AdminTeamController {
                 });
             }
 
+            /* ── Expanded Form Submit (Add / Edit page) ── */
+            var expandedForm = document.getElementById('tm-member-form');
+            if (expandedForm) {
+                expandedForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    var submitBtn = document.getElementById('tm-submit-btn');
+                    var oldHtml   = submitBtn ? submitBtn.innerHTML : '';
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<svg viewBox="0 0 14 14" style="width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;animation:tm-spin 1s linear infinite"><circle cx="7" cy="7" r="5" stroke-opacity=".3"/><path d="M7 2a5 5 0 0 1 5 5"/></svg> Đang lưu…';
+                    }
+
+                    var fd = new FormData(expandedForm);
+                    fd.set('action', 'bacera_team_save');
+                    fd.set('_nonce', tmConfig.nonce);
+
+                    // Sync gallery textarea (hidden) – ensure latest value included
+                    var glTa = document.getElementById('tm-gallery');
+                    if (glTa) fd.set('gallery_urls', glTa.value);
+
+                    fetch(tmConfig.ajaxurl, { method: 'POST', body: fd })
+                        .then(function(r) { return r.json(); })
+                        .then(function(res) {
+                            if (res.success) {
+                                toast(res.data ? res.data.message : 'Đã lưu!');
+                                // If adding new member → redirect to edit page of new ID
+                                var newId = res.data && res.data.id ? res.data.id : 0;
+                                var curId = parseInt((fd.get('id') || '0'), 10);
+                                setTimeout(function() {
+                                    if (!curId && newId) {
+                                        window.location.href = tmConfig.editBase + newId;
+                                    } else {
+                                        // Reload to refresh form values
+                                        window.location.reload();
+                                    }
+                                }, 800);
+                            } else {
+                                toast((res.data ? res.data.message : null) || 'Lưu thất bại!', false);
+                                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = oldHtml; }
+                            }
+                        })
+                        .catch(function() {
+                            toast('Lỗi kết nối máy chủ!', false);
+                            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = oldHtml; }
+                        });
+                });
+            }
+
             /* ── Load Sortable ── */
             var sortBox = document.getElementById('tm-sortable');
             if (sortBox && typeof window.Sortable !== 'undefined') {
