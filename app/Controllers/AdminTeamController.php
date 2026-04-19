@@ -1060,568 +1060,524 @@ class AdminTeamController {
         $is_edit  = ! is_null( $m );
         $list_url = admin_url( 'admin.php?page=bacera-team' );
         $save_label = $is_edit ? 'Lưu thay đổi' : 'Thêm thành viên';
-
-        $departments_preset = [
-            'Ban Giám đốc',
-            'Sales & Business',
-            'Marketing & Creative',
-            'Craft & Production',
-            'Accounting',
-            'HR & Admin',
-        ];
-        $cur_dept = $m['department'] ?? '';
+        $departments_preset = ['Ban Giám đốc','Sales & Business','Marketing & Creative','Craft & Production','Accounting','HR & Admin'];
+        $cur_dept  = $m['department'] ?? '';
+        $has_photo = !empty($m['photo_url']);
         ?>
 
-        <!-- ══ STICKY HEADER ══ -->
-        <div class="tmf-header">
-            <div class="tmf-hd-info">
-                <div class="tmf-hd-icon">
+        <style>
+        /* ═══════════════════════════════════════
+           EXPANDED FORM — REDESIGNED UI 2025
+        ════════════════════════════════════════ */
+        .ef-wrap { display:flex; flex-direction:column; gap:0; min-height:100vh; background:#f6f6f4; }
+
+        /* ── Sticky top bar ── */
+        .ef-topbar {
+            position:sticky; top:32px; z-index:100;
+            display:flex; align-items:center; gap:12px;
+            padding:14px 24px;
+            background:rgba(255,255,255,.92);
+            backdrop-filter:blur(12px);
+            border-bottom:1px solid #e8e5df;
+            box-shadow:0 1px 3px rgba(0,0,0,.06);
+        }
+        .ef-topbar-back { display:flex; align-items:center; gap:6px; font-size:12px; color:#8a8075; text-decoration:none; padding:5px 10px; border-radius:7px; border:1px solid #e8e5df; background:#fff; transition:all .15s; font-weight:500; }
+        .ef-topbar-back:hover { background:#f6f3ee; color:#3a3228; border-color:#c8bfb0; }
+        .ef-topbar-back svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
+        .ef-topbar-divider { width:1px; height:20px; background:#e8e5df; }
+        .ef-topbar-info { flex:1; min-width:0; }
+        .ef-topbar-title { font-size:14px; font-weight:700; color:#1a1714; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .ef-topbar-sub { font-size:11px; color:#8a8075; margin-top:1px; }
+        .ef-topbar-acts { display:flex; align-items:center; gap:8px; }
+        .ef-btn { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; border:none; cursor:pointer; font-family:inherit; text-decoration:none; transition:all .15s; line-height:1; }
+        .ef-btn svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; flex-shrink:0; }
+        .ef-btn-ghost { background:transparent; border:1px solid #e8e5df; color:#5a5450; }
+        .ef-btn-ghost:hover { background:#f6f3ee; border-color:#c8bfb0; color:#1a1714; }
+        .ef-btn-primary { background:#1a1714; color:#fff; border:1px solid transparent; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+        .ef-btn-primary:hover { background:#2e2a26; transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.2); }
+        .ef-btn-primary:disabled { opacity:.5; transform:none; cursor:not-allowed; }
+        .ef-btn-danger { background:#fff5f5; border:1px solid #fecaca; color:#dc2626; }
+        .ef-btn-danger:hover { background:#fef2f2; border-color:#fca5a5; }
+        .ef-badge-active { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+        .ef-badge-active.show { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+        .ef-badge-active.hide { background:#fafafa; color:#9ca3af; border:1px solid #e5e7eb; }
+
+        /* ── 2-Column layout ── */
+        .ef-body { display:grid; grid-template-columns:1fr 340px; gap:20px; padding:20px 24px 40px; max-width:1200px; }
+        @media(max-width:900px) { .ef-body { grid-template-columns:1fr; } }
+
+        /* ── Cards (sections) ── */
+        .ef-card { background:#fff; border-radius:14px; border:1px solid #e8e5df; overflow:hidden; margin-bottom:16px; }
+        .ef-card:last-child { margin-bottom:0; }
+        .ef-card-head { display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid #f0ede8; }
+        .ef-card-head svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; flex-shrink:0; color:#7c6f62; }
+        .ef-card-head-title { font-size:12px; font-weight:700; color:#1a1714; letter-spacing:.3px; text-transform:uppercase; }
+        .ef-card-head-sub { font-size:11px; color:#a09080; margin-left:auto; }
+        .ef-card-body { padding:18px; }
+
+        /* ── Fields ── */
+        .ef-field { margin-bottom:14px; }
+        .ef-field:last-child { margin-bottom:0; }
+        .ef-field-label { display:flex; align-items:center; gap:8px; font-size:11.5px; font-weight:600; color:#4a4440; margin-bottom:7px; }
+        .ef-field-ic { width:24px; height:24px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+        .ef-field-ic svg, .ef-field-ic img { width:24px; height:24px; display:block; border-radius:6px; }
+        .ef-field-req { color:#e53e3e; margin-left:2px; }
+        .ef-input, .ef-select, .ef-textarea { width:100%; padding:8px 11px; border:1.5px solid #e8e5df; border-radius:8px; font-size:13px; font-family:inherit; color:#1a1714; background:#fff; transition:border .15s, box-shadow .15s; outline:none; box-sizing:border-box; }
+        .ef-input:focus, .ef-select:focus, .ef-textarea:focus { border-color:#8b7d6b; box-shadow:0 0 0 3px rgba(139,125,107,.12); }
+        .ef-input::placeholder { color:#b0a898; }
+        .ef-textarea { resize:vertical; min-height:90px; line-height:1.6; }
+        .ef-select { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238a8075' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; }
+        .ef-hint { display:block; font-size:11px; color:#a09080; margin-top:5px; }
+        .ef-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        @media(max-width:600px) { .ef-row2 { grid-template-columns:1fr; } }
+
+        /* ── Social grid ── */
+        .ef-social-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        @media(max-width:600px) { .ef-social-grid { grid-template-columns:1fr; } }
+
+        /* ── Photo zone ── */
+        .ef-photo-zone { position:relative; width:100%; aspect-ratio:3/4; background:#f6f3ee; border-radius:12px; overflow:hidden; cursor:pointer; border:2px dashed #d5cfc8; transition:border .2s; display:flex; align-items:center; justify-content:center; }
+        .ef-photo-zone:hover { border-color:#8b7d6b; }
+        .ef-photo-zone img { width:100%; height:100%; object-fit:cover; display:block; }
+        .ef-photo-ph { display:flex; flex-direction:column; align-items:center; gap:8px; color:#a09080; }
+        .ef-photo-ph svg { width:32px; height:32px; stroke:currentColor; fill:none; stroke-width:1.2; }
+        .ef-photo-ph span { font-size:12px; font-weight:500; }
+        .ef-photo-overlay { position:absolute; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
+        .ef-photo-zone:hover .ef-photo-overlay { opacity:1; }
+        .ef-photo-overlay span { color:#fff; font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px; }
+        .ef-photo-overlay svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; }
+        .ef-url-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
+        .ef-url-row .ef-input { flex:1; font-size:12px; }
+
+        /* ── Status pills ── */
+        .ef-status-row { display:flex; gap:8px; }
+        .ef-status-pill { display:flex; align-items:center; gap:7px; padding:9px 14px; border-radius:10px; border:1.5px solid #e8e5df; cursor:pointer; font-size:12px; font-weight:600; color:#6b6460; transition:all .15s; flex:1; justify-content:center; }
+        .ef-status-pill input { display:none; }
+        .ef-status-pill svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; }
+        .ef-status-pill:hover { border-color:#c8bfb0; background:#faf8f5; }
+        .ef-status-pill.is-show { border-color:#86efac; background:#f0fdf4; color:#16a34a; }
+        .ef-status-pill.is-hide  { border-color:#e8e5df; background:#f9f9f9; color:#9ca3af; }
+
+        /* ── Gallery ── */
+        .ef-gallery-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+        .ef-gal-item { position:relative; width:68px; height:68px; border-radius:8px; overflow:hidden; border:1.5px solid #e8e5df; cursor:pointer; flex-shrink:0; }
+        .ef-gal-item img { width:100%; height:100%; object-fit:cover; display:block; }
+        .ef-gal-del { position:absolute; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s; }
+        .ef-gal-item:hover .ef-gal-del { opacity:1; }
+        .ef-gal-del svg { width:18px; height:18px; stroke:#fff; stroke-width:2.5; fill:none; }
+
+        /* ── Tab bar (social) ── */
+        .ef-tabs { display:flex; gap:4px; border-bottom:1.5px solid #e8e5df; margin-bottom:16px; }
+        .ef-tab { padding:7px 12px; font-size:11.5px; font-weight:600; color:#8a8075; border-bottom:2px solid transparent; cursor:pointer; transition:all .15s; margin-bottom:-2px; border-radius:6px 6px 0 0; white-space:nowrap; }
+        .ef-tab:hover { color:#3a3228; background:#f6f3ee; }
+        .ef-tab.active { color:#1a1714; border-bottom-color:#1a1714; background:transparent; }
+        .ef-tab-pane { display:none; }
+        .ef-tab-pane.active { display:block; }
+
+        @keyframes ef-spin { to { transform:rotate(360deg); } }
+        </style>
+
+        <div class="ef-wrap">
+
+        <!-- ── TOP BAR ── -->
+        <div class="ef-topbar">
+            <a href="<?php echo esc_url($list_url); ?>" class="ef-topbar-back">
+                <svg viewBox="0 0 12 12"><path d="M8 2L4 6l4 4"/></svg>
+                Danh sách
+            </a>
+            <div class="ef-topbar-divider"></div>
+            <div class="ef-topbar-info">
+                <div class="ef-topbar-title">
+                    <?php echo $is_edit ? 'Chỉnh sửa: <strong>' . esc_html($m['name']) . '</strong>' : 'Thêm thành viên mới'; ?>
+                </div>
+                <div class="ef-topbar-sub">
                     <?php if ($is_edit): ?>
-                    <svg viewBox="0 0 16 16"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>
+                    ID #<?php echo esc_html($m['id']); ?> &middot; Tạo: <?php echo esc_html(substr($m['created_at'] ?? '—', 0, 10)); ?>
                     <?php else: ?>
-                    <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><path d="M14 14c0-3.31-2.69-6-6-6S2 10.69 2 14"/><path d="M11 3v5M13.5 5.5h-5" stroke-linecap="round"/></svg>
+                    Điền đầy đủ thông tin để thành viên hiển thị đúng
                     <?php endif; ?>
                 </div>
-                <div>
-                    <div class="tmf-hd-title">
-                        <?php echo $is_edit ? 'Chỉnh sửa: ' . esc_html($m['name']) : 'Thêm thành viên mới'; ?>
-                    </div>
-                    <div class="tmf-hd-sub">
-                        <?php echo $is_edit ? 'Cập nhật thông tin thành viên' : 'Điền đầy đủ để hiển thị trên trang Our Team'; ?>
-                    </div>
-                </div>
             </div>
-            <div class="tmf-hd-acts">
-                <a href="<?php echo esc_url($list_url); ?>" class="tm-btn tm-btn-outline">
-                    <svg viewBox="0 0 14 14"><path d="M9 11L5 7l4-4" stroke-linejoin="round"/></svg>
-                    Danh sách
-                </a>
+            <div class="ef-topbar-acts">
                 <?php if ($is_edit): ?>
-                <a href="<?php echo esc_url(admin_url('admin.php?page=bacera-team&action=add')); ?>"
-                   class="tm-btn tm-btn-outline">
+                <span class="ef-badge-active <?php echo ($m['is_active'] ?? 1) ? 'show' : 'hide'; ?>">
+                    <svg viewBox="0 0 10 10" width="8" height="8" fill="currentColor"><circle cx="5" cy="5" r="4"/></svg>
+                    <?php echo ($m['is_active'] ?? 1) ? 'Hiển thị' : 'Đã ẩn'; ?>
+                </span>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=bacera-team&action=add')); ?>" class="ef-btn ef-btn-ghost">
                     <svg viewBox="0 0 14 14"><path d="M7 2v10M2 7h10" stroke-linecap="round"/></svg>
                     Thêm mới
                 </a>
                 <?php endif; ?>
-                <button type="submit" form="tm-member-form" id="tm-submit-btn" class="tm-btn tm-btn-solid">
+                <button type="submit" form="ef-member-form" id="tm-submit-btn" class="ef-btn ef-btn-primary">
                     <svg viewBox="0 0 14 14"><polyline points="2,7 5.5,10.5 12,3"/></svg>
                     <?php echo $save_label; ?>
                 </button>
             </div>
         </div>
 
-        <!-- ══ FORM ══ -->
-        <form id="tm-member-form" method="post" enctype="multipart/form-data">
+        <!-- ── FORM ── -->
+        <form id="ef-member-form" method="post">
             <input type="hidden" name="action" value="bacera_team_save">
             <input type="hidden" name="_nonce" value="<?php echo esc_attr($nonce); ?>">
             <input type="hidden" name="id"     value="<?php echo esc_attr($m['id'] ?? 0); ?>">
 
-            <div class="tmf-body">
+            <div class="ef-body">
 
-                <!-- LEFT: Main fields -->
-                <div class="tmf-main">
+                <!-- ══ LEFT COLUMN ══ -->
+                <div class="ef-left">
 
-                    <!-- Section 1: Identity -->
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
-                            <svg viewBox="0 0 13 13"><circle cx="6.5" cy="4" r="2.5"/><path d="M1 12c0-3 11-3 11 0"/></svg>
-                            Thông tin cá nhân
+                    <!-- Card: Thông tin cá nhân -->
+                    <div class="ef-card">
+                        <div class="ef-card-head">
+                            <svg viewBox="0 0 14 14"><circle cx="7" cy="5" r="3"/><path d="M1 13c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+                            <span class="ef-card-head-title">Thông tin cá nhân</span>
                         </div>
-                        <div class="tmf-sec-body">
-
-                            <!-- Name -->
-                            <div class="tmf-field">
-                                <label class="tmf-label" for="tm-name">
-                                    <svg viewBox="0 0 12 12"><rect x="1" y="1" width="10" height="10" rx="1.5"/><path d="M3.5 4.5h5M3.5 7.5h3"/></svg>
-                                    Họ &amp; Tên <span class="tmf-req">*</span>
-                                </label>
-                                <input type="text" id="tm-name" name="name" class="tmf-input"
+                        <div class="ef-card-body">
+                            <div class="ef-field">
+                                <div class="ef-field-label">
+                                    Họ &amp; Tên <span class="ef-field-req">*</span>
+                                </div>
+                                <input type="text" id="tm-name" name="name" class="ef-input"
                                        value="<?php echo esc_attr($m['name'] ?? ''); ?>"
                                        placeholder="Nguyễn Văn A" required autocomplete="off">
                             </div>
-
-                            <!-- Role + Department -->
-                            <div class="tmf-row2">
-                                <div class="tmf-field">
-                                    <label class="tmf-label" for="tm-role">
-                                        <svg viewBox="0 0 12 12"><rect x="1" y="3" width="10" height="7" rx="1.5"/><path d="M4 3V2a2 2 0 014 0v1"/></svg>
-                                        Chức danh
-                                    </label>
-                                    <input type="text" id="tm-role" name="role" class="tmf-input"
+                            <div class="ef-row2">
+                                <div class="ef-field">
+                                    <div class="ef-field-label">Chức danh</div>
+                                    <input type="text" id="tm-role" name="role" class="ef-input"
                                            value="<?php echo esc_attr($m['role'] ?? ''); ?>"
-                                           placeholder="CEO, Marketing Manager…">
+                                           placeholder="CEO, Manager…">
                                 </div>
-                                <div class="tmf-field">
-                                    <label class="tmf-label" for="tm-dept">
-                                        <svg viewBox="0 0 12 12"><rect x="1" y="5" width="3" height="6" rx="1"/><rect x="4.5" y="3" width="3" height="8" rx="1"/><rect x="8" y="1" width="3" height="10" rx="1"/></svg>
-                                        Phòng ban
-                                    </label>
-                                    <select id="tm-dept" name="department" class="tmf-select">
+                                <div class="ef-field">
+                                    <div class="ef-field-label">Phòng ban</div>
+                                    <select id="tm-dept" name="department" class="ef-select">
                                         <option value="">— Chọn phòng ban —</option>
                                         <?php foreach ($departments_preset as $d): ?>
-                                        <option value="<?php echo esc_attr($d); ?>"
-                                            <?php selected($cur_dept, $d); ?>>
-                                            <?php echo esc_html($d); ?>
-                                        </option>
+                                        <option value="<?php echo esc_attr($d); ?>" <?php selected($cur_dept, $d); ?>><?php echo esc_html($d); ?></option>
                                         <?php endforeach; ?>
                                         <?php if ($cur_dept && !in_array($cur_dept, $departments_preset)): ?>
-                                        <option value="<?php echo esc_attr($cur_dept); ?>" selected>
-                                            <?php echo esc_html($cur_dept); ?>
-                                        </option>
+                                        <option value="<?php echo esc_attr($cur_dept); ?>" selected><?php echo esc_html($cur_dept); ?></option>
                                         <?php endif; ?>
                                     </select>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
-                    <!-- Section 2: Bio -->
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
-                            <svg viewBox="0 0 13 13"><rect x="1" y="1" width="11" height="11" rx="1.5"/><path d="M3.5 4.5h6M3.5 7h6M3.5 9.5h4"/></svg>
-                            Tiểu sử
+                    <!-- Card: Tiểu sử -->
+                    <div class="ef-card">
+                        <div class="ef-card-head">
+                            <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2"/><path d="M3.5 4.5h7M3.5 7h7M3.5 9.5h4.5"/></svg>
+                            <span class="ef-card-head-title">Tiểu sử</span>
                         </div>
-                        <div class="tmf-sec-body">
-                            <div class="tmf-field">
-                                <label class="tmf-label" for="tm-bio">Nội dung giới thiệu</label>
-                                <textarea id="tm-bio" name="bio" class="tmf-textarea" rows="4"
-                                          placeholder="Vài dòng giới thiệu, sở trường, châm ngôn nghề nghiệp…"
-                                          ><?php echo esc_textarea($m['bio'] ?? ''); ?></textarea>
-                                <span class="tmf-hint">Xuống dòng = tạo nhiều đoạn văn trên trang cá nhân.</span>
+                        <div class="ef-card-body">
+                            <div class="ef-field">
+                                <textarea id="tm-bio" name="bio" class="ef-textarea" rows="4"
+                                          placeholder="Vài dòng giới thiệu, sở trường, châm ngôn…"><?php echo esc_textarea($m['bio'] ?? ''); ?></textarea>
+                                <span class="ef-hint">Xuống dòng = tạo nhiều đoạn văn trên trang cá nhân.</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
-                            <svg viewBox="0 0 14 14"><path d="M7 13.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M3.5 3.5v7h7v-7h-7z" fill="none" stroke="currentColor"/></svg>
-                            Liên hệ & Mạng xã hội 
-                            <span style="font-weight:400;font-size:11px;color:var(--text-3);margin-left:auto;">(Tùy chọn)</span>
+                    <!-- Card: Liên hệ & Mạng xã hội (Tabbed) -->
+                    <div class="ef-card">
+                        <div class="ef-card-head">
+                            <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/><path d="M7 4v3l2 2"/></svg>
+                            <span class="ef-card-head-title">Liên hệ &amp; Mạng xã hội</span>
+                            <span class="ef-card-head-sub">Tùy chọn</span>
                         </div>
-                        <div class="tmf-sec-body">
-                            <style>
-                                .social-icon-label { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--text); margin-bottom:6px; }
-                                .social-icon-wrapper { width:32px; height:32px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:8px; overflow:hidden; }
-                                .social-icon-wrapper svg,.social-icon-wrapper img { width:32px; height:32px; display:block; }
-                            </style>
+                        <div class="ef-card-body">
 
-                            <div class="tmf-row2">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 93 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="93" height="92" rx="12" fill="#4CAF50"/><path d="M62 57.7c-.1-1.1-.9-2.5-2.2-3.9-1.3-1.4-2.9-2.7-4.4-3.5-1.5-.8-2.9-.7-3.9.3l-2.2 2.2c-.3.3-.7.5-1 .4-.3-.1-1.5-.6-4-3.1-2.5-2.5-3-3.7-3.1-4-.1-.3.1-.7.4-1l2.2-2.2c1-1 1.1-2.4.3-3.9-.8-1.5-2.1-3.1-3.5-4.4-1.4-1.3-2.8-2.1-3.9-2.2-1.1-.1-2 .3-2.7 1l-2 2c-1.5 1.5-2.2 3.6-2 5.7.2 2.1 1.2 5.4 4.5 8.7 3.3 3.3 6.6 4.3 8.7 4.5 2.1.2 4.2-.5 5.7-2l2-2c.7-.7 1.1-1.6 1-2.7z" fill="white"/></svg></div>
-                                        Điện thoại
-                                    </label>
-                                    <input type="text" name="phone" class="tmf-input" placeholder="090..." value="<?php echo esc_attr($m['phone'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 92 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.638672" y="0.5" width="90.5618" height="90.5618" rx="11.5" fill="white" stroke="#C4CFE3"/><path d="M22.0065 66.1236H30.4893V45.5227L18.3711 36.4341V62.4881C18.3711 64.4997 20.001 66.1236 22.0065 66.1236Z" fill="#4285F4"/><path d="M59.5732 66.1236H68.056C70.0676 66.1236 71.6914 64.4937 71.6914 62.4881V36.4341L59.5732 45.5227" fill="#34A853"/><path d="M59.5732 29.7693V45.5229L71.6914 36.4343V31.587C71.6914 27.0912 66.5594 24.5282 62.9663 27.2245" fill="#FBBC04"/><path d="M30.4893 45.5227V29.769L45.0311 40.6754L59.5729 29.769V45.5227L45.0311 56.429" fill="#EA4335"/><path d="M18.3711 31.587V36.4343L30.4893 45.5229V29.7693L27.0962 27.2245C23.4971 24.5282 18.3711 27.0912 18.3711 31.587Z" fill="#C5221F"/></svg></div>
-                                        Email
-                                    </label>
-                                    <input type="email" name="email" class="tmf-input" placeholder="admin@domain.com" value="<?php echo esc_attr($m['email'] ?? ''); ?>">
-                                </div>
+                            <!-- Tab nav -->
+                            <div class="ef-tabs" id="ef-social-tabs">
+                                <div class="ef-tab active" data-tab="ef-t-contact">📞 Liên hệ</div>
+                                <div class="ef-tab" data-tab="ef-t-social1">🌐 Social 1</div>
+                                <div class="ef-tab" data-tab="ef-t-social2">💬 Messaging</div>
                             </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#337FFF"/><path d="M57.4233 48.6403L58.7279 40.3588H50.6917V34.9759C50.6917 32.7114 51.8137 30.4987 55.4013 30.4987H59.1063V23.4465C56.9486 23.1028 54.7685 22.9168 52.5834 22.8901C45.9692 22.8901 41.651 26.8626 41.651 34.0442V40.3588H34.3193V48.6403H41.651V68.671H50.6917V48.6403H57.4233Z" fill="white"/></svg></div>
-                                        Facebook
-                                    </label>
-                                    <input type="url" name="facebook" class="tmf-input" placeholder="https://facebook.com/..." value="<?php echo esc_attr($m['facebook'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="url(#ig_exp)"/><path d="M38.3762 45.7808C38.3762 41.1786 42.1083 37.4468 46.7132 37.4468C51.3182 37.4468 55.0522 41.1786 55.0522 45.7808C55.0522 50.383 51.3182 54.1148 46.7132 54.1148C42.1083 54.1148 38.3762 50.383 38.3762 45.7808ZM33.8683 45.7808C33.8683 52.8708 39.619 58.618 46.7132 58.618C53.8075 58.618 59.5581 52.8708 59.5581 45.7808C59.5581 38.6908 53.8075 32.9436 46.7132 32.9436C39.619 32.9436 33.8683 38.6908 33.8683 45.7808ZM36.4001 20.9322C33.7371 21.0534 31.9174 21.4754 30.3282 22.0934C28.6824 22.7316 27.2892 23.5878 25.897 24.977C24.5047 26.3662 23.6502 27.7608 23.0116 29.4056C22.3933 30.9948 21.971 32.8124 21.8497 35.4738C21.7265 38.1394 21.6982 38.9916 21.6982 45.7808C21.6982 52.57 21.7265 53.4222 21.8497 56.0878C21.971 58.7494 22.3933 60.5668 23.0116 62.156C23.6502 63.7998 24.5049 65.196 25.897 66.5846C27.289 67.9732 28.6824 68.8282 30.3282 69.4682C31.9204 70.0862 33.7371 70.5082 36.4001 70.6294C39.0687 70.7506 39.92 70.7808 46.7132 70.7808C53.5065 70.7808 54.3592 70.7526 57.0264 70.6294C59.6896 70.5082 61.5081 70.0862 63.0983 69.4682C64.7431 68.8282 66.1373 67.9738 67.5295 66.5846C68.9218 65.1954 69.7745 63.7998 70.4149 62.156C71.0332 60.5668 71.4575 58.7492 71.5768 56.0878C71.698 53.4202 71.7262 52.57 71.7262 45.7808C71.7262 38.9916 71.698 38.1394 71.5768 35.4738C71.4555 32.8122 71.0332 30.9938 70.4149 29.4056C69.7745 27.7618 68.9196 26.3684 67.5295 24.977C66.1395 23.5856 64.7431 22.7316 63.1003 22.0934C61.5081 21.4754 59.6894 21.0514 57.0284 20.9322C54.3612 20.811 53.5085 20.7808 46.7152 20.7808C39.922 20.7808 39.0687 20.809 36.4001 20.9322Z" fill="white"/><defs><linearGradient id="ig_exp" x1="90.9407" y1="91.5618" x2="-0.621143" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#FBE18A"/><stop offset="0.21" stop-color="#FCBB45"/><stop offset="0.38" stop-color="#F75274"/><stop offset="0.52" stop-color="#D53692"/><stop offset="0.74" stop-color="#8F39CE"/><stop offset="1" stop-color="#5B4FE9"/></linearGradient></defs></svg></div>
-                                        Instagram
-                                    </label>
-                                    <input type="url" name="instagram" class="tmf-input" placeholder="https://instagram.com/..." value="<?php echo esc_attr($m['instagram'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="0.138672" width="91.5618" height="91.5618" rx="12" fill="black"/><path d="M50.7568 42.1716L69.3704 21H64.9596L48.7974 39.383L35.8887 21H21L40.5205 48.7983L21 71H25.4111L42.4788 51.5869L56.1113 71H71L50.7557 42.1716H50.7568ZM44.7152 49.0433L42.7374 46.2752L27.0005 24.2492H33.7756L46.4755 42.0249L48.4533 44.7929L64.9617 67.8986H58.1865L44.7152 49.0443V49.0433Z" fill="white"/></svg></div>
-                                        X / Twitter
-                                    </label>
-                                    <input type="url" name="x_twitter" class="tmf-input" placeholder="https://x.com/..." value="<?php echo esc_attr($m['x_twitter'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="5" fill="#010101"/><path d="M16.6 7.8c-.7-.5-1.3-1.3-1.5-2.3H13v9.5c0 1-.9 1.7-1.7 1.7-1 0-1.7-.8-1.7-1.7s.8-1.7 1.7-1.7c.2 0 .3 0 .5.1V11c-.2 0-.3 0-.5 0-1.9 0-3.5 1.6-3.5 3.5S9.4 18 11.3 18s3.5-1.6 3.5-3.5V9.7c.8.5 1.7.8 2.6.8V8c-.3 0-.6-.1-.8-.2z" fill="white"/></svg></div>
-                                        TikTok
-                                    </label>
-                                    <input type="url" name="tiktok" class="tmf-input" placeholder="https://tiktok.com/@..." value="<?php echo esc_attr($m['tiktok'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#006699"/><path d="M37.1339 63.4304V40.9068H29.6473V63.4304H37.1346H37.1339ZM33.3922 37.8321C36.0023 37.8321 37.6273 36.1025 37.6273 33.9411C37.5785 31.7304 36.0023 30.0491 33.4418 30.0491C30.8795 30.0491 29.2061 31.7304 29.2061 33.9409C29.2061 36.1023 30.8305 37.8319 33.3431 37.8319H33.3916L33.3922 37.8321ZM41.2777 63.4304H48.7637V50.8535C48.7637 50.1813 48.8125 49.5072 49.0103 49.0271C49.5513 47.6815 50.7831 46.2887 52.8517 46.2887C55.5599 46.2887 56.644 48.354 56.644 51.3822V63.4304H64.1297V50.516C64.1297 43.598 60.4369 40.3787 55.5115 40.3787C51.4733 40.3787 49.6998 42.6357 48.7144 44.173H48.7643V40.9075H41.2781C41.3759 43.0205 41.2775 63.4312 41.2775 63.4312L41.2777 63.4304Z" fill="white"/></svg></div>
-                                        LinkedIn
-                                    </label>
-                                    <input type="url" name="linkedin" class="tmf-input" placeholder="https://linkedin.com/in/..." value="<?php echo esc_attr($m['linkedin'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#FF0000"/><path fill-rule="evenodd" clip-rule="evenodd" d="M67.5615 29.2428C69.8115 29.8504 71.58 31.6234 72.1778 33.8708C73.2654 37.9495 73.2654 46.4647 73.2654 46.4647C73.2654 46.4647 73.2654 54.98 72.1778 59.0586C71.5717 61.3144 69.8032 63.0873 67.5615 63.6866C63.4932 64.7771 47.1703 64.7771 47.1703 64.7771C47.1703 64.7771 30.8557 64.7771 26.7791 63.6866C24.5291 63.079 22.7606 61.306 22.1628 59.0586C21.0752 54.98 21.0752 46.4647 21.0752 46.4647C21.0752 46.4647 21.0752 37.9495 22.1628 33.8708C22.7689 31.615 24.5374 29.8421 26.7791 29.2428C30.8557 28.1523 47.1703 28.1523 47.1703 28.1523C47.1703 28.1523 63.4932 28.1523 67.5615 29.2428ZM55.5142 46.4647L41.9561 54.314V38.6154L55.5142 46.4647Z" fill="white"/></svg></div>
-                                        YouTube
-                                    </label>
-                                    <input type="url" name="youtube" class="tmf-input" placeholder="https://youtube.com/..." value="<?php echo esc_attr($m['youtube'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#E60023"/><path d="M44.2808 23.0437C36.8492 23.893 29.4439 30.0479 29.1382 38.84C28.9461 44.2083 30.435 48.2356 35.4258 49.3664C37.5915 45.4553 34.7272 44.5927 34.2818 41.7633C32.4523 30.1686 47.346 22.2615 55.14 30.3563C60.5324 35.9615 56.9826 53.206 48.2848 51.4136C39.9537 49.7017 52.3629 35.9749 45.713 33.2796C40.3074 31.0894 37.4343 39.9798 39.9974 44.396C38.4953 51.9902 35.2599 59.1464 36.5698 68.6715C40.8183 65.5158 42.2504 59.4727 43.425 53.1702C45.5601 54.4978 46.6998 55.8789 49.4244 56.0935C59.4714 56.8891 65.0822 45.8263 63.7112 35.6218C62.4929 26.5749 53.6729 21.971 44.2808 23.0437Z" fill="white"/></svg></div>
-                                        Pinterest
-                                    </label>
-                                    <input type="url" name="pinterest" class="tmf-input" placeholder="https://pinterest.com/..." value="<?php echo esc_attr($m['pinterest'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="url(#msg_exp)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M46.4114 21C32.0561 21 20.9307 31.317 20.9307 45.2508C20.9307 52.5396 23.9761 58.8375 28.9338 63.1887C29.3491 63.5559 29.6003 64.0639 29.6208 64.6122L29.7592 69.059C29.8054 70.4775 31.2973 71.398 32.62 70.8296L37.6752 68.6414C38.1058 68.4553 38.5826 68.4201 39.0338 68.5408C41.3563 69.1696 43.8326 69.5016 46.4114 69.5016C60.7668 69.5016 71.8922 59.1846 71.8922 45.2508C71.8922 31.317 60.7668 21 46.4114 21ZM61.7102 39.6572L54.2249 51.3072C53.0354 53.1584 50.4822 53.6211 48.698 52.3082L42.7457 47.9269C42.1971 47.5245 41.4486 47.5295 40.9051 47.9319L32.8661 53.9179C31.7946 54.7177 30.3898 53.4551 31.1127 52.3384L38.598 40.6884C39.7875 38.8372 42.3407 38.3745 44.1248 39.6874L50.0772 44.0687C50.6258 44.4711 51.3743 44.4661 51.9177 44.0637L59.9567 38.0777C61.0283 37.2779 62.433 38.5405 61.7102 39.6572Z" fill="white"/><defs><radialGradient id="msg_exp" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(15.4753 92.5593) scale(100.718 100.715)"><stop stop-color="#0099FF"/><stop offset="0.6" stop-color="#A033FF"/><stop offset="0.9" stop-color="#FF5280"/><stop offset="1" stop-color="#FF7061"/></radialGradient></defs></svg></div>
-                                        Messenger
-                                    </label>
-                                    <input type="url" name="messenger" class="tmf-input" placeholder="https://m.me/..." value="<?php echo esc_attr($m['messenger'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#00D95F"/><path d="M23.5068 66.8405L26.7915 54.6381C24.1425 49.8847 23.3009 44.3378 24.4211 39.0154C25.5413 33.693 28.5482 28.952 32.89 25.6624C37.2319 22.3729 42.6173 20.7554 48.0583 21.1068C53.4992 21.4582 58.6306 23.755 62.5108 27.5756C66.3911 31.3962 68.7599 36.4844 69.1826 41.9065C69.6053 47.3286 68.0535 52.7208 64.812 57.0938C61.5705 61.4668 56.8568 64.5271 51.5357 65.7133C46.2146 66.8994 40.6432 66.1318 35.8438 63.5513L23.5068 66.8405ZM36.4386 58.985L37.2016 59.4365C40.6779 61.4918 44.7382 62.3423 48.7498 61.8555C52.7613 61.3687 56.4987 59.5719 59.3796 56.7452C62.2605 53.9185 64.123 50.2206 64.6769 46.2279C65.2308 42.2351 64.445 38.1717 62.4419 34.6709C60.4388 31.1701 57.331 28.4285 53.6027 26.8734C49.8745 25.3184 45.7352 25.0372 41.8299 26.0736C37.9247 27.11 34.4729 29.4059 32.0124 32.6035C29.5519 35.801 28.2209 39.7206 28.2269 43.7514C28.2237 47.0937 29.1503 50.3712 30.9038 53.2192L31.3823 54.0061L29.546 60.8167L36.4386 58.985Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M54.9566 46.8847C54.0759 47.4007 52.2714 48.0327 52.0387 49.1033C51.9416 49.6269 52.0093 50.1675 52.2326 50.6512C52.6125 51.4518 53.184 52.1469 53.8965 52.6755C54.609 53.2041 55.4409 53.5499 56.319 53.6824C57.86 53.8568 59.4196 53.6117 60.8322 52.973C62.192 52.5086 63.4937 51.8897 64.7117 51.1284C67.139 49.6305 69.2514 47.6767 70.932 45.3755C71.449 44.6749 71.9282 43.9473 72.3673 43.1956C72.976 42.2144 73.4379 41.1497 73.7381 40.0354C73.8563 39.5716 73.9172 39.0951 73.9192 38.6165C73.9489 37.7643 73.7865 36.9163 73.4441 36.135C73.1016 35.3537 72.5879 34.6589 71.9406 34.1019C71.5677 33.7709 71.1068 33.5546 70.6135 33.4791C70.1202 33.4036 69.6155 33.472 69.1602 33.6762C68.2777 34.42 67.627 35.4002 67.2851 36.5011C66.8429 37.2863 66.6364 38.1818 66.6903 39.0809C66.9329 39.8959 67.3777 40.6368 67.9834 41.235C68.1565 41.3827 68.2653 41.5916 68.287 41.8178C68.3088 42.044 68.2416 42.2697 68.0998 42.4475C66.4372 45.2965 63.8578 47.5012 60.7804 48.7034C60.6092 48.797 60.4097 48.8251 60.2192 48.7823C60.0287 48.7396 59.8604 48.629 59.7459 48.4713C59.2028 47.8134 58.6596 46.4977 57.8191 46.1495C57.2596 46.0186 56.6776 46.0168 56.1173 46.1442C55.5571 46.2716 55.0334 46.5249 54.9566 46.8847Z" fill="white"/></svg></div>
-                                        WhatsApp
-                                    </label>
-                                    <input type="text" name="whatsapp" class="tmf-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['whatsapp'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 92 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="#34AADF"/><path d="M25.0881 43.5652C25.0881 43.5652 43.716 35.7194 50.1765 32.9567C52.6532 31.8518 61.0518 28.3155 61.0518 28.3155C61.0518 28.3155 64.9282 26.7685 64.6052 30.5256C64.4974 32.0728 63.6361 37.4874 62.7747 43.3442C61.4825 51.6322 60.0827 60.6935 60.0827 60.6935C60.0827 60.6935 59.8674 63.2352 58.0369 63.6772C56.2065 64.1192 53.1914 62.1302 52.6532 61.6881C52.2223 61.3566 44.5774 56.3838 41.7778 53.9527C41.0241 53.2897 40.1627 51.9637 41.8854 50.4166C45.7618 46.7699 50.3919 42.2392 53.1914 39.3661C54.4836 38.04 55.7757 34.9459 50.3919 38.703C42.7469 44.1178 35.2096 49.201 35.2096 49.201C35.2096 49.201 33.4868 50.306 30.2565 49.3115C27.0261 48.317 23.2575 46.9909 23.2575 46.9909C23.2575 46.9909 20.6734 45.3334 25.0881 43.5652Z" fill="white"/></svg></div>
-                                        Telegram
-                                    </label>
-                                    <input type="url" name="telegram" class="tmf-input" placeholder="https://t.me/..." value="<?php echo esc_attr($m['telegram'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/250px-Icon_of_Zalo.svg.png" alt="Zalo" width="32" height="32" style="border-radius:8px;object-fit:contain;"></div>
-                                        Zalo
-                                    </label>
-                                    <input type="text" name="zalo" class="tmf-input" placeholder="SĐT hoặc link Zalo" value="<?php echo esc_attr($m['zalo'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 92 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="#754A91"/><path d="M35.396 62.5C33.27 61.96 31.5 60.99 30.01 59.68c-1.09-.98-1.99-2.14-2.67-3.43-.96-1.86-1.6-3.87-1.89-5.94-.36-2.6-.49-5.22-.38-7.84.03-1.22.09-2.43.23-3.65.22-2.32.82-4.59 1.75-6.73 1.16-2.63 3.26-4.74 5.9-5.93 1.8-.81 3.69-1.41 5.63-1.77 1.91-.36 3.83-.58 5.77-.66 1.75-.06 3.5-.04 5.24.07 2.5.1 4.97.52 7.36 1.22 1.77.51 3.46 1.27 5.01 2.27 1.51 1.02 2.72 2.41 3.54 4.03.96 1.89 1.61 3.92 1.93 5.01.21 1.24.35 2.49.41 3.75.09 1.56.08 3.12.02 4.67-.06 1.55-.19 3.06-.39 4.58-.24 2.28-.95 4.49-2.08 6.49-1.47 2.53-3.83 4.44-6.62 5.38-1.91.66-3.89 1.13-5.9 1.41-1.47.2-2.94.35-4.42.41-1.13.05-2.26.04-3.39.02-.64 0-1.28-.06-1.92-.12-.13-.01-.27.01-.39.05-.58.23-1.1.65-1.47 1.22-1.29 1.53-2.63 3.02-3.98 4.51-.25.27-.53.51-.85.69-.41.27-.91.28-1.35.06-.44-.22-.78-.63-.93-1.12-.14-.42-.2-.85-.2-1.29V62.5z" fill="white"/><path d="M34.5 37.5c.8-.76 1.3-1.31 2.19-1.8.74-.47 1.62-.39 2.12.28.95.99 1.81 2.07 2.55 3.22.37.52.64 1.1.82 1.71.06.48-.23.97-.44 1.37-.4.39-.83.76-1.28 1.09-.53.38-.62 1.03-.44 1.46.28 1.31.92 2.52 1.84 3.5 1.12 1.36 2.56 2.41 4.2 3.08.7.3 1.47.16 1.9-.24.25-.31.52-.61.74-.93.49-.71 1.32-.81 2.16-.54 1.68.68 2.8 1.47 3.84 2.36.66.54 1.14 1.22 1.3 1.5.1.35.07.72-.07 1.05-.22.56-.53 1.08-.93 1.54-.5.68-1.13 1.26-1.86 1.69-.73.43-1.55.38-2.32.15-2.84-1.13-5.49-2.67-7.86-4.57-2.32-1.89-4.35-4.11-6.02-6.59-1.41-2.05-2.53-4.28-3.33-6.63-.16-.58-.28-1.17-.33-1.76z" fill="white"/></svg></div>
-                                        Viber
-                                    </label>
-                                    <input type="text" name="viber" class="tmf-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['viber'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 92 92" fill="none"><rect x="0.138672" width="91.5618" height="91.5618" rx="12" fill="#00B7F0"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.0659 43.0286C37.6308 43.9944 38.4114 44.8169 39.3468 45.4319C40.5861 46.2419 41.9036 46.9259 43.2795 47.4736C44.8179 48.1158 46.0114 48.6602 46.8601 49.1069C47.5778 49.4595 48.2292 49.9331 48.7856 50.5069C49.4397 52.1569 48.3952 54.4169 47.4835 55.0297C46.3928 55.3201 45.2967 55.2419 43.453 55.0519C42.0181 54.5986 40.3546 53.8086 39.1599 53.3456C38.5192 53.3369 36.9491 53.8902 36.3401 55.4236C36.49 56.4915 36.8039 56.9302 37.1821 57.409C37.6711 57.7888 38.2289 58.0369 40.4105 58.9814C42.7753 59.4283 45.1516 59.3452 48.6018 59.0998C50.2305 58.5186 53.6093 56.0136 54.8679 53.3425C54.8173 51.8669 53.9447 48.4269 52.5071 46.5875C51.5286 45.9502 47.6043 43.9352 47.1504 43.7536C45.7455 43.1736 43.9803 42.3569 42.29 41.1486C41.6627 39.5602 41.9574 38.266 42.8707 37.3019C43.7839 36.7581 44.8349 36.4895 45.8974 36.5286C48.3134 36.8286 51.874 37.9819 53.2906 37.3919C53.7271 36.6721 53.8546 35.8402 53.319 34.3519C52.8388 33.848 51.5837 33.2452 49.3662 32.6736C47.24 32.4185 41.364 33.2369 38.6787 34.5607C36.285 39.7069 37.0659 43.0286 37.0659 43.0286Z" fill="white"/></svg></div>
-                                        Skype
-                                    </label>
-                                    <input type="text" name="skype" class="tmf-input" placeholder="Skype ID" value="<?php echo esc_attr($m['skype'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#51C332"/><path d="M55.8615 36.5403C56.8503 36.5403 57.8161 36.6225 58.769 36.74C57.0463 29.1747 49.1004 23.4524 39.5457 23.4524C28.7309 23.4524 19.9658 30.7781 19.9658 39.8123C19.9658 45.021 22.8964 49.6421 27.4419 52.6322L24.8606 57.8086L31.8926 54.7884C33.4005 55.3254 34.9674 55.7676 36.6411 55.9734C36.4124 54.975 36.2824 53.9515 36.2824 52.901C36.2824 43.8797 45.0634 36.5403 55.8615 36.5403ZM46.0722 30.8139C47.4235 30.8139 48.5194 31.9132 48.5194 33.2682C48.5194 34.6237 47.4236 35.7222 46.0722 35.7222C44.7201 35.7222 43.6247 34.6237 43.6247 33.2682C43.6247 31.9131 44.7201 30.8139 46.0722 30.8139ZM33.0189 35.7222C31.6674 35.7222 30.5715 34.6237 30.5715 33.2682C30.5715 31.9132 31.6675 30.8139 33.0189 30.8139C34.3703 30.8139 35.4664 31.9132 35.4664 33.2682C35.4663 34.6237 34.3702 35.7222 33.0189 35.7222Z" fill="white"/><path d="M72.1779 52.9008C72.1779 45.6724 64.8709 39.8123 55.8615 39.8123C46.8517 39.8123 39.5457 45.6724 39.5457 52.9008C39.5457 60.1287 46.8517 65.9889 55.8615 65.9889C57.3432 65.9889 58.7525 65.7794 60.12 65.4821L68.9148 69.2608L65.8731 63.1654C69.6849 60.7698 72.1779 57.0859 72.1779 52.9008ZM50.9668 52.0827C49.6154 52.0827 48.5193 50.9838 48.5193 49.6281C48.5193 48.2731 49.6153 47.1746 50.9668 47.1746C52.3186 47.1746 53.4141 48.2736 53.4141 49.6281C53.4141 50.9839 52.3184 52.0827 50.9668 52.0827ZM60.7564 52.0827C59.4043 52.0827 58.3091 50.9838 58.3091 49.6281C58.3091 48.2731 59.4042 47.1746 60.7564 47.1746C62.1083 47.1746 63.2039 48.2736 63.2039 49.6281C63.2039 50.9839 62.1083 52.0827 60.7564 52.0827Z" fill="white"/></svg></div>
-                                        WeChat
-                                    </label>
-                                    <input type="text" name="wechat" class="tmf-input" placeholder="WeChat ID" value="<?php echo esc_attr($m['wechat'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            <div class="tmf-row2" style="margin-top:12px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper" style="overflow:hidden;border:none;padding:0;"><svg width="32" height="32" viewBox="0 0 93 92" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="93" height="92" rx="12" fill="#06C755"/><path d="M78 40.2C78 25.5 63.2 13.5 46.3 13.5 29.4 13.5 14.6 25.5 14.6 40.2c0 13.2 11.7 24.3 27.6 26.4 1.1.2 2.5.7 2.9 1.7.4 1 .3 2.4 0 3.3l-.5 2.7c-.1 1-.9 3.8 1.5 2.7 2.4-1.1 13.3-7.8 18.2-13.4C69.1 59 78 50.2 78 40.2zM35.8 48.2H29v-14h3.1v11h3.7v3zm4.6 0h-3.1V34.2h3.1v14zm14 0h-3l-5.3-9.4v9.4H43V34.2h3l5.3 9.3v-9.3h3.1v14zm12.6-11h-6.2v2.5h6.2v3.1h-6.2v2.5h6.2v3H57.7V34.2H67v3z" fill="white"/></svg></div>
-                                        LINE App
-                                    </label>
-                                    <input type="text" name="line_app" class="tmf-input" placeholder="Line ID" value="<?php echo esc_attr($m['line_app'] ?? ''); ?>">
-                                </div>
-                            </div>
+
+                            <!-- Tab: Liên hệ -->
+                            <div class="ef-tab-pane active" id="ef-t-contact">
+                                <div class="ef-social-grid">
+
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect width="93" height="92" rx="12" fill="#4CAF50"/><path d="M62 57.7c-.1-1.1-.9-2.5-2.2-3.9-1.3-1.4-2.9-2.7-4.4-3.5-1.5-.8-2.9-.7-3.9.3l-2.2 2.2c-.3.3-.7.5-1 .4-.3-.1-1.5-.6-4-3.1-2.5-2.5-3-3.7-3.1-4-.1-.3.1-.7.4-1l2.2-2.2c1-1 1.1-2.4.3-3.9-.8-1.5-2.1-3.1-3.5-4.4-1.4-1.3-2.8-2.1-3.9-2.2-1.1-.1-2 .3-2.7 1l-2 2c-1.5 1.5-2.2 3.6-2 5.7.2 2.1 1.2 5.4 4.5 8.7 3.3 3.3 6.6 4.3 8.7 4.5 2.1.2 4.2-.5 5.7-2l2-2c.7-.7 1.1-1.6 1-2.7z" fill="white"/></svg></span>
+                            <span>Điện thoại</span>
                         </div>
-                                        Số điện thoại
-                                    </label>
-                                    <input type="text" name="phone" class="tmf-input" placeholder="090..." value="<?php echo esc_attr($m['phone'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="#6b5344" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                        </div>
-                                        Email
-                                    </label>
-                                    <input type="email" name="email" class="tmf-input" placeholder="admin@domain.com" value="<?php echo esc_attr($m['email'] ?? ''); ?>">
+                        <input type="text" name="phone" class="ef-input" placeholder="090 xxx xxxx" value="<?php echo esc_attr($m['phone'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 92 92" fill="none"><rect x="0.638672" y="0.5" width="90.5618" height="90.5618" rx="11.5" fill="white" stroke="#C4CFE3"/><path d="M22.0065 66.1236H30.4893V45.5227L18.3711 36.4341V62.4881C18.3711 64.4997 20.001 66.1236 22.0065 66.1236Z" fill="#4285F4"/><path d="M59.5732 66.1236H68.056C70.0676 66.1236 71.6914 64.4937 71.6914 62.4881V36.4341L59.5732 45.5227" fill="#34A853"/><path d="M59.5732 29.7693V45.5229L71.6914 36.4343V31.587C71.6914 27.0912 66.5594 24.5282 62.9663 27.2245" fill="#FBBC04"/><path d="M30.4893 45.5227V29.769L45.0311 40.6754L59.5729 29.769V45.5227L45.0311 56.429" fill="#EA4335"/><path d="M18.3711 31.587V36.4343L30.4893 45.5229V29.7693L27.0962 27.2245C23.4971 24.5282 18.3711 27.0912 18.3711 31.587Z" fill="#C5221F"/></svg></span>
+                            <span>Email</span>
+                        </div>
+                        <input type="email" name="email" class="ef-input" placeholder="admin@domain.com" value="<?php echo esc_attr($m['email'] ?? ''); ?>">
+                    </div>
                                 </div>
                             </div>
 
-                            <div class="tmf-row2" style="margin-top:16px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M46.4927 38.6403L47.7973 30.3588H39.7611V24.9759C39.7611 22.7114 40.883 20.4987 44.4706 20.4987H48.1756V13.4465C46.018 13.1028 43.8378 12.9168 41.6527 12.8901C35.0385 12.8901 30.7204 16.8626 30.7204 24.0442V30.3588H23.3887V38.6403H30.7204V58.671H39.7611V38.6403H46.4927Z" fill="#337FFF"/></svg>
-                                        </div>
-                                        Facebook
-                                    </label>
-                                    <input type="url" name="facebook" class="tmf-input" placeholder="https://facebook.com/..." value="<?php echo esc_attr($m['facebook'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M27.4456 35.7808C27.4456 31.1786 31.1776 27.4468 35.7826 27.4468C40.3875 27.4468 44.1216 31.1786 44.1216 35.7808C44.1216 40.383 40.3875 44.1148 35.7826 44.1148C31.1776 44.1148 27.4456 40.383 27.4456 35.7808ZM22.9377 35.7808C22.9377 42.8708 28.6883 48.618 35.7826 48.618C42.8768 48.618 48.6275 42.8708 48.6275 35.7808C48.6275 28.6908 42.8768 22.9436 35.7826 22.9436C28.6883 22.9436 22.9377 28.6908 22.9377 35.7808ZM46.1342 22.4346C46.1339 23.0279 46.3098 23.608 46.6394 24.1015C46.9691 24.595 47.4377 24.9797 47.9861 25.2069C48.5346 25.4342 49.1381 25.4939 49.7204 25.3784C50.3028 25.2628 50.8378 24.9773 51.2577 24.5579C51.6777 24.1385 51.9638 23.6041 52.0799 23.0222C52.1959 22.4403 52.1367 21.8371 51.9097 21.2888C51.6828 20.7406 51.2982 20.2719 50.8047 19.942C50.3112 19.6122 49.7309 19.436 49.1372 19.4358H49.136C48.3402 19.4361 47.5771 19.7522 47.0142 20.3144C46.4514 20.8767 46.1349 21.6392 46.1342 22.4346ZM25.6765 56.1302C23.2377 56.0192 21.9121 55.6132 21.0311 55.2702C19.8632 54.8158 19.0299 54.2746 18.1538 53.4002C17.2777 52.5258 16.7354 51.6938 16.2827 50.5266C15.9393 49.6466 15.533 48.3214 15.4222 45.884C15.3009 43.2488 15.2767 42.4572 15.2767 35.781C15.2767 29.1048 15.3029 28.3154 15.4222 25.678C15.5332 23.2406 15.9425 21.918 16.2827 21.0354C16.7374 19.8682 17.2789 19.0354 18.1538 18.1598C19.0287 17.2842 19.8612 16.7422 21.0311 16.2898C21.9117 15.9466 23.2377 15.5406 25.6765 15.4298C28.3133 15.3086 29.1054 15.2844 35.7826 15.2844C42.4598 15.2844 43.2527 15.3106 45.8916 15.4298C48.3305 15.5408 49.6539 15.9498 50.537 16.2898C51.7049 16.7422 52.5382 17.2854 53.4144 18.1598C54.2905 19.0342 54.8308 19.8682 55.2855 21.0354C55.6289 21.9154 56.0351 23.2406 56.146 25.678C56.2673 28.3154 56.2915 29.1048 56.2915 35.781C56.2915 42.4572 56.2673 43.2466 56.146 45.884C56.0349 48.3214 55.6267 49.6462 55.2855 50.5266C54.8308 51.6938 54.2893 52.5266 53.4144 53.4002C52.5394 54.2738 51.7049 54.8158 50.537 55.2702C49.6565 55.6134 48.3305 56.0194 45.8916 56.1302C43.2549 56.2514 42.4628 56.2756 35.7826 56.2756C29.1024 56.2756 28.3125 56.2514 25.6765 56.1302ZM25.4694 10.9322C22.8064 11.0534 20.9867 11.4754 19.3976 12.0934C17.7518 12.7316 16.3585 13.5878 14.9663 14.977C13.5741 16.3662 12.7195 17.7608 12.081 19.4056C11.4626 20.9948 11.0403 22.8124 10.9191 25.4738C10.7958 28.1394 10.7676 28.9916 10.7676 35.7808C10.7676 42.57 10.7958 43.4222 10.9191 46.0878C11.0403 48.7494 11.4626 50.5668 12.081 52.156C12.7195 53.7998 13.5743 55.196 14.9663 56.5846C16.3583 57.9732 17.7518 58.8282 19.3976 59.4682C20.9897 60.0862 22.8064 60.5082 25.4694 60.6294C28.138 60.7506 28.9893 60.7808 35.7826 60.7808C42.5759 60.7808 43.4286 60.7526 46.0958 60.6294C48.759 60.5082 50.5774 60.0862 52.1676 59.4682C53.8124 58.8282 55.2066 57.9738 56.5989 56.5846C57.9911 55.1954 58.8438 53.7998 59.4842 52.156C60.1026 50.5668 60.5268 48.7492 60.6461 46.0878C60.7674 43.4202 60.7956 42.57 60.7956 35.7808C60.7956 28.9916 60.7674 28.1394 60.6461 25.4738C60.5248 22.8122 60.1026 20.9938 59.4842 19.4056C58.8438 17.7618 57.9889 16.3684 56.5989 14.977C55.2088 13.5856 53.8124 12.7316 52.1696 12.0934C50.5775 11.4754 48.7588 11.0514 46.0978 10.9322C43.4306 10.811 42.5779 10.7808 35.7846 10.7808C28.9913 10.7808 28.138 10.809 25.4694 10.9322Z" fill="url(#ig_adm1)"/><defs><radialGradient id="ig_adm1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(17.4144 61.017) scale(65.31 65.2708)"><stop offset="0.09" stop-color="#FA8F21"/><stop offset="0.78" stop-color="#D82D7E"/></radialGradient></defs></svg>
-                                        </div>
-                                        Instagram
-                                    </label>
-                                    <input type="url" name="instagram" class="tmf-input" placeholder="https://instagram.com/..." value="<?php echo esc_attr($m['instagram'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            
-                            <div class="tmf-row2" style="margin-top:16px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40.7568 32.1716L59.3704 11H54.9596L38.7974 29.383L25.8887 11H11L30.5205 38.7983L11 61H15.4111L32.4788 41.5869L46.1113 61H61L40.7557 32.1716H40.7568ZM34.7152 39.0433L32.7374 36.2752L17.0005 14.2492H23.7756L36.4755 32.0249L38.4533 34.7929L54.9617 57.8986H48.1865L34.7152 39.0443V39.0433Z" fill="black"/></svg>
-                                        </div>
-                                        X / Twitter
-                                    </label>
-                                    <input type="url" name="x_twitter" class="tmf-input" placeholder="https://x.com/..." value="<?php echo esc_attr($m['x_twitter'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M45.6721 29.4285C48.7387 31.6085 52.4112 32.7733 56.1737 32.7592V25.3024C55.434 25.3045 54.6963 25.2253 53.9739 25.0663V31.0068C50.203 31.0135 46.5252 29.8354 43.4599 27.6389V42.9749C43.4507 45.4914 42.7606 47.9585 41.4628 50.1146C40.165 52.2706 38.3079 54.0353 36.0885 55.2215C33.8691 56.4076 31.37 56.9711 28.8563 56.852C26.3426 56.733 23.9079 55.9359 21.8105 54.5453C23.7506 56.5082 26.2295 57.8513 28.9333 58.4044C31.6372 58.9576 34.4444 58.6959 36.9994 57.6526C39.5545 56.6093 41.7425 54.8312 43.2864 52.5436C44.8302 50.256 45.6605 47.5616 45.6721 44.8018V29.4285ZM48.3938 21.8226C46.8343 20.1323 45.8775 17.9739 45.6721 15.6832V14.7139H43.5842C43.8423 16.1699 44.4039 17.5553 45.2326 18.78C46.0612 20.0048 47.1383 21.0414 48.3938 21.8226ZM26.645 48.642C25.9213 47.6957 25.4779 46.5653 25.365 45.3793C25.2522 44.1934 25.4746 42.9996 26.0068 41.9338C26.5391 40.8681 27.3598 39.9731 28.3757 39.3508C29.3915 38.7285 30.5616 38.4039 31.7529 38.4139C32.4106 38.4137 33.0644 38.5143 33.6916 38.7121V31.0068C32.9584 30.9097 32.2189 30.8682 31.4794 30.8826V36.8728C29.9522 36.39 28.2992 36.4998 26.8492 37.1803C25.3992 37.8608 24.2585 39.0621 23.6539 40.5454C23.0494 42.0286 23.0252 43.6851 23.5864 45.1853C24.1475 46.6855 25.2527 47.9196 26.6823 48.642H26.645Z" fill="#EE1D52"/><path fill-rule="evenodd" clip-rule="evenodd" d="M43.4589 27.5892C46.5241 29.7857 50.2019 30.9638 53.9729 30.9571V25.0166C51.8243 24.5623 49.8726 23.4452 48.3927 21.8226C47.1372 21.0414 46.0601 20.0048 45.2315 18.78C44.4029 17.5553 43.8412 16.1699 43.5831 14.7139H38.09V44.8018C38.0849 46.1336 37.6629 47.4304 36.8831 48.51C36.1034 49.5897 35.0051 50.3981 33.7425 50.8217C32.4798 51.2453 31.1162 51.2629 29.8431 50.872C28.57 50.4811 27.4512 49.7012 26.6439 48.642C25.3645 47.9965 24.3399 46.9387 23.7354 45.6394C23.1309 44.3401 22.9818 42.875 23.3121 41.4805C23.6424 40.0861 24.4329 38.8435 25.556 37.9535C26.6791 37.0634 28.0693 36.5776 29.5023 36.5745C30.1599 36.5766 30.8134 36.6772 31.4411 36.8728V30.8826C28.7288 30.9477 26.0946 31.8033 23.8617 33.3444C21.6289 34.8855 19.8946 37.0451 18.8717 39.5579C17.8489 42.0708 17.5821 44.8276 18.1039 47.49C18.6258 50.1524 19.9137 52.6045 21.8095 54.5453C23.9073 55.9459 26.3458 56.7512 28.8651 56.8755C31.3845 56.9997 33.8904 56.4383 36.1158 55.2509C38.3413 54.0636 40.2031 52.2948 41.5027 50.133C42.8024 47.9712 43.4913 45.4973 43.4962 42.9749L43.4589 27.5892Z" fill="black"/><path fill-rule="evenodd" clip-rule="evenodd" d="M53.9736 25.0161V23.4129C52.0005 23.4213 50.0655 22.8696 48.3934 21.8221C49.8695 23.4493 51.8229 24.5674 53.9736 25.0161ZM43.5838 14.7134C43.5838 14.4275 43.4968 14.1292 43.4596 13.8434V12.874H35.8785V42.9744C35.872 44.6598 35.197 46.2738 34.0017 47.4621C32.8064 48.6504 31.1885 49.3159 29.503 49.3126C28.5106 49.3176 27.5311 49.0876 26.6446 48.6415C27.4519 49.7007 28.5707 50.4805 29.8438 50.8715C31.1169 51.2624 32.4805 51.2448 33.7432 50.8212C35.0058 50.3976 36.1041 49.5892 36.8838 48.5095C37.6636 47.4298 38.0856 46.1331 38.0907 44.8013V14.7134H43.5838ZM31.4418 30.8696V29.167C28.3222 28.7432 25.1511 29.3885 22.4453 30.9977C19.7394 32.6069 17.6584 35.0851 16.5413 38.0284C15.4242 40.9718 15.337 44.2067 16.2938 47.206C17.2506 50.2053 19.195 52.792 21.8102 54.5448C19.9287 52.5995 18.6545 50.1484 18.1433 47.4908C17.6321 44.8333 17.906 42.0844 18.9315 39.5799C19.957 37.0755 21.6897 34.924 23.918 33.3882C26.1463 31.8524 28.7736 30.9988 31.4791 30.9318L31.4418 30.8696Z" fill="#69C9D0"/></svg>
-                                        </div>
-                                        TikTok
-                                    </label>
-                                    <input type="url" name="tiktok" class="tmf-input" placeholder="https://tiktok.com/..." value="<?php echo esc_attr($m['tiktok'] ?? ''); ?>">
-                                </div>
-                            </div>
-
-                            <div class="tmf-row2" style="margin-top:16px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 71 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5762 56.8405L15.8608 44.6381C... Z" fill="#00D95F"/><path d="M12.5762 56.8405L15.8608 44.6381C13.2118 39.8847 12.3702 34.3378 13.4904 29.0154C14.6106 23.693 17.6176 18.952 21.9594 15.6624C26.3012 12.3729 31.6867 10.7554 37.1276 11.1068C42.5685 11.4582 47.6999 13.755 51.5802 17.5756C55.4604 21.3962 57.8292 26.4844 58.2519 31.9065C58.6746 37.3286 57.1228 42.7208 53.8813 47.0938C50.6399 51.4668 45.9261 54.5271 40.605 55.7133C35.284 56.8994 29.7125 56.1318 24.9131 53.5513L12.5762 56.8405ZM25.508 48.985L26.2709 49.4365C29.7473 51.4918 33.8076 52.3423 37.8191 51.8555C41.8306 51.3687 45.5681 49.5719 48.4489 46.7452C51.3298 43.9185 53.1923 40.2206 53.7463 36.2279C54.3002 32.2351 53.5143 28.1717 51.5113 24.6709C49.5082 21.1701 46.4003 18.4285 42.6721 16.8734C38.9438 15.3184 34.8045 15.0372 30.8993 16.0736C26.994 17.11 23.5422 19.4059 21.0817 22.6035C18.6212 25.801 17.2903 29.7206 17.2963 33.7514C17.293 37.0937 18.2197 40.3712 19.9732 43.2192L20.4516 44.0061L18.6153 50.8167L25.508 48.985Z" fill="#00D95F"/><path fill-rule="evenodd" clip-rule="evenodd" d="M44.0259 36.8847C43.5787 36.5249 43.0549 36.2716 42.4947 36.1442C41.9344 36.0168 41.3524 36.0186 40.793 36.1495C39.9524 36.4977 39.4093 37.8134 38.8661 38.4713C38.7516 38.629 38.5833 38.7396 38.3928 38.7823C38.2024 38.8251 38.0028 38.797 37.8316 38.7034C34.7543 37.5012 32.1748 35.2965 30.5122 32.4475C30.3704 32.2697 30.3033 32.044 30.325 31.8178C30.3467 31.5916 30.4555 31.3827 30.6286 31.235C31.2344 30.6368 31.6791 29.8959 31.9218 29.0809C31.9756 28.1818 31.7691 27.2863 31.3269 26.5011C30.985 25.4002 30.3344 24.42 29.4518 23.6762C28.9966 23.472 28.4919 23.4036 27.9985 23.4791C27.5052 23.5546 27.0443 23.7709 26.6715 24.1019C26.0242 24.6589 25.5104 25.3537 25.168 26.135C24.8256 26.9163 24.6632 27.7643 24.6929 28.6165C24.6949 29.0951 24.7557 29.5716 24.8739 30.0354C25.1742 31.1497 25.636 32.2144 26.2447 33.1956C26.6839 33.9473 27.163 34.6749 27.6801 35.3755C29.3607 37.6767 31.4732 39.6305 33.9003 41.1284C35.1183 41.8897 36.42 42.5086 37.7799 42.973C39.1924 43.6117 40.752 43.8568 42.2931 43.6824C43.1711 43.5499 44.003 43.2041 44.7156 42.6755C45.4281 42.1469 45.9995 41.4518 46.3795 40.6512C46.6028 40.1675 46.6705 39.6269 46.5735 39.1033C46.3407 38.0327 44.9053 37.4007 44.0259 36.8847Z" fill="white"/></svg>
-                                        </div>
-                                        WhatsApp
-                                    </label>
-                                    <input type="text" name="whatsapp" class="tmf-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['whatsapp'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 71 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M33.3501 13.0437C25.9186 13.893 18.5132 20.0479 18.2075 28.84C18.0154 34.2083 19.5044 38.2356 24.4951 39.3664C26.6608 35.4553 23.7965 34.5927 23.3511 31.7633C21.5216 20.1686 36.4153 12.2615 44.2093 20.3563C49.6018 25.9615 46.0519 43.206 37.3541 41.4136C29.0231 39.7017 41.4323 25.9749 34.7823 23.2796C29.3767 21.0894 26.5037 29.9798 29.0667 34.396C27.5647 41.9902 24.3292 49.1464 25.6391 58.6715C29.8876 55.5158 31.3198 49.4727 32.4943 43.1702C34.6295 44.4978 35.7691 45.8789 38.4937 46.0935C48.5407 46.8891 54.1515 35.8263 52.7805 25.6218C51.5623 16.5749 42.7422 11.971 33.3501 13.0437Z" fill="#FF0000"/></svg>
-                                        </div>
-                                        YouTube
-                                    </label>
-                                    <input type="url" name="youtube" class="tmf-input" placeholder="https://youtube.com/..." value="<?php echo esc_attr($m['youtube'] ?? ''); ?>">
-                                </div>
-                            </div>
-                            
-                            <div class="tmf-row2" style="margin-top:16px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.6975 11C12.6561 11 11 12.6057 11 14.5838V57.4474C11 59.4257 12.6563 61.03 14.6975 61.03H57.3325C59.3747 61.03 61.03 59.4255 61.03 57.4468V14.5838C61.03 12.6057 59.3747 11 57.3325 11H14.6975ZM26.2032 30.345V52.8686H18.7167V30.345H26.2032ZM26.6967 23.3793C26.6967 25.5407 25.0717 27.2703 22.4615 27.2703L22.4609 27.2701H22.4124C19.8998 27.2701 18.2754 25.5405 18.2754 23.3791C18.2754 21.1686 19.9489 19.4873 22.5111 19.4873C25.0717 19.4873 26.6478 21.1686 26.6967 23.3793ZM37.833 52.8686H30.3471L30.3469 52.8694C30.3469 52.8694 30.4452 32.4588 30.3475 30.3458H37.8336V33.5339C38.8288 31.9995 40.6098 29.8169 44.5808 29.8169C49.5062 29.8169 53.1991 33.0363 53.1991 39.9543V52.8686H45.7133V40.8204C45.7133 37.7922 44.6293 35.7269 41.921 35.7269C39.8524 35.7269 38.6206 37.1198 38.0796 38.4653C37.8819 38.9455 37.833 39.6195 37.833 40.2918V52.8686Z" fill="#006699"/></svg>
-                                        </div>
-                                        LinkedIn
-                                    </label>
-                                    <input type="url" name="linkedin" class="tmf-input" placeholder="https://linkedin.com/..." value="<?php echo esc_attr($m['linkedin'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M45.8956 26.0879C46.8845 26.0879 47.8503 26.1701 48.8032 26.2876C47.0805 18.7224 39.1346 13 29.5799 13C18.7651 13 10 20.3257 10 29.3599C10 34.5686 12.9306 39.1897 17.4761 42.1798L14.8948 47.3562L21.9268 44.336C23.4347 44.873 25.0016 45.3152 26.6753 45.521C26.4465 44.5226 26.3166 43.4991 26.3166 42.4487C26.3166 33.4273 35.0976 26.0879 45.8956 26.0879ZM36.1064 20.3615C37.4577 20.3615 38.5536 21.4608 38.5536 22.8158C38.5536 24.1713 37.4578 25.2698 36.1064 25.2698C34.7543 25.2698 33.6589 24.1713 33.6589 22.8158C33.6589 21.4607 34.7543 20.3615 36.1064 20.3615ZM23.0531 25.2698C21.7016 25.2698 20.6057 24.1713 20.6057 22.8158C20.6057 21.4608 21.7017 20.3615 23.0531 20.3615C24.4045 20.3615 25.5006 21.4608 25.5006 22.8158C25.5005 24.1713 24.4044 25.2698 23.0531 25.2698Z" fill="#51C332"/><path d="M62.2121 42.4484C62.2121 35.22 54.9051 29.3599 45.8956 29.3599C36.8858 29.3599 29.5799 35.22 29.5799 42.4484C29.5799 49.6763 36.8858 55.5365 45.8956 55.5365C47.3773 55.5365 48.7867 55.3271 50.1542 55.0297L58.9489 58.8084L55.9072 52.713C59.7191 50.3174 62.2121 46.6335 62.2121 42.4484ZM41.001 41.6303C39.6496 41.6303 38.5534 40.5314 38.5534 39.1757C38.5534 37.8207 39.6495 36.7222 41.001 36.7222C42.3528 36.7222 43.4482 37.8212 43.4482 39.1757C43.4482 40.5316 42.3526 41.6303 41.001 41.6303ZM50.7905 41.6303C49.4385 41.6303 48.3433 40.5314 48.3433 39.1757C48.3433 37.8207 49.4384 36.7222 50.7905 36.7222C52.1425 36.7222 53.238 37.8212 53.238 39.1757C53.238 40.5316 52.1425 41.6303 50.7905 41.6303Z" fill="#51C332"/></svg>
-                                        </div>
-                                        WeChat
-                                    </label>
-                                    <input type="text" name="wechat" class="tmf-input" placeholder="WeChat ID" value="<?php echo esc_attr($m['wechat'] ?? ''); ?>">
+                            <!-- Tab: Social 1 (Facebook, IG, X, TikTok, LinkedIn, YouTube, Pinterest) -->
+                            <div class="ef-tab-pane" id="ef-t-social1">
+                                <div class="ef-social-grid">
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#337FFF"/><path d="M57.4233 48.6403L58.7279 40.3588H50.6917V34.9759C50.6917 32.7114 51.8137 30.4987 55.4013 30.4987H59.1063V23.4465C56.9486 23.1028 54.7685 22.9168 52.5834 22.8901C45.9692 22.8901 41.651 26.8626 41.651 34.0442V40.3588H34.3193V48.6403H41.651V68.671H50.6917V48.6403H57.4233Z" fill="white"/></svg></span>
+                            <span>Facebook</span>
+                        </div>
+                        <input type="url" name="facebook" class="ef-input" placeholder="https://facebook.com/..." value="<?php echo esc_attr($m['facebook'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="url(#ig_ef)"/><path d="M38.3762 45.7808C38.3762 41.1786 42.1083 37.4468 46.7132 37.4468C51.3182 37.4468 55.0522 41.1786 55.0522 45.7808C55.0522 50.383 51.3182 54.1148 46.7132 54.1148C42.1083 54.1148 38.3762 50.383 38.3762 45.7808ZM33.8683 45.7808C33.8683 52.8708 39.619 58.618 46.7132 58.618C53.8075 58.618 59.5581 52.8708 59.5581 45.7808C59.5581 38.6908 53.8075 32.9436 46.7132 32.9436C39.619 32.9436 33.8683 38.6908 33.8683 45.7808ZM36.4001 20.9322C33.7371 21.0534 31.9174 21.4754 30.3282 22.0934C28.6824 22.7316 27.2892 23.5878 25.897 24.977C24.5047 26.3662 23.6502 27.7608 23.0116 29.4056C22.3933 30.9948 21.971 32.8124 21.8497 35.4738C21.7265 38.1394 21.6982 38.9916 21.6982 45.7808C21.6982 52.57 21.7265 53.4222 21.8497 56.0878C21.971 58.7494 22.3933 60.5668 23.0116 62.156C23.6502 63.7998 24.5049 65.196 25.897 66.5846C27.289 67.9732 28.6824 68.8282 30.3282 69.4682C31.9204 70.0862 33.7371 70.5082 36.4001 70.6294C39.0687 70.7506 39.92 70.7808 46.7132 70.7808C53.5065 70.7808 54.3592 70.7526 57.0264 70.6294C59.6896 70.5082 61.5081 70.0862 63.0983 69.4682C64.7431 68.8282 66.1373 67.9738 67.5295 66.5846C68.9218 65.1954 69.7745 63.7998 70.4149 62.156C71.0332 60.5668 71.4575 58.7492 71.5768 56.0878C71.698 53.4202 71.7262 52.57 71.7262 45.7808C71.7262 38.9916 71.698 38.1394 71.5768 35.4738C71.4555 32.8122 71.0332 30.9938 70.4149 29.4056C69.7745 27.7618 68.9196 26.3684 67.5295 24.977C66.1395 23.5856 64.7431 22.7316 63.1003 22.0934C61.5081 21.4754 59.6894 21.0514 57.0284 20.9322C54.3612 20.811 53.5085 20.7808 46.7152 20.7808C39.922 20.7808 39.0687 20.809 36.4001 20.9322Z" fill="white"/><defs><linearGradient id="ig_ef" x1="90.9407" y1="91.5618" x2="-0.621143" y2="0" gradientUnits="userSpaceOnUse"><stop stop-color="#FBE18A"/><stop offset="0.21" stop-color="#FCBB45"/><stop offset="0.38" stop-color="#F75274"/><stop offset="0.52" stop-color="#D53692"/><stop offset="0.74" stop-color="#8F39CE"/><stop offset="1" stop-color="#5B4FE9"/></linearGradient></defs></svg></span>
+                            <span>Instagram</span>
+                        </div>
+                        <input type="url" name="instagram" class="ef-input" placeholder="https://instagram.com/..." value="<?php echo esc_attr($m['instagram'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="0.138672" width="91.5618" height="91.5618" rx="12" fill="black"/><path d="M50.7568 42.1716L69.3704 21H64.9596L48.7974 39.383L35.8887 21H21L40.5205 48.7983L21 71H25.4111L42.4788 51.5869L56.1113 71H71L50.7557 42.1716H50.7568ZM44.7152 49.0433L42.7374 46.2752L27.0005 24.2492H33.7756L46.4755 42.0249L48.4533 44.7929L64.9617 67.8986H58.1865L44.7152 49.0443V49.0433Z" fill="white"/></svg></span>
+                            <span>X / Twitter</span>
+                        </div>
+                        <input type="url" name="x_twitter" class="ef-input" placeholder="https://x.com/..." value="<?php echo esc_attr($m['x_twitter'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="5" fill="#010101"/><path d="M16.6 7.8c-.7-.5-1.3-1.3-1.5-2.3H13v9.5c0 1-.9 1.7-1.7 1.7-1 0-1.7-.8-1.7-1.7s.8-1.7 1.7-1.7c.2 0 .3 0 .5.1V11c-.2 0-.3 0-.5 0-1.9 0-3.5 1.6-3.5 3.5S9.4 18 11.3 18s3.5-1.6 3.5-3.5V9.7c.8.5 1.7.8 2.6.8V8c-.3 0-.6-.1-.8-.2z" fill="white"/></svg></span>
+                            <span>TikTok</span>
+                        </div>
+                        <input type="url" name="tiktok" class="ef-input" placeholder="https://tiktok.com/@..." value="<?php echo esc_attr($m['tiktok'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#006699"/><path d="M37.1339 63.4304V40.9068H29.6473V63.4304H37.1346H37.1339ZM33.3922 37.8321C36.0023 37.8321 37.6273 36.1025 37.6273 33.9411C37.5785 31.7304 36.0023 30.0491 33.4418 30.0491C30.8795 30.0491 29.2061 31.7304 29.2061 33.9409C29.2061 36.1023 30.8305 37.8319 33.3431 37.8319H33.3916L33.3922 37.8321ZM41.2777 63.4304H48.7637V50.8535C48.7637 50.1813 48.8125 49.5072 49.0103 49.0271C49.5513 47.6815 50.7831 46.2887 52.8517 46.2887C55.5599 46.2887 56.644 48.354 56.644 51.3822V63.4304H64.1297V50.516C64.1297 43.598 60.4369 40.3787 55.5115 40.3787C51.4733 40.3787 49.6998 42.6357 48.7144 44.173H48.7643V40.9075H41.2781C41.3759 43.0205 41.2775 63.4312 41.2775 63.4312L41.2777 63.4304Z" fill="white"/></svg></span>
+                            <span>LinkedIn</span>
+                        </div>
+                        <input type="url" name="linkedin" class="ef-input" placeholder="https://linkedin.com/in/..." value="<?php echo esc_attr($m['linkedin'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#FF0000"/><path fill-rule="evenodd" clip-rule="evenodd" d="M67.5615 29.2428C69.8115 29.8504 71.58 31.6234 72.1778 33.8708C73.2654 37.9495 73.2654 46.4647 73.2654 46.4647C73.2654 46.4647 73.2654 54.98 72.1778 59.0586C71.5717 61.3144 69.8032 63.0873 67.5615 63.6866C63.4932 64.7771 47.1703 64.7771 47.1703 64.7771C47.1703 64.7771 30.8557 64.7771 26.7791 63.6866C24.5291 63.079 22.7606 61.306 22.1628 59.0586C21.0752 54.98 21.0752 46.4647 21.0752 46.4647C21.0752 46.4647 21.0752 37.9495 22.1628 33.8708C22.7689 31.615 24.5374 29.8421 26.7791 29.2428C30.8557 28.1523 47.1703 28.1523 47.1703 28.1523C47.1703 28.1523 63.4932 28.1523 67.5615 29.2428ZM55.5142 46.4647L41.9561 54.314V38.6154L55.5142 46.4647Z" fill="white"/></svg></span>
+                            <span>YouTube</span>
+                        </div>
+                        <input type="url" name="youtube" class="ef-input" placeholder="https://youtube.com/..." value="<?php echo esc_attr($m['youtube'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#E60023"/><path d="M44.2808 23.0437C36.8492 23.893 29.4439 30.0479 29.1382 38.84C28.9461 44.2083 30.435 48.2356 35.4258 49.3664C37.5915 45.4553 34.7272 44.5927 34.2818 41.7633C32.4523 30.1686 47.346 22.2615 55.14 30.3563C60.5324 35.9615 56.9826 53.206 48.2848 51.4136C39.9537 49.7017 52.3629 35.9749 45.713 33.2796C40.3074 31.0894 37.4343 39.9798 39.9974 44.396C38.4953 51.9902 35.2599 59.1464 36.5698 68.6715C40.8183 65.5158 42.2504 59.4727 43.425 53.1702C45.5601 54.4978 46.6998 55.8789 49.4244 56.0935C59.4714 56.8891 65.0822 45.8263 63.7112 35.6218C62.4929 26.5749 53.6729 21.971 44.2808 23.0437Z" fill="white"/></svg></span>
+                            <span>Pinterest</span>
+                        </div>
+                        <input type="url" name="pinterest" class="ef-input" placeholder="https://pinterest.com/..." value="<?php echo esc_attr($m['pinterest'] ?? ''); ?>">
+                    </div>
                                 </div>
                             </div>
 
-                            <div class="tmf-row2" style="margin-top:16px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper font-bold text-[#0068FF] text-[15px]">
-                                            Zalo
+                            <!-- Tab: Messaging (WA, TG, Messenger, Zalo, Viber, Skype, WeChat, LINE) -->
+                            <div class="ef-tab-pane" id="ef-t-social2">
+                                <div class="ef-social-grid">
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect x="1.13867" width="91.5618" height="91.5618" rx="12" fill="#00D95F"/><path d="M23.5068 66.8405L26.7915 54.6381C24.1425 49.8847 23.3009 44.3378 24.4211 39.0154C25.5413 33.693 28.5482 28.952 32.89 25.6624C37.2319 22.3729 42.6173 20.7554 48.0583 21.1068C53.4992 21.4582 58.6306 23.755 62.5108 27.5756C66.3911 31.3962 68.7599 36.4844 69.1826 41.9065C69.6053 47.3286 68.0535 52.7208 64.812 57.0938C61.5705 61.4668 56.8568 64.5271 51.5357 65.7133C46.2146 66.8994 40.6432 66.1318 35.8438 63.5513L23.5068 66.8405Z" fill="white"/></svg></span>
+                            <span>WhatsApp</span>
+                        </div>
+                        <input type="text" name="whatsapp" class="ef-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['whatsapp'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 92 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="#34AADF"/><path d="M25.0881 43.5652C25.0881 43.5652 43.716 35.7194 50.1765 32.9567C52.6532 31.8518 61.0518 28.3155 61.0518 28.3155C61.0518 28.3155 64.9282 26.7685 64.6052 30.5256C64.4974 32.0728 63.6361 37.4874 62.7747 43.3442C61.4825 51.6322 60.0827 60.6935 60.0827 60.6935C60.0827 60.6935 59.8674 63.2352 58.0369 63.6772C56.2065 64.1192 53.1914 62.1302 52.6532 61.6881C52.2223 61.3566 44.5774 56.3838 41.7778 53.9527C41.0241 53.2897 40.1627 51.9637 41.8854 50.4166C45.7618 46.7699 50.3919 42.2392 53.1914 39.3661C54.4836 38.04 55.7757 34.9459 50.3919 38.703C42.7469 44.1178 35.2096 49.201 35.2096 49.201C35.2096 49.201 33.4868 50.306 30.2565 49.3115C27.0261 48.317 23.2575 46.9909 23.2575 46.9909C23.2575 46.9909 20.6734 45.3334 25.0881 43.5652Z" fill="white"/></svg></span>
+                            <span>Telegram</span>
+                        </div>
+                        <input type="url" name="telegram" class="ef-input" placeholder="https://t.me/..." value="<?php echo esc_attr($m['telegram'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="url(#msg_ef)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M46.4114 21C32.0561 21 20.9307 31.317 20.9307 45.2508C20.9307 52.5396 23.9761 58.8375 28.9338 63.1887C29.3491 63.5559 29.6003 64.0639 29.6208 64.6122L29.7592 69.059C29.8054 70.4775 31.2973 71.398 32.62 70.8296L37.6752 68.6414C38.1058 68.4553 38.5826 68.4201 39.0338 68.5408C41.3563 69.1696 43.8326 69.5016 46.4114 69.5016C60.7668 69.5016 71.8922 59.1846 71.8922 45.2508C71.8922 31.317 60.7668 21 46.4114 21ZM61.7102 39.6572L54.2249 51.3072C53.0354 53.1584 50.4822 53.6211 48.698 52.3082L42.7457 47.9269C42.1971 47.5245 41.4486 47.5295 40.9051 47.9319L32.8661 53.9179C31.7946 54.7177 30.3898 53.4551 31.1127 52.3384L38.598 40.6884C39.7875 38.8372 42.3407 38.3745 44.1248 39.6874L50.0772 44.0687C50.6258 44.4711 51.3743 44.4661 51.9177 44.0637L59.9567 38.0777C61.0283 37.2779 62.433 38.5405 61.7102 39.6572Z" fill="white"/><defs><radialGradient id="msg_ef" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(15.4753 92.5593) scale(100.718 100.715)"><stop stop-color="#0099FF"/><stop offset="0.6" stop-color="#A033FF"/><stop offset="0.9" stop-color="#FF5280"/><stop offset="1" stop-color="#FF7061"/></radialGradient></defs></svg></span>
+                            <span>Messenger</span>
+                        </div>
+                        <input type="url" name="messenger" class="ef-input" placeholder="https://m.me/..." value="<?php echo esc_attr($m['messenger'] ?? ''); ?>">
+                    </div>
+                                    <div class="ef-field">
+                                        <div class="ef-field-label">
+                                            <span class="ef-field-ic"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/250px-Icon_of_Zalo.svg.png" alt="Zalo" width="32" height="32" style="border-radius:8px;object-fit:contain;"></span>
+                                            <span>Zalo</span>
                                         </div>
-                                        Zalo
-                                    </label>
-                                    <input type="text" name="zalo" class="tmf-input" placeholder="Số điện thoại hoặc link Zalo" value="<?php echo esc_attr($m['zalo'] ?? ''); ?>">
-                                </div>
-                                <div class="tmf-field">
-                                    <label class="social-icon-label">
-                                        <div class="social-icon-wrapper border-none">
-                                            <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40.3522 25.55C40.3522 29.4089 38.8124 33.1097 36.0717 35.8384C33.3309 38.5671 29.6136 40.1 25.7376 40.1C21.8616 40.1 18.1443 38.5671 15.4036 35.8384C12.6628 33.1097 11.123 29.4089 11.123 25.55C11.123 21.6911 12.6628 17.9902 15.4036 15.2616C18.1443 12.5329 21.8616 11 25.7376 11C29.6136 11 33.3309 12.5329 36.0717 15.2616C38.8124 17.9902 40.3522 21.6911 40.3522 25.55Z" fill="url(#skype1)"/><path d="M60.7196 46.445C60.7196 48.3564 60.3415 50.2491 59.6068 52.015C58.8721 53.7809 57.7952 55.3854 56.4376 56.737C55.0801 58.0885 53.4684 59.1606 51.6947 59.8921C49.921 60.6235 48.0199 61 46.1 61C42.2227 61 38.5041 59.4665 35.7624 56.737C33.0207 54.0074 31.4805 50.3052 31.4805 46.445C31.4805 42.5848 33.0207 38.8827 35.7624 36.1531C38.5041 33.4235 42.2227 31.89 46.1 31.89C48.0199 31.89 49.921 32.2665 51.6947 32.9979C53.4684 33.7294 55.0801 34.8015 56.4376 36.1531C57.7952 37.5046 58.8721 39.1092 59.6068 40.8751C60.3415 42.641 60.7196 44.5336 60.7196 46.445Z" fill="url(#skype2)"/><path d="M59.0711 36.1084C59.0711 39.1347 58.4724 42.1313 57.3092 44.9273C56.1459 47.7232 54.4409 50.2637 52.2914 52.4036C50.142 54.5436 47.5903 56.241 44.7819 57.3992C41.9735 58.5573 38.9635 59.1534 35.9238 59.1534C32.884 59.1534 29.874 58.5573 27.0656 57.3992C24.2573 56.241 21.7055 54.5436 19.5561 52.4036C17.4066 50.2637 15.7016 47.7232 14.5384 44.9273C13.3751 42.1313 12.7764 39.1347 12.7764 36.1084C12.7764 33.082 13.3751 30.0854 14.5384 27.2894C15.7016 24.4935 17.4066 21.953 19.5561 19.8131C21.7055 17.6732 24.2573 15.9757 27.0656 14.8176C29.874 13.6594 32.884 13.0634 35.9238 13.0634C38.9635 13.0634 41.9735 13.6594 44.7819 14.8176C47.5903 15.9757 50.142 17.6732 52.2914 19.8131C54.4409 21.953 56.1459 24.4935 57.3092 27.2894C58.4724 30.0854 59.0711 33.082 59.0711 36.1084Z" fill="url(#skype3)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M29.4151 35.3084C28.4797 34.6934 27.6991 33.8709 27.1343 32.905C26.5889 31.8846 26.3197 30.7396 26.3534 29.5834C26.3121 28.116 26.8134 26.6849 27.7616 25.5634C28.7471 24.4371 30.0136 23.5918 31.4324 23.1134C32.9754 22.5688 34.6012 22.2954 36.2377 22.305C37.3084 22.2949 38.378 22.3769 39.4346 22.55C40.1909 22.6667 40.9337 22.8582 41.6521 23.1217C42.3117 23.3447 42.9072 23.7245 43.3873 24.2284C43.7411 24.6429 43.9315 25.172 43.9229 25.7167C43.9355 25.9997 43.8922 26.2823 43.7954 26.5486C43.6987 26.8148 43.5504 27.0594 43.359 27.2684C43.1778 27.4609 42.958 27.6131 42.7139 27.7147C42.4697 27.8164 42.2068 27.8654 41.9424 27.8584C41.5786 27.8554 41.2196 27.7747 40.8895 27.6217C40.0761 27.258 39.2381 26.9517 38.3818 26.705C37.5935 26.4974 36.7809 26.3965 35.9657 26.405C34.9033 26.366 33.8522 26.6345 32.939 27.1784C32.5537 27.4122 32.2383 27.7452 32.0258 28.1425C31.8133 28.5397 31.7115 28.9867 31.731 29.4367C31.7254 30.0275 31.9505 30.5972 32.3584 31.025C32.8431 31.5276 33.416 31.9371 34.0486 32.2334C34.7572 32.5845 35.8139 33.05 37.2188 33.63C37.3744 33.6792 37.5261 33.74 37.6726 33.8117C39.0436 34.3534 40.3581 35.0283 41.597 35.8267C42.5755 36.464 43.4006 37.3098 44.013 38.3034C44.6161 39.3476 44.9181 40.5382 44.8857 41.7434C44.9363 43.2189 44.513 44.672 43.6776 45.89C42.827 47.0433 41.6503 47.9157 40.2989 48.395C38.6702 48.9763 36.9491 49.2564 35.2199 49.2217C32.8437 49.3048 30.4788 48.8578 28.2972 47.9134C27.7395 47.6653 27.2505 47.2855 26.8723 46.8067C26.5583 46.368 26.3955 45.8392 26.4085 45.3C26.3929 45.0157 26.4393 44.7313 26.5444 44.4666C26.6495 44.2018 26.8109 43.9631 27.0175 43.7667C27.4504 43.388 28.0125 43.1899 28.5875 43.2134C29.2282 43.2221 29.8576 43.3838 30.4229 43.685C31.1259 44.0361 31.6804 44.2995 32.0864 44.475C32.5501 44.6689 33.0304 44.8207 33.5214 44.9284C34.1268 45.061 34.7453 45.1248 35.3651 45.1184C36.4611 45.1965 37.5518 44.9061 38.4635 44.2934C38.8048 44.0266 39.0776 43.6825 39.2592 43.2895C39.4408 42.8964 39.5261 42.4659 39.508 42.0334C39.509 41.4201 39.275 40.8297 38.854 40.3834C38.2975 39.8095 37.6461 39.3359 36.9285 38.9834C36.0798 38.5367 34.8862 37.9923 33.3478 37.35C31.972 36.8024 30.6545 36.1184 29.4151 35.3084Z" fill="white"/><defs><linearGradient id="skype1" x1="23.4584" y1="11.1767" x2="28.0069" y2="39.9249" gradientUnits="userSpaceOnUse"><stop offset="0.012" stop-color="#00B7F0"/><stop offset="0.339" stop-color="#009DE5"/><stop offset="0.755" stop-color="#0082D9"/><stop offset="1" stop-color="#0078D4"/></linearGradient><linearGradient id="skype2" x1="33.446" y1="53.7417" x2="58.7384" y2="39.124" gradientUnits="userSpaceOnUse"><stop stop-color="#0078D4"/><stop offset="0.37" stop-color="#007AD5"/><stop offset="0.573" stop-color="#0082D9"/><stop offset="0.735" stop-color="#0090DF"/><stop offset="0.875" stop-color="#00A3E7"/><stop offset="1" stop-color="#00BCF2"/></linearGradient><linearGradient id="skype3" x1="26.8904" y1="20.4817" x2="49.9459" y2="60.4589" gradientUnits="userSpaceOnUse"><stop stop-color="#00B7F0"/><stop offset="1" stop-color="#007CC1"/></linearGradient></defs></svg>
-                                        </div>
-                                        Skype
-                                    </label>
-                                    <input type="text" name="skype" class="tmf-input" placeholder="Skype ID" value="<?php echo esc_attr($m['skype'] ?? ''); ?>">
+                                        <input type="text" name="zalo" class="ef-input" placeholder="SĐT hoặc link Zalo" value="<?php echo esc_attr($m['zalo'] ?? ''); ?>">
+                                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 92 93" fill="none"><rect x="0.138672" y="1" width="91.5618" height="91.5618" rx="12" fill="#754A91"/><path d="M35.396 62.5C33.27 61.96 31.5 60.99 30.01 59.68c-1.09-.98-1.99-2.14-2.67-3.43-.96-1.86-1.6-3.87-1.89-5.94-.36-2.6-.49-5.22-.38-7.84.03-1.22.09-2.43.23-3.65.22-2.32.82-4.59 1.75-6.73 1.16-2.63 3.26-4.74 5.9-5.93 1.8-.81 3.69-1.41 5.63-1.77 1.91-.36 3.83-.58 5.77-.66 1.75-.06 3.5-.04 5.24.07 2.5.1 4.97.52 7.36 1.22 1.77.51 3.46 1.27 5.01 2.27 1.51 1.02 2.72 2.41 3.54 4.03.96 1.89 1.61 3.92 1.93 5.01.21 1.24.35 2.49.41 3.75.09 1.56.08 3.12.02 4.67-.06 1.55-.19 3.06-.39 4.58-.24 2.28-.95 4.49-2.08 6.49-1.47 2.53-3.83 4.44-6.62 5.38-1.91.66-3.89 1.13-5.9 1.41-1.47.2-2.94.35-4.42.41-1.13.05-2.26.04-3.39.02-.64 0-1.28-.06-1.92-.12-.13-.01-.27.01-.39.05-.58.23-1.1.65-1.47 1.22-1.29 1.53-2.63 3.02-3.98 4.51-.41.27-.91.28-1.35.06-.44-.22-.78-.63-.93-1.12-.14-.42-.2-.85-.2-1.29V62.5z" fill="white"/></svg></span>
+                            <span>Viber</span>
+                        </div>
+                        <input type="text" name="viber" class="ef-input" placeholder="+84 9x..." value="<?php echo esc_attr($m['viber'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 92 92" fill="none"><rect x="0.138672" width="91.5618" height="91.5618" rx="12" fill="#00B7F0"/><path d="M57 35.3c-.6-.5-1.4-.8-2.2-.8-1.7 0-2.5.8-3.8 1.4-1 .4-2.1.6-3.4.6-4.4 0-7.9-3.4-7.9-7.6 0-1.3.3-2.5.9-3.5.7-1.3 1.1-2 1.1-3.1 0-.7-.2-1.4-.7-1.9-.5-.5-1.2-.8-2-.8-4.8 0-8.7 3.3-8.7 7.4 0 1.2.3 2.4.9 3.5.3.6.5 1.2.5 1.9 0 5.3-4.3 9.5-9.7 9.5-1.3 0-2.6-.3-3.7-.8-1.2-.6-2-.9-3.2-.9-3.8 0-6.8 3-6.8 6.7 0 5.2 5.8 9 13.4 9 2.5 0 4.9-.5 6.9-1.5 1.4-.7 2.9-1 4.5-1 4.9 0 8.8 3.7 8.8 8.2 0 1.3-.4 2.6-1 3.7-.8 1.3-1.2 2.6-1.2 3.8 0 3.8 3.2 6.9 7.2 6.9 5.8 0 10.5-4.5 10.5-10v-.5c.7-1.2 1-2.5 1-3.8 0-1.9-.7-3.7-2-5.1" fill="white"/></svg></span>
+                            <span>Skype</span>
+                        </div>
+                        <input type="text" name="skype" class="ef-input" placeholder="Skype ID" value="<?php echo esc_attr($m['skype'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 93" fill="none"><rect x="1.13867" y="1" width="91.5618" height="91.5618" rx="12" fill="#51C332"/><path d="M55.8615 36.5403C57.0463 29.1747 49.1004 23.4524 39.5457 23.4524C28.7309 23.4524 19.9658 30.7781 19.9658 39.8123C19.9658 45.021 22.8964 49.6421 27.4419 52.6322L24.8606 57.8086L31.8926 54.7884C33.4005 55.3254 34.9674 55.7676 36.6411 55.9734C36.2824 43.8797 45.0634 36.5403 55.8615 36.5403ZM46.0722 30.8139C47.4235 30.8139 48.5194 31.9132 48.5194 33.2682C48.5194 34.6237 47.4236 35.7222 46.0722 35.7222C44.7201 35.7222 43.6247 34.6237 43.6247 33.2682C43.6247 31.9131 44.7201 30.8139 46.0722 30.8139ZM33.0189 35.7222C31.6674 35.7222 30.5715 34.6237 30.5715 33.2682C30.5715 31.9132 31.6675 30.8139 33.0189 30.8139C34.3703 30.8139 35.4664 31.9132 35.4664 33.2682C35.4663 34.6237 34.3702 35.7222 33.0189 35.7222Z" fill="white"/><path d="M72.1779 52.9008C72.1779 45.6724 64.8709 39.8123 55.8615 39.8123C46.8517 39.8123 39.5457 45.6724 39.5457 52.9008C39.5457 60.1287 46.8517 65.9889 55.8615 65.9889C57.3432 65.9889 58.7525 65.7794 60.12 65.4821L68.9148 69.2608L65.8731 63.1654C69.6849 60.7698 72.1779 57.0859 72.1779 52.9008ZM50.9668 52.0827C49.6154 52.0827 48.5193 50.9838 48.5193 49.6281C48.5193 48.2731 49.6153 47.1746 50.9668 47.1746C52.3186 47.1746 53.4141 48.2736 53.4141 49.6281C53.4141 50.9839 52.3184 52.0827 50.9668 52.0827ZM60.7564 52.0827C59.4043 52.0827 58.3091 50.9838 58.3091 49.6281C58.3091 48.2731 59.4042 47.1746 60.7564 47.1746C62.1083 47.1746 63.2039 48.2736 63.2039 49.6281C63.2039 50.9839 62.1083 52.0827 60.7564 52.0827Z" fill="white"/></svg></span>
+                            <span>WeChat</span>
+                        </div>
+                        <input type="text" name="wechat" class="ef-input" placeholder="WeChat ID" value="<?php echo esc_attr($m['wechat'] ?? ''); ?>">
+                    </div>
+                    <div class="ef-field">
+                        <div class="ef-field-label">
+                            <span class="ef-field-ic"><svg width="32" height="32" viewBox="0 0 93 92" fill="none"><rect width="93" height="92" rx="12" fill="#06C755"/><path d="M78 40.2C78 25.5 63.2 13.5 46.3 13.5 29.4 13.5 14.6 25.5 14.6 40.2c0 13.2 11.7 24.3 27.6 26.4 1.1.2 2.5.7 2.9 1.7.4 1 .3 2.4 0 3.3l-.5 2.7c-.1 1-.9 3.8 1.5 2.7 2.4-1.1 13.3-7.8 18.2-13.4C69.1 59 78 50.2 78 40.2zM35.8 48.2H29v-14h3.1v11h3.7v3zm4.6 0h-3.1V34.2h3.1v14zm14 0h-3l-5.3-9.4v9.4H43V34.2h3l5.3 9.3v-9.3h3.1v14zm12.6-11h-6.2v2.5h6.2v3.1h-6.2v2.5h6.2v3H57.7V34.2H67v3z" fill="white"/></svg></span>
+                            <span>LINE App</span>
+                        </div>
+                        <input type="text" name="line_app" class="ef-input" placeholder="Line ID" value="<?php echo esc_attr($m['line_app'] ?? ''); ?>">
+                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="tmf-row2" style="margin-top:16px;">
-                                <div class="tmf-field">
-                                    <label class="social-icon-label" style="opacity:0.6;">
-                                        <div class="social-icon-wrapper border-none" style="background:#51C332;color:#fff;font-weight:bold;font-size:10px;">
-                                            LINE
-                                        </div>
-                                        Line App (Tùy chọn)
-                                    </label>
-                                    <input type="text" name="line_app" class="tmf-input" placeholder="Line ID" value="<?php echo esc_attr($m['line_app'] ?? ''); ?>">
-                                </div>
-                            </div>
+
                         </div>
                     </div>
 
-                    <!-- Section 2.8: Gallery -->
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
+                    <!-- Card: Thư viện ảnh -->
+                    <div class="ef-card">
+                        <div class="ef-card-head">
                             <svg viewBox="0 0 14 14"><rect x="1" y="2" width="12" height="10" rx="1.5"/><circle cx="5" cy="6" r="1.5"/><path d="M1 10l3-3 2.5 2.5 2-2L13 10"/></svg>
-                            Thư viện ảnh Khác
+                            <span class="ef-card-head-title">Thư viện ảnh</span>
+                            <span class="ef-card-head-sub">Nhiều ảnh</span>
                         </div>
-                        <div class="tmf-sec-body">
-                            <div class="tmf-field">
-                                <label class="tmf-label">Các ảnh khác (Nhiều ảnh)</label>
-                                <textarea id="tm-gallery" name="gallery_urls" class="tmf-textarea" rows="4" style="display:none;"
-                                          ><?php echo esc_textarea($m['gallery_urls'] ?? ''); ?></textarea>
-                                          
-                                <div id="tm-gallery-preview" style="display:flex; flex-wrap:wrap; gap:8px; padding-top:8px;"></div>
-                                
-                                <button type="button" id="tm-gallery-btn" class="tm-btn tm-btn-outline tm-btn-sm" style="margin-top:8px;">
-                                    <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
-                                    Chọn từ thiết bị web
-                                </button>
-                            </div>
+                        <div class="ef-card-body">
+                            <div id="tm-gallery-preview" class="ef-gallery-grid"></div>
+                            <textarea id="tm-gallery" name="gallery_urls" class="ef-textarea" rows="3"
+                                      style="display:none;"><?php echo esc_textarea($m['gallery_urls'] ?? ''); ?></textarea>
+                            <button type="button" id="tm-gallery-btn" class="ef-btn ef-btn-ghost" style="font-size:12px;">
+                                <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
+                                Thêm ảnh vào thư viện
+                            </button>
+                            <span class="ef-hint" style="margin-top:8px;">Ảnh sẽ hiển thị trong gallery 3D trên trang cá nhân.</span>
                         </div>
                     </div>
 
+                </div><!-- /ef-left -->
 
-                    <!-- Section 3: Status -->
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
-                            <svg viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5.5"/><path d="M4.5 6.5l1.5 1.5 3-3"/></svg>
-                            Trạng thái hiển thị
+                <!-- ══ RIGHT SIDEBAR ══ -->
+                <div class="ef-right">
+
+                    <!-- Card: Ảnh đại diện -->
+                    <div class="ef-card" style="margin-bottom:16px;">
+                        <div class="ef-card-head">
+                            <svg viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2"/><circle cx="5" cy="5" r="1.5"/><path d="M1 10l3-3 2.5 2.5 2-2 3.5 3.5"/></svg>
+                            <span class="ef-card-head-title">Ảnh đại diện</span>
                         </div>
-                        <div class="tmf-sec-body">
-                            <div class="tmf-status-group" id="tm-status-group">
-                                <label class="tmf-status-pill <?php echo ($m['is_active'] ?? 1) ? 'active-show' : ''; ?>" id="pill-show">
-                                    <input type="radio" name="is_active" value="1" <?php checked($m['is_active'] ?? 1, 1); ?>>
-                                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 4"/></svg>
-                                    Hiển thị trên website
-                                </label>
-                                <label class="tmf-status-pill <?php echo !($m['is_active'] ?? 1) ? 'active-hide' : ''; ?>" id="pill-hide">
-                                    <input type="radio" name="is_active" value="0" <?php checked($m['is_active'] ?? 1, 0); ?>>
-                                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4.5 7.5l3-3M7.5 7.5l-3-3"/></svg>
-                                    Ẩn khỏi website
-                                </label>
-                            </div>
-                            <span class="tmf-hint">Chỉ thành viên "Ẩn" sẽ không hiển thị trên trang Our Team.</span>
-                        </div>
-                    </div>
+                        <div class="ef-card-body">
 
-                </div><!-- /tmf-main -->
-
-                <!-- RIGHT: Sidebar -->
-                <div class="tmf-side">
-
-                    <!-- Photo zone -->
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
-                            <svg viewBox="0 0 13 13"><rect x="1" y="1" width="11" height="11" rx="1.5"/><circle cx="4.5" cy="4.5" r="1.5"/><path d="M1 9.5l3-3 2.5 2.5 2-2 3.5 3.5"/></svg>
-                            Ảnh đại diện
-                        </div>
-                        <div class="tmf-sec-body">
-
-                            <!-- Clickable photo zone -->
-                            <div class="tmf-photo-zone" id="tm-photo-zone" onclick="document.getElementById('tm-media-btn').click()">
+                            <div class="ef-photo-zone" id="tm-photo-zone" onclick="document.getElementById('tm-media-btn').click()">
                                 <?php $has_photo = !empty($m['photo_url']); ?>
                                 <img id="tm-photo-img" src="<?php echo esc_url($m['photo_url'] ?? ''); ?>" alt=""
-                                     style="display:<?php echo $has_photo ? 'block' : 'none'; ?>"
+                                     style="display:<?php echo $has_photo ? 'block' : 'none'; ?>; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;"
                                      onerror="this.style.display='none';document.getElementById('tm-photo-placeholder').style.display='flex'">
-                                <div class="tmf-photo-initials" id="tm-photo-placeholder"
-                                     style="display:<?php echo $has_photo ? 'none' : 'flex'; ?>">
-                                    <div class="tmf-photo-initials-text" id="tm-photo-initials-big"></div>
-                                    <div class="tmf-photo-initials-label">
-                                        <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
-                                        <?php echo $has_photo ? 'Đổi ảnh' : 'Nhấp để chọn'; ?>
-                                    </div>
+                                <div class="ef-photo-ph" id="tm-photo-placeholder"
+                                     style="display:<?php echo $has_photo ? 'none' : 'flex'; ?>;">
+                                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M3 17l4-4 3 3 3-3 5 5"/></svg>
+                                    <span><?php echo $has_photo ? 'Đổi ảnh' : 'Nhấp để chọn ảnh'; ?></span>
                                 </div>
-
-                                <!-- Hover overlay -->
-                                <div class="tmf-photo-overlay">
-                                    <div class="tmf-photo-overlay-label">
+                                <div class="ef-photo-overlay">
+                                    <span>
                                         <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
                                         Đổi ảnh
-                                    </div>
+                                    </span>
                                 </div>
                             </div>
 
-                            <!-- Preview info below photo -->
-                            <div>
-                                <div class="tmf-preview-name" id="preview-name"><?php echo esc_html($m['name'] ?? 'Tên thành viên'); ?></div>
-                                <div class="tmf-preview-role" id="preview-role"><?php echo esc_html($m['role'] ?? 'Chức danh'); ?></div>
-                                <div class="tmf-preview-dept" id="preview-dept">
-                                    <?php if (!empty($cur_dept)): ?>
-                                    <span class="tm-badge tm-badge-accent"><?php echo esc_html($cur_dept); ?></span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <!-- URL input (hidden, triggered by photo click) -->
-                            <div class="tmf-url-row">
-                                <input type="url" name="photo_url" id="tm-photo-input" class="tmf-input"
+                            <div class="ef-url-row">
+                                <input type="url" name="photo_url" id="tm-photo-input" class="ef-input"
                                        value="<?php echo esc_attr($m['photo_url'] ?? ''); ?>"
-                                       placeholder="https://…/photo.jpg">
-                                <button type="button" id="tm-media-btn" class="tm-btn tm-btn-outline" title="Chọn từ Media" style="flex-shrink:0;">
+                                       placeholder="Dán URL ảnh…">
+                                <button type="button" id="tm-media-btn" class="ef-btn ef-btn-ghost" title="Chọn từ Media Library" style="flex-shrink:0;padding:7px 10px;">
                                     <svg viewBox="0 0 14 14"><rect x="1" y="3" width="12" height="9" rx="1.5"/><circle cx="5" cy="7" r="1.5"/><path d="M1 11l3-3 2.5 2.5 2-2L12 11"/></svg>
                                 </button>
-                                <?php if (!empty($m['photo_url'])): ?>
-                                <button type="button" id="tm-photo-clear" class="tm-btn tm-btn-danger" title="Xóa ảnh" style="flex-shrink:0;">
+                                <button type="button" id="tm-photo-clear" class="ef-btn ef-btn-danger" title="Xóa ảnh" style="flex-shrink:0;padding:7px 10px;<?php echo $has_photo ? '' : 'display:none;'; ?>">
                                     <svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg>
                                 </button>
-                                <?php else: ?>
-                                <button type="button" id="tm-photo-clear" class="tm-btn tm-btn-danger" title="Xóa ảnh" style="flex-shrink:0;display:none;">
-                                    <svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg>
-                                </button>
-                                <?php endif; ?>
                             </div>
-                            <span class="tmf-hint">Tỷ lệ ảnh đẹp nhất: 3:4 (dọc). Nhất vào vùng ảnh hoặc dán URL bên trên.</span>
+                            <span class="ef-hint">Tỷ lệ tốt nhất: 3:4 (dọc). Nhấn vào ô ảnh hoặc dán URL.</span>
+
                         </div>
                     </div>
 
-                    <!-- Tips -->
-                    <div class="tmf-section">
-                        <div class="tmf-sec-head">
-                            <svg viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5.5"/><path d="M6.5 6v3.5M6.5 4.5v.5"/></svg>
-                            Lưu ý
+                    <!-- Card: Preview -->
+                    <div class="ef-card" style="margin-bottom:16px;">
+                        <div class="ef-card-head">
+                            <svg viewBox="0 0 14 14"><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z"/><circle cx="7" cy="7" r="1.5"/></svg>
+                            <span class="ef-card-head-title">Xem trước</span>
                         </div>
-                        <div class="tmf-sec-body" style="gap:10px;">
-                            <?php
-                            $tips = [
-                                'Thành viên "Ban Giám đốc" được hệ thống xếp lên đầu trang Our Team.',
-                                'Nhấn khởi dều Enter trong ô Bio để ngăn cách đoạn văn.',
-                                'Thứ tự có thể điều chỉnh bằng kéo thả tay trên trang danh sách.',
-                            ];
-                            foreach ($tips as $tip):
-                            ?>
-                            <div style="display:flex;gap:8px;align-items:flex-start;">
-                                <svg style="width:12px;height:12px;stroke:var(--text-3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;margin-top:2px;" viewBox="0 0 12 12"><polyline points="2,6.5 4.5,9 10,3.5"/></svg>
-                                <span style="font-size:12px;color:var(--text-2);line-height:1.5;"><?php echo $tip; ?></span>
-                            </div>
-                            <?php endforeach; ?>
+                        <div class="ef-card-body" style="text-align:center;">
+                            <div id="preview-name" style="font-size:14px;font-weight:700;color:#1a1714;"><?php echo esc_html($m['name'] ?? 'Tên thành viên'); ?></div>
+                            <div id="preview-role" style="font-size:12px;color:#8a8075;margin-top:3px;"><?php echo esc_html($m['role'] ?? 'Chức danh'); ?></div>
+                            <?php if (!empty($cur_dept)): ?>
+                            <div style="margin-top:8px;"><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:#f6f3ee;color:#6b5344;border:1px solid #e8e0d5;"><?php echo esc_html($cur_dept); ?></span></div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
-                </div><!-- /tmf-side -->
+                    <!-- Card: Trạng thái -->
+                    <div class="ef-card">
+                        <div class="ef-card-head">
+                            <svg viewBox="0 0 14 14"><circle cx="7" cy="7" r="6"/><path d="M5 7l1.5 1.5L9 5"/></svg>
+                            <span class="ef-card-head-title">Trạng thái hiển thị</span>
+                        </div>
+                        <div class="ef-card-body">
+                            <div class="ef-status-row" id="tm-status-group">
+                                <label class="ef-status-pill <?php echo ($m['is_active'] ?? 1) ? 'is-show' : ''; ?>" id="pill-show">
+                                    <input type="radio" name="is_active" value="1" <?php checked($m['is_active'] ?? 1, 1); ?>>
+                                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4 6l1.5 1.5L8 4"/></svg>
+                                    Hiển thị
+                                </label>
+                                <label class="ef-status-pill <?php echo !($m['is_active'] ?? 1) ? 'is-hide' : ''; ?>" id="pill-hide">
+                                    <input type="radio" name="is_active" value="0" <?php checked($m['is_active'] ?? 1, 0); ?>>
+                                    <svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="5"/><path d="M4.5 7.5l3-3M7.5 7.5l-3-3"/></svg>
+                                    Ẩn
+                                </label>
+                            </div>
+                            <span class="ef-hint" style="margin-top:10px;">Thành viên "Ẩn" sẽ không xuất hiện trên trang Our Team.</span>
+                        </div>
+                    </div>
 
-            </div><!-- /tmf-body -->
+                </div><!-- /ef-right -->
+
+            </div><!-- /ef-body -->
         </form>
 
+        <!-- Tab script -->
+        <script>
+        (function(){
+            var tabs = document.querySelectorAll('.ef-tab');
+            tabs.forEach(function(tab){
+                tab.addEventListener('click', function(){
+                    var target = this.getAttribute('data-tab');
+                    document.querySelectorAll('.ef-tab').forEach(function(t){ t.classList.remove('active'); });
+                    document.querySelectorAll('.ef-tab-pane').forEach(function(p){ p.classList.remove('active'); });
+                    this.classList.add('active');
+                    var pane = document.getElementById(target);
+                    if(pane) pane.classList.add('active');
+                });
+            });
+
+            // Live preview name/role sync
+            var nm = document.getElementById('tm-name'), rl = document.getElementById('tm-role');
+            var pn = document.getElementById('preview-name'), pr = document.getElementById('preview-role');
+            if(nm && pn) nm.addEventListener('input', function(){ pn.textContent = this.value || 'Tên thành viên'; });
+            if(rl && pr) rl.addEventListener('input', function(){ pr.textContent = this.value || 'Chức danh'; });
+
+            // Status pill sync
+            document.querySelectorAll('input[name="is_active"]').forEach(function(r){
+                r.addEventListener('change', function(){
+                    document.getElementById('pill-show').classList.toggle('is-show', this.value==='1');
+                    document.getElementById('pill-hide').classList.toggle('is-hide', this.value==='0');
+                });
+            });
+        })();
+        </script>
+
+        </div><!-- /ef-wrap -->
         <?php
     }
 
@@ -1660,14 +1616,17 @@ class AdminTeamController {
             function syncGalleryPreview(ta, previewDiv) {
                 if (!ta || !previewDiv) return;
                 var urls = ta.value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean);
+                var isExpanded = previewDiv.id === 'tm-gallery-preview';
+                var itemClass  = isExpanded ? 'ef-gal-item tmm-gal-item' : 'tmm-gal-item';
+                var delClass   = isExpanded ? 'ef-gal-del tmm-gal-del' : 'tmm-gal-del';
                 if (urls.length === 0) {
-                    previewDiv.innerHTML = '<div style="font-size:11px; color:var(--text-3); font-style:italic; padding:10px 0;">Chưa có ảnh nào. Hãy nhấn Thêm ảnh.</div>'; return;
+                    previewDiv.innerHTML = '<div style="font-size:11px;color:#a09080;font-style:italic;padding:8px 0;">Chưa có ảnh nào. Nhấn "Thêm ảnh" để bắt đầu.</div>'; return;
                 }
                 var html = '';
                 for (var i = 0; i < urls.length; i++) {
-                    html += '<div style="position:relative; width:64px; height:64px; border-radius:6px; border:1px solid var(--border); overflow:hidden; flex-shrink:0; cursor:pointer;" class="tmm-gal-item" data-index="'+i+'" title="Nhấn để xóa ảnh này">' +
+                    html += '<div class="'+itemClass+'" data-index="'+i+'" title="Nhấn để xóa ảnh này">' +
                             '<img src="'+urls[i]+'" style="width:100%;height:100%;object-fit:cover;">' +
-                            '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;" class="tmm-gal-del"><svg style="width:20px;height:20px;stroke:#fff;stroke-width:2" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></div>' +
+                            '<div class="'+delClass+'"><svg style="width:18px;height:18px;stroke:#fff;stroke-width:2.5;fill:none" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></div>' +
                             '</div>';
                 }
                 previewDiv.innerHTML = html;
@@ -2099,7 +2058,7 @@ class AdminTeamController {
             }
 
             /* ── Expanded Form Submit (Add / Edit page) ── */
-            var expandedForm = document.getElementById('tm-member-form');
+            var expandedForm = document.getElementById('ef-member-form');
             if (expandedForm) {
                 expandedForm.addEventListener('submit', function(e) {
                     e.preventDefault();
