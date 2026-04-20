@@ -56,32 +56,7 @@ if ($post_cats) {
 $related_query = new WP_Query($related_args);
 ?>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-            typography: {
-                DEFAULT: { css: { color: '#3d2f26' } }
-            },
-        },
-    },
-    plugins: [],
-}
-</script>
+
 
 <style>
 /* ───────────────────────────────────────────────────────
@@ -214,7 +189,7 @@ tailwind.config = {
 <!-- ═══════════════════════════════════════════════════
      2. ARTICLE BODY
 ═══════════════════════════════════════════════════ -->
-<div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-14">
+<div class="bacera-container py-14">
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-16" id="article-grid">
 
         <!-- Main content -->
@@ -368,7 +343,7 @@ tailwind.config = {
      3. RELATED POSTS
 ═══════════════════════════════════════════════════ -->
 <?php if ($related_query->have_posts()): ?>
-<section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+<section class="bacera-container pb-20">
     <div class="w-full h-[1px] divider-art opacity-40 mb-14"></div>
     <div class="flex items-center gap-4 mb-8">
         <span class="w-8 h-[1px] bg-accentdark"></span>
@@ -406,7 +381,7 @@ tailwind.config = {
 <!-- ═══════════════════════════════════════════════════
      4. CTA FOOTER
 ═══════════════════════════════════════════════════ -->
-<div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+<div class="bacera-container pb-20">
     <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
         <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>
         <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10 pointer-events-none"></div>

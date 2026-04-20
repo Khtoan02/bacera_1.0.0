@@ -36,39 +36,14 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-<!-- Embed Tailwind runtime specifically for this template's unique design system -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    bgtheme: '#f8f7f3', 
-                    textmain: '#3d2f26', 
-                    textmuted: '#6b5344', 
-                    accent: '#c0a28e', 
-                    accentdark: '#8d6a54', 
-                    terracotta: '#d95f47' 
-                },
-                fontFamily: {
-                    serif: ['"Gowun Batang"', 'serif'],
-                    sans: ['"Bricolage Grotesque"', 'sans-serif'],
-                }
-            }
-        }
-    }
-</script>
+
 
 <style>
     /* Hide scrollbar for review slider */
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Noise grain effect */
-    .bg-texture {
-        background-color: #F7F6F0;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    }
+
 
     /* Vertical Text */
     .vertical-text {
@@ -87,7 +62,7 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
 <div class="font-sans antialiased bg-texture text-[#2C2824] selection:bg-accentdark selection:text-white w-full overflow-hidden">
 
     <!-- 1. HERO SECTION -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-12 pb-24 relative">
+    <section class="bacera-container pt-12 pb-24 relative">
         
         <!-- Decorative Vertical Text -->
         <div class="absolute left-6 top-32 hidden xl:block z-10">
@@ -150,12 +125,12 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
     </section>
 
     <!-- Art Divider -->
-    <div class="w-full max-w-[1232px] mx-auto px-6 lg:px-0 py-12">
+    <div class="w-full bacera-container py-12">
         <div class="w-full h-[1px] divider-art opacity-60"></div>
     </div>
 
     <!-- 2. CRAFTING PHILOSOPHY -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 py-20">
+    <section class="bacera-container section-pad">
         <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <h2 class="font-serif text-4xl lg:text-5xl text-textmain leading-tight">
                 Crafting <br>
@@ -203,7 +178,7 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
 
     <!-- 3. THE COLLECTION (Products) -->
     <section id="collection" class="py-24 lg:py-32 relative border-t border-accent/20">
-        <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+        <div class="bacera-container">
             <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
                 
                 <!-- Image Section (Left) -->
@@ -308,7 +283,7 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
 
     <!-- 4. THE WORKSHOP (Experience) -->
     <section id="workshop" class="py-24 lg:py-32 relative bg-white/40 border-t border-accent/20">
-        <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+        <div class="bacera-container">
             <div class="flex flex-col lg:flex-row-reverse items-center gap-16 lg:gap-24">
                 
                 <!-- Image Section (Right) -->
@@ -418,7 +393,7 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
     <?php get_template_part('app/Views/components/presence-partners'); ?>
 
     <!-- 6. REVIEWS -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 py-20 mb-10 relative bg-textmain text-bgtheme rounded-3xl lg:rounded-[60px] overflow-hidden">
+    <section class="bacera-container section-pad mb-10 relative bg-textmain text-bgtheme rounded-3xl lg:rounded-[60px] overflow-hidden">
         
         <div class="absolute inset-0 bg-texture opacity-10"></div>
 
@@ -467,6 +442,11 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
 
         </div>
     </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SEO CONTENT BLOCK
+    ═══════════════════════════════════════════════════════ -->
+    <?php get_template_part('app/Views/components/seo-content', null, ['title' => 'Về Bacera']); ?>
 
 </div>
 

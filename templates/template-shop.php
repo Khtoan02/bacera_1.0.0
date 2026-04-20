@@ -1150,6 +1150,12 @@ get_header();
 		</div>
 
 		<?php endif; ?>
+
+		<!-- ═══════════════════════════════════════════════════════
+			 SEO CONTENT BLOCK
+		═══════════════════════════════════════════════════════ -->
+		<?php get_template_part('app/Views/components/seo-content', null, ['title' => 'Cửa hàng']); ?>
+
 	</div>
 	<div id="bacera-cart-overlay" class="bacera-cart-overlay" aria-hidden="true"></div>
 	<aside id="bacera-cart-drawer" class="bacera-cart-drawer" aria-hidden="true" aria-label="<?php esc_attr_e( 'Shopping cart', 'bacera' ); ?>">

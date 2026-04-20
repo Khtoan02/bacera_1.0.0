@@ -29,28 +29,7 @@ function bacera_cat_url(string $slug): string {
 }
 ?>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-        },
-    },
-}
-</script>
+
 
 <style>
 .bg-texture {
@@ -114,7 +93,7 @@ $init_count = $cat_obj ? (int)$cat_obj->count : wp_count_posts('post')->publish;
 
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
 
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-0">
+    <div class="bacera-container pt-14 pb-0">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-4 tracking-wide" id="bc-nav">
@@ -147,7 +126,7 @@ $init_count = $cat_obj ? (int)$cat_obj->count : wp_count_posts('post')->publish;
     </div>
 
     <!-- ═══ MAIN LAYOUT: Sidebar + Grid ═══ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-10 lg:gap-14">
 
             <!-- ── SIDEBAR ── -->
@@ -231,7 +210,7 @@ $init_count = $cat_obj ? (int)$cat_obj->count : wp_count_posts('post')->publish;
     </div>
 
     <!-- ═══ CTA BANNER ═══ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="divider-art opacity-40 h-[1px] mb-12"></div>
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>

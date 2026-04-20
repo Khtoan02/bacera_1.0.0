@@ -94,35 +94,7 @@ $home_url    = home_url( '/' );
 $detail_base = get_permalink(); // member detail loads on same page via ?member_id=X
 ?>
 
-<!-- Embed Tailwind runtime (same pattern as other templates) -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    bgtheme:    '#f8f7f3',
-                    textmain:   '#3d2f26',
-                    textmuted:  '#6b5344',
-                    accent:     '#c0a28e',
-                    accentdark: '#8d6a54',
-                    terracotta: '#d95f47',
-                },
-                fontFamily: {
-                    serif: ['"Gowun Batang"', 'serif'],
-                    sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-                },
-            },
-        },
-    }
-</script>
-
 <style>
-    /* Noise-grain texture */
-    .bg-texture {
-        background-color: #F7F6F0;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    }
 
     /* Dashed divider */
     .divider-art {
@@ -131,12 +103,47 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
         background-repeat: repeat-x;
     }
 
-    /* Member card image hover zoom */
-    .member-card:hover .member-img {
+    /* ── Member Card ── */
+    .member-card {
+        display: block;
+        text-decoration: none;
+        cursor: default;
+    }
+    a.member-card { cursor: pointer; }
+
+    /* Portrait wrapper: clean rounded image with warm hover */
+    .member-photo {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        /* 3:4 portrait ratio */
+        padding-bottom: 133.33%;
+        height: 0;
+        background: #EBE7DF;
+        box-shadow: 0 2px 12px rgba(61,47,38,.10);
+        transition: box-shadow .35s ease, transform .35s cubic-bezier(.22,1,.36,1);
+    }
+    a.member-card:hover .member-photo,
+    .member-card:hover .member-photo {
+        box-shadow: 0 12px 32px rgba(61,47,38,.18);
+        transform: translateY(-5px);
+    }
+
+    .member-photo img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform .6s cubic-bezier(.22,1,.36,1);
+    }
+    a.member-card:hover .member-photo img,
+    .member-card:hover .member-photo img {
         transform: scale(1.05);
     }
 
-    /* Subtle fade-in for sections */
+    /* Subtle fade-in */
     @keyframes fadeUp {
         from { opacity: 0; transform: translateY(20px); }
         to   { opacity: 1; transform: translateY(0); }
@@ -149,7 +156,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          1. BREADCRUMB + TITLE
     ═══════════════════════════════════════════════════════ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-0">
+    <div class="bacera-container pt-14 pb-0">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-4 tracking-wide">
@@ -171,7 +178,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          2. HERO IMAGE
     ═══════════════════════════════════════════════════════ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
+    <div class="bacera-container mb-20">
         <div class="w-full overflow-hidden rounded-2xl aspect-[21/9] bg-[#e2e2e2] shadow-md">
             <img src="<?php echo esc_url($hero_img); ?>"
                  alt="Our Team at Bacera"
@@ -182,7 +189,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <!-- ═══════════════════════════════════════════════════════
          3. BOARD OF DIRECTORS
     ═══════════════════════════════════════════════════════ -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-24">
+    <section class="bacera-container mb-24">
 
         <!-- Section label -->
         <div class="flex items-center gap-4 mb-8">
@@ -201,12 +208,13 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
                 }
             ?>
             <?php if ($m_url): ?><a href="<?php echo esc_url($m_url); ?>" class="member-card group"><?php else: ?><div class="member-card group"><?php endif; ?>
+
                 <!-- Portrait -->
-                <div class="overflow-hidden rounded-xl aspect-[3/4] bg-[#EBE7DF] mb-4 shadow-sm">
+                <div class="member-photo mb-4">
                     <img src="<?php echo esc_url($member['img']); ?>"
-                         alt="<?php echo esc_attr($member['name']); ?>"
-                         class="member-img w-full h-full object-cover transition-transform duration-700">
+                         alt="<?php echo esc_attr($member['name']); ?>">
                 </div>
+
                 <!-- Info -->
                 <h3 class="text-sm font-semibold text-textmain mb-0.5 <?php echo $m_url ? 'group-hover:text-terracotta transition-colors' : ''; ?>">
                     <?php echo esc_html($member['name']); ?>
@@ -220,7 +228,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     </section>
 
     <!-- Dashed divider -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
+    <div class="bacera-container mb-20">
         <div class="w-full h-[1px] divider-art opacity-50"></div>
     </div>
 
@@ -228,7 +236,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
          4. DEPARTMENTS
     ═══════════════════════════════════════════════════════ -->
     <?php foreach ($departments as $dept): ?>
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
+    <section class="bacera-container mb-20">
 
         <!-- Department label -->
         <div class="flex items-center gap-4 mb-8">
@@ -238,7 +246,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
             </h2>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6 row-gap-10">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
             <?php foreach ($dept['members'] as $member):
                 if ( !empty($member['seo_slug']) ) {
                     $m_url = home_url( '/our-team/' . $member['seo_slug'] . '/' );
@@ -247,12 +255,13 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
                 }
             ?>
             <?php if ($m_url): ?><a href="<?php echo esc_url($m_url); ?>" class="member-card group"><?php else: ?><div class="member-card group"><?php endif; ?>
+
                 <!-- Portrait -->
-                <div class="overflow-hidden rounded-xl aspect-[3/4] bg-[#EBE7DF] mb-3 shadow-sm">
+                <div class="member-photo mb-3">
                     <img src="<?php echo esc_url($member['img']); ?>"
-                         alt="<?php echo esc_attr($member['name']); ?>"
-                         class="member-img w-full h-full object-cover transition-transform duration-700">
+                         alt="<?php echo esc_attr($member['name']); ?>">
                 </div>
+
                 <!-- Info -->
                 <h3 class="text-[13px] font-semibold text-textmain mb-0.5 leading-snug <?php echo $m_url ? 'group-hover:text-terracotta transition-colors' : ''; ?>">
                     <?php echo esc_html($member['name']); ?>
@@ -267,7 +276,7 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
 
     <!-- Small divider between departments (skip after last) -->
     <?php if ($dept !== end($departments)): ?>
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
+    <div class="bacera-container mb-20">
         <div class="w-full h-[1px] divider-art opacity-30"></div>
     </div>
     <?php endif; ?>
@@ -275,9 +284,14 @@ $detail_base = get_permalink(); // member detail loads on same page via ?member_
     <?php endforeach; ?>
 
     <!-- ═══════════════════════════════════════════════════════
-         5. CLOSING CTA BANNER
+         5. SEO CONTENT BLOCK
     ═══════════════════════════════════════════════════════ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <?php get_template_part('app/Views/components/seo-content', null, ['title' => 'Về đội ngũ Bacera']); ?>
+
+    <!-- ═══════════════════════════════════════════════════════
+         6. CLOSING CTA BANNER
+    ═══════════════════════════════════════════════════════ -->
+    <div class="bacera-container pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <!-- Decorative circle -->
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>

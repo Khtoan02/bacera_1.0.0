@@ -35,28 +35,7 @@ $blog_url = get_permalink();
 $blog_cat_base = home_url('/blog/category/');
 ?>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-        },
-    },
-}
-</script>
+
 
 <style>
 .bg-texture {
@@ -84,7 +63,7 @@ tailwind.config = {
 
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
 
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-0">
+    <div class="bacera-container pt-14 pb-0">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-4 tracking-wide">
@@ -122,7 +101,7 @@ tailwind.config = {
     ?>
 
     <!-- ═══ HERO POST ═══ -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-16">
+    <section class="bacera-container mb-16">
         <a href="<?php echo esc_url($hero_url); ?>" class="hero-post group relative grid lg:grid-cols-[1fr_480px] gap-0 rounded-2xl overflow-hidden bg-textmain shadow-2xl min-h-[420px]">
             <!-- Image -->
             <div class="overflow-hidden relative order-2 lg:order-1 min-h-[260px] lg:min-h-0">
@@ -166,7 +145,7 @@ tailwind.config = {
 
     <!-- ═══ CATEGORY FILTER ═══ -->
     <?php if ($all_cats): ?>
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-12">
+    <div class="bacera-container mb-12">
         <div class="flex items-center gap-2 flex-wrap">
             <a href="<?php echo esc_url($blog_url); ?>"
                class="cat-pill inline-flex items-center px-4 py-2 rounded-full border border-accent/30 text-[12px] font-medium tracking-wide text-textmuted <?php echo !$current_cat ? 'active' : ''; ?>">
@@ -184,7 +163,7 @@ tailwind.config = {
     <?php endif; ?>
 
     <!-- ═══ POST GRID ═══ -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-20">
+    <section class="bacera-container mb-20">
 
         <?php if ($query->have_posts()): ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -279,12 +258,12 @@ tailwind.config = {
     </section>
 
     <!-- ═══ DIVIDER ═══ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-16">
+    <div class="bacera-container mb-16">
         <div class="w-full h-[1px] divider-art opacity-40"></div>
     </div>
 
     <!-- ═══ NEWSLETTER CTA ═══ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>
             <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10 pointer-events-none"></div>

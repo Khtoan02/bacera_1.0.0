@@ -22,29 +22,29 @@ if (!str_starts_with($variant, 'ghost')) {
 
 // Map out the complex Figma states per variant
 $variants = [
-    // bg-red-500 -> hover shadow -> active bg-orange-700 -> disabled bg-neutral-200 text-primary-300
-    'primary' => 'bg-red-500 text-stone-200 hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] active:bg-orange-700 active:shadow-none disabled:bg-neutral-200 disabled:text-primary-300 disabled:shadow-none',
+    // Primary: terracotta -> hover shadow -> active accentdark -> disabled bg-accent text-white
+    'primary' => 'bg-terracotta text-white hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.15)] active:bg-accentdark active:shadow-none disabled:bg-accent/50 disabled:text-white disabled:shadow-none',
     
-    // bg-stone-600 -> hover bg-red-500 shadow -> active bg-orange-700 -> disabled bg-neutral-200 text-primary-300
-    'secondary' => 'bg-stone-600 text-stone-50 hover:bg-red-500 hover:text-stone-200 hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] active:bg-orange-700 active:shadow-none disabled:bg-neutral-200 disabled:text-primary-300 disabled:shadow-none',
+    // Secondary: textmain -> hover terracotta shadow -> active accentdark -> disabled bg-accent/50 text-white
+    'secondary' => 'bg-textmain text-white hover:bg-terracotta hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.15)] active:bg-accentdark active:shadow-none disabled:bg-accent/50 disabled:text-white disabled:shadow-none',
     
-    // outline-stone-300 text-primary-600 -> hover bg-red-500 shadow text-stone-200 -> active bg-orange-700 -> disabled outline-stone-50 text-stone-200
-    'outline' => 'ring-1 ring-inset ring-neutral-300 text-primary-600 hover:bg-red-500 hover:ring-0 hover:text-stone-200 hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] active:bg-orange-700 active:shadow-none disabled:ring-neutral-50 disabled:text-stone-200 disabled:bg-transparent disabled:shadow-none',
+    // Outline: ring-accentdark text-accentdark -> hover bg-terracotta ring-0 text-white shadow -> active bg-accentdark -> disabled ring-accent/30 text-accent/50
+    'outline' => 'ring-1 ring-inset ring-accent text-accentdark hover:bg-terracotta hover:ring-0 hover:text-white hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.15)] active:bg-accentdark active:shadow-none disabled:ring-accent/30 disabled:text-accent/50 disabled:bg-transparent disabled:shadow-none',
     
-    // bg-neutral-200 text-primary-600 -> hover shadow -> active bg-neutral-300 -> disabled bg-neutral-200 text-primary-300
-    'light' => 'bg-neutral-200 text-primary-600 hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] active:bg-neutral-300 active:shadow-none disabled:bg-neutral-200 disabled:text-primary-300 disabled:shadow-none',
+    // Light: bgtheme text-textmain -> hover shadow -> active accent/20 -> disabled bgtheme/50 text-textmuted
+    'light' => 'bg-bgtheme text-textmain hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.1)] active:bg-accent/20 active:shadow-none disabled:bg-bgtheme/50 disabled:text-textmuted disabled:shadow-none',
     
-    // bg-stone-400 text-primary-600 -> hover bg-neutral-200 shadow -> active bg-neutral-300 -> disabled bg-neutral-200 text-primary-300
-    'secondary-light' => 'bg-stone-400 text-primary-600 hover:bg-neutral-200 hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] active:bg-neutral-300 active:shadow-none disabled:bg-neutral-200 disabled:text-primary-300 disabled:shadow-none',
+    // Secondary-light: accent/20 text-textmain -> hover bgtheme shadow -> active accent/30 -> disabled accent/10 text-textmuted
+    'secondary-light' => 'bg-accent/10 text-textmain hover:bg-bgtheme hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.1)] active:bg-accent/30 active:shadow-none disabled:bg-accent/10 disabled:text-textmuted disabled:shadow-none',
     
-    // outline-stone-50 text-stone-50 -> hover bg-neutral-200 shadow text-primary-600 -> active bg-neutral-300 -> disabled bg-neutral-200 text-primary-300
-    'outline-light' => 'ring-1 ring-inset ring-neutral-50 text-stone-50 hover:bg-neutral-200 hover:ring-0 hover:text-primary-600 hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.25)] active:bg-neutral-300 active:text-primary-600 active:shadow-none disabled:ring-0 disabled:bg-neutral-200 disabled:text-primary-300 disabled:shadow-none',
+    // Outline-light: ring-white text-white -> hover bg-white ring-0 text-textmain shadow -> active bg-bgtheme -> disabled ring-white/30 text-white/50
+    'outline-light' => 'ring-1 ring-inset ring-white/50 text-white hover:bg-white hover:ring-0 hover:text-textmain hover:shadow-[2px_2px_10px_0px_rgba(0,0,0,0.15)] active:bg-bgtheme active:text-textmain active:shadow-none disabled:ring-0 disabled:bg-white/20 disabled:text-white/50 disabled:shadow-none',
     
     // Ghost (Dark text context)
-    'ghost' => 'text-primary-600 hover:text-primary-800 active:opacity-70 active:text-primary-800 disabled:opacity-70 disabled:text-primary-400',
+    'ghost' => 'text-textmain hover:text-terracotta active:opacity-70 disabled:opacity-50 disabled:text-textmuted',
     
     // Ghost Light (Light text context)
-    'ghost-light' => 'text-stone-200 hover:text-stone-200 active:opacity-70 active:text-stone-200 disabled:opacity-70 disabled:text-stone-200'
+    'ghost-light' => 'text-white hover:text-bgtheme active:opacity-70 disabled:opacity-50 disabled:text-white/50'
 ];
 
 $final_class = $base_classes . ($variants[$variant] ?? $variants['primary']) . ' ' . $class . ($disabled ? ' cursor-not-allowed pointer-events-none' : '');

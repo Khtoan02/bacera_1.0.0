@@ -120,9 +120,14 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     }
 
     /* ── Logo ── */
-    .hdr-logo { transition: filter .3s ease; }
-    #site-header.is-hero .hdr-logo { filter: brightness(0) invert(1); transition: none; }
-    #site-header.is-hero:hover .hdr-logo { filter: brightness(1); transition: none; }
+    .hdr-logo-light { transition: opacity .3s ease; }
+    .hdr-logo-dark  { transition: opacity .3s ease; display: none; }
+    /* Trên hero: ẩn logo sáng, hiện logo tối */
+    #site-header.is-hero .hdr-logo-light { display: none; }
+    #site-header.is-hero .hdr-logo-dark  { display: block; }
+    /* Khi không có dark logo (chưa upload): dùng filter invert cho light logo */
+    #site-header.is-hero .hdr-logo-light.hdr-logo--no-dark { display: block; filter: brightness(0) invert(1); }
+    #site-header.is-hero:hover .hdr-logo-light.hdr-logo--no-dark { filter: brightness(1); transition: none; }
 
     /* ── Nav links / text ── */
     .hdr-link {
@@ -284,6 +289,17 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     .search-overlay input::placeholder { color: #a8a29e; }
     </style>
 
+    <?php
+    // Custom favicon từ Bacera Config → Giao diện
+    add_action('wp_head', function() {
+        $fav = function_exists('bacera_get_favicon_url') ? bacera_get_favicon_url() : '';
+        if ($fav) {
+            echo '<link rel="icon" type="image/x-icon" href="' . esc_url($fav) . '">' . "\n";
+            echo '<link rel="shortcut icon" href="' . esc_url($fav) . '">' . "\n";
+            echo '<link rel="apple-touch-icon" href="' . esc_url($fav) . '">' . "\n";
+        }
+    }, 1);
+    ?>
     <?php wp_head(); ?>
 </head>
 <body <?php body_class('bg-neutral-100 font-sans antialiased overflow-x-hidden'); ?>>
@@ -299,8 +315,19 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
         <a href="<?php echo esc_url(home_url('/')); ?>"
            class="flex items-center justify-center pr-6 xl:pr-8">
-            <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>"
-                 class="hdr-logo h-9 w-auto object-contain"
+            <?php
+            $hp_logo_light = bacera_get_brand_logo_url();
+            $hp_logo_dark  = function_exists('bacera_get_brand_logo_dark_url') ? bacera_get_brand_logo_dark_url() : $hp_logo_light;
+            $hp_has_dark   = (int)get_option('bacera_logo_dark_id',0) > 0;
+            $hp_no_dark_cls = $hp_has_dark ? '' : ' hdr-logo--no-dark';
+            ?>
+            <?php if ($hp_has_dark): ?>
+            <img src="<?php echo esc_url($hp_logo_dark); ?>"
+                 class="hdr-logo-dark h-9 w-auto object-contain"
+                 alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+            <?php endif; ?>
+            <img src="<?php echo esc_url($hp_logo_light); ?>"
+                 class="hdr-logo-light<?php echo $hp_no_dark_cls; ?> h-9 w-auto object-contain"
                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
         </a>
 
@@ -619,45 +646,37 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
         </div>
     </div>
 
-    <div class="flex lg:hidden items-center justify-between h-[64px] px-4" id="mobile-hdr">
-        <a href="<?php echo esc_url(home_url('/')); ?>">
-            <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>"
-                 class="hdr-logo h-8 w-auto object-contain"
+    <!-- Mobile Header (App-like: Back / Logo / Search) -->
+    <div class="flex lg:hidden items-center justify-between h-[64px] px-4 relative" id="mobile-hdr">
+        <button onclick="window.history.length > 1 ? window.history.back() : window.location.href='<?php echo esc_url(home_url('/')); ?>'" 
+                class="hdr-icon w-10 h-10 flex items-center justify-center -ml-2 focus:outline-none" aria-label="Back">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        
+        <a href="<?php echo esc_url(home_url('/')); ?>" class="absolute left-1/2 -translate-x-1/2">
+            <?php
+            $hp_logo_light_m = bacera_get_brand_logo_url();
+            $hp_logo_dark_m  = function_exists('bacera_get_brand_logo_dark_url') ? bacera_get_brand_logo_dark_url() : $hp_logo_light_m;
+            $hp_has_dark_m   = (int)get_option('bacera_logo_dark_id',0) > 0;
+            ?>
+            <?php if ($hp_has_dark_m): ?>
+            <img src="<?php echo esc_url($hp_logo_dark_m); ?>"
+                 class="hdr-logo-dark h-7 w-auto object-contain"
+                 alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+            <?php endif; ?>
+            <img src="<?php echo esc_url($hp_logo_light_m); ?>"
+                 class="hdr-logo-light<?php echo $hp_has_dark_m ? '' : ' hdr-logo--no-dark'; ?> h-7 w-auto object-contain"
                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
         </a>
-        <div class="flex items-center gap-3">
-            <a href="<?php echo esc_url( $bacera_hdr_cart_url ); ?>" class="relative hdr-icon w-9 h-9 flex items-center justify-center no-underline" title="<?php esc_attr_e( 'Giỏ hàng', 'bacera' ); ?>">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                <span class="absolute -top-1 -right-1 bg-[#d95f47] w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold">1</span>
-            </a>
-            <button id="mobile-toggle" class="hdr-icon w-9 h-9 flex items-center justify-center focus:outline-none">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path id="icon-open"  stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
-                    <path id="icon-close" stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" style="display:none"/>
-                </svg>
-            </button>
-        </div>
-        <div id="mobile-menu"
-             class="hidden absolute top-[64px] left-0 right-0 bg-white shadow-xl z-[60] py-3">
-            <nav class="flex flex-col">
-                <?php
-                $mobile_links = [
-                    'Shop'     => $bacera_hdr_shop_url,
-                    'Workshop' => $bacera_hdr_workshop_url,
-                    'About us' => $about_page,
-                    'Blog'     => $bacera_hdr_blog_url,
-                    'Contact'  => $bacera_hdr_contact_url,
-                ];
-                foreach ($mobile_links as $ml => $ml_url): ?>
-                <a href="<?php echo esc_url( $ml_url ); ?>" class="px-5 py-3 text-primary-700 text-[15px] font-medium border-b border-neutral-200 last:border-0 hover:text-[#d95f47] transition-colors no-underline"><?php echo esc_html( $ml ); ?></a>
-                <?php endforeach; ?>
-            </nav>
-            <div class="flex items-center gap-4 px-5 mt-3 pt-3 border-t border-neutral-200">
-                <button onclick="mstSwitchLang('vi','Tiếng Việt')" class="text-primary-600 text-sm">🇻🇳 Tiếng Việt</button>
-                <span class="text-primary-300">·</span>
-                <button onclick="mstSwitchLang('en','English')" class="text-[#d95f47] text-sm font-semibold">🇺🇸 English</button>
-            </div>
-        </div>
+        
+        <button onclick="document.getElementById('search-overlay').classList.add('is-active'); document.getElementById('search-input').focus();" 
+                class="hdr-icon w-10 h-10 flex items-center justify-center -mr-2 focus:outline-none" aria-label="Search">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </button>
     </div>
 
 </header>
@@ -665,7 +684,15 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 <div class="search-overlay" id="search-overlay" role="search" aria-label="Tìm kiếm">
 
     <a href="<?php echo esc_url(home_url('/')); ?>" class="shrink-0 flex items-center pr-4">
-        <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>" class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+        <?php
+        $srch_dark_id  = (int)get_option('bacera_logo_dark_id', 0);
+        $srch_logo_src = $srch_dark_id
+            ? wp_get_attachment_image_url($srch_dark_id, 'full')
+            : bacera_get_brand_logo_url();
+        $srch_style    = $srch_dark_id ? '' : 'style="filter:brightness(0)invert(1)"';
+        ?>
+        <img src="<?php echo esc_url($srch_logo_src); ?>" <?php echo $srch_style; ?>
+             class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
     </a>
 
     <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" class="flex flex-1 items-center gap-3">

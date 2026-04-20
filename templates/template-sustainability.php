@@ -9,37 +9,8 @@ get_header();
 $home_url = home_url('/');
 ?>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-                earth:      '#5C6B3A',
-                earthlight: '#7A8C4E',
-                earthbg:    '#F3F5EE',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-        },
-    },
-}
-</script>
 
 <style>
-.bg-texture {
-    background-color: #F7F6F0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox=%270 0 200 200%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27 opacity=%270.03%27/%3E%3C/svg%3E");
-}
 .divider-art {
     background-image: linear-gradient(to right, #D0BCA0 50%, transparent 50%);
     background-size: 10px 1px; background-repeat: repeat-x;
@@ -99,19 +70,19 @@ tailwind.config = {
 
 /* Commitment strip */
 .commit-strip {
-    background:linear-gradient(135deg, #2d3a1a 0%, #3d2f26 100%);
+    background:linear-gradient(135deg, #3d2f26 0%, #1f1813 100%);
     border-radius:28px; overflow:hidden; position:relative;
 }
 .commit-strip::before {
     content:''; position:absolute; inset:0;
-    background-image:radial-gradient(circle at 80% 50%, rgba(92,107,58,.3) 0%, transparent 60%);
+    background-image:radial-gradient(circle at 80% 50%, rgba(217,95,71,.3) 0%, transparent 60%);
 }
 </style>
 
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
 
     <!-- ── HERO ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-16">
+    <div class="bacera-container pt-14 pb-16">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-5 tracking-wide">
@@ -133,7 +104,7 @@ tailwind.config = {
                 </p>
                 <div class="flex items-center gap-4 flex-wrap">
                     <a href="#our-commitments"
-                       class="inline-flex items-center gap-2 px-6 py-3 bg-[#5C6B3A] hover:bg-[#4a5530] text-white text-[13px] font-medium rounded-full transition-all">
+                       class="inline-flex items-center gap-2 px-6 py-3 bg-terracotta hover:bg-[#b84833] text-white text-[13px] font-medium rounded-full transition-all">
                         Our commitments
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-3 3-3-3m3 3V3M5 21h14a2 2 0 002-2v-5"/>
@@ -148,27 +119,27 @@ tailwind.config = {
 
             <!-- Hero visual: leaf / earth motif -->
             <div class="fade-up relative" style="animation-delay:.15s">
-                <div class="relative rounded-[28px] overflow-hidden aspect-[4/3] bg-[#2d3a1a]">
+                <div class="relative rounded-[28px] overflow-hidden aspect-[4/3] bg-textmain">
                     <img src="https://images.unsplash.com/photo-1530731141654-5993c3016c77?auto=format&fit=crop&q=80&w=900"
                          alt="Sustainable ceramics studio"
                          class="w-full h-full object-cover opacity-75 mix-blend-luminosity">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#2d3a1a]/80 via-transparent to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-textmain/80 via-transparent to-transparent"></div>
                     <!-- Floating stat chip -->
                     <div class="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-xl">
-                        <div class="text-[10px] uppercase tracking-[.15em] text-[#5C6B3A] font-semibold mb-1">Carbon offset</div>
+                        <div class="text-[10px] uppercase tracking-[.15em] text-terracotta font-semibold mb-1">Carbon offset</div>
                         <div class="font-serif text-3xl text-textmain font-bold">80<span class="text-terracotta text-lg">%</span></div>
                         <div class="text-[11px] text-textmuted mt-0.5">reduction since 2021</div>
                     </div>
                 </div>
                 <!-- Decorative ring -->
-                <div class="absolute -top-6 -right-6 w-32 h-32 rounded-full border-2 border-dashed border-[#5C6B3A]/20 -z-10"></div>
+                <div class="absolute -top-6 -right-6 w-32 h-32 rounded-full border-2 border-dashed border-terracotta/20 -z-10"></div>
             </div>
         </div>
     </div>
 
     <!-- ── STATS ── -->
     <div class="bg-[#F3F5EE] border-y border-[#DDD8CC]">
-        <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-14">
+        <div class="bacera-container py-14">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
                 <?php
                 $stats = [
@@ -188,9 +159,9 @@ tailwind.config = {
     </div>
 
     <!-- ── PILLARS ── -->
-    <div id="our-commitments" class="max-w-[1232px] mx-auto px-6 lg:px-0 py-20">
+    <div id="our-commitments" class="bacera-container section-pad">
         <div class="text-center mb-14">
-            <p class="text-xs uppercase tracking-[.35em] text-[#5C6B3A] font-semibold mb-3">Our commitments</p>
+            <p class="text-xs uppercase tracking-[.35em] text-terracotta font-semibold mb-3">Our commitments</p>
             <h2 class="font-serif text-4xl lg:text-5xl font-medium text-textmain leading-tight">
                 Four pillars of<br><span class="italic text-terracotta">responsible craft</span>
             </h2>
@@ -200,8 +171,8 @@ tailwind.config = {
             $pillars = [
                 [
                     'icon_path' => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
-                    'icon_bg'   => '#EEF2E6',
-                    'icon_color'=> '#5C6B3A',
+                    'icon_bg'   => '#FAF5EF',
+                    'icon_color'=> '#8d6a54',
                     'title'     => 'Responsible Sourcing',
                     'desc'      => 'All clay is sourced from certified Vietnamese suppliers who practice responsible land use. We only buy from sources that prioritise soil regeneration.',
                 ],
@@ -214,15 +185,15 @@ tailwind.config = {
                 ],
                 [
                     'icon_path' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
-                    'icon_bg'   => '#EEF2E6',
-                    'icon_color'=> '#5C6B3A',
+                    'icon_bg'   => '#FAF5EF',
+                    'icon_color'=> '#8d6a54',
                     'title'     => 'Zero Waste Studio',
                     'desc'      => 'Clay scraps are reclaimed and recycled back into production. Broken pieces are ground and reused as grog — a natural aggregate in new clay bodies.',
                 ],
                 [
                     'icon_path' => 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064',
-                    'icon_bg'   => '#F0EBF8',
-                    'icon_color'=> '#7554A8',
+                    'icon_bg'   => '#FDEEE9',
+                    'icon_color'=> '#d95f47',
                     'title'     => 'Natural Glazes Only',
                     'desc'      => 'Every glaze in our studio is made from natural minerals: feldspar, wood ash, rice husk, and local stone. No synthetic colourants. No toxic heavy metals.',
                 ],
@@ -244,7 +215,7 @@ tailwind.config = {
 
     <!-- ── TWO-COL: Story + Timeline ── -->
     <div class="bg-[#F3F5EE] border-y border-[#DDD8CC]">
-        <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-20 grid lg:grid-cols-2 gap-16 items-start">
+        <div class="bacera-container section-pad grid lg:grid-cols-2 gap-16 items-start">
 
             <!-- Left: Image -->
             <div class="relative fade-up">
@@ -263,7 +234,7 @@ tailwind.config = {
 
             <!-- Right: Goals Timeline -->
             <div class="fade-up lg:pt-8" style="animation-delay:.1s">
-                <p class="text-xs uppercase tracking-[.35em] text-[#5C6B3A] font-semibold mb-3">Our roadmap</p>
+                <p class="text-xs uppercase tracking-[.35em] text-terracotta font-semibold mb-3">Our roadmap</p>
                 <h2 class="font-serif text-4xl font-medium text-textmain mb-3">Sustainability<br><span class="italic text-terracotta">goals & progress</span></h2>
                 <p class="text-[14px] text-textmuted leading-relaxed mb-10">We hold ourselves to milestones — and we share the progress honestly, year by year.</p>
 
@@ -286,7 +257,7 @@ tailwind.config = {
                             <?php endif; ?>
                         </div>
                         <div class="flex items-center gap-3 mb-1">
-                            <span class="text-[10px] font-bold uppercase tracking-[.15em] <?php echo $g['done'] ? 'text-[#5C6B3A]' : 'text-textmuted'; ?>"><?php echo $g['year']; ?></span>
+                            <span class="text-[10px] font-bold uppercase tracking-[.15em] <?php echo $g['done'] ? 'text-terracotta' : 'text-textmuted'; ?>"><?php echo $g['year']; ?></span>
                             <?php if (!$g['done']): ?><span class="text-[9px] bg-[#f2ede6] text-textmuted px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">Planned</span><?php endif; ?>
                         </div>
                         <h4 class="text-[14px] font-semibold text-textmain mb-1"><?php echo $g['title']; ?></h4>
@@ -299,9 +270,9 @@ tailwind.config = {
     </div>
 
     <!-- ── Materials section ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-20">
+    <div class="bacera-container section-pad">
         <div class="text-center mb-14">
-            <p class="text-xs uppercase tracking-[.35em] text-[#5C6B3A] font-semibold mb-3">What we use</p>
+            <p class="text-xs uppercase tracking-[.35em] text-terracotta font-semibold mb-3">What we use</p>
             <h2 class="font-serif text-4xl lg:text-5xl font-medium text-textmain">Our natural<br><span class="italic text-terracotta">material palette</span></h2>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -320,7 +291,7 @@ tailwind.config = {
                      style="background:<?php echo $m['color']; ?>"></div>
                 <div>
                     <div class="text-[14px] font-semibold text-textmain mb-0.5"><?php echo $m['name']; ?></div>
-                    <div class="text-[11px] text-[#5C6B3A] font-medium mb-1"><?php echo $m['origin']; ?></div>
+                    <div class="text-[11px] text-terracotta font-medium mb-1"><?php echo $m['origin']; ?></div>
                     <div class="text-[12px] text-textmuted"><?php echo $m['note']; ?></div>
                 </div>
             </div>
@@ -328,18 +299,23 @@ tailwind.config = {
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+         SEO CONTENT BLOCK
+    ═══════════════════════════════════════════════════════ -->
+    <?php get_template_part('app/Views/components/seo-content', null, ['title' => get_the_title()]); ?>
+
     <!-- ── CTA strip ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="commit-strip px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative">
             <div class="relative z-10 text-center lg:text-left">
-                <p class="text-[10px] uppercase tracking-[.35em] text-[#a8be78] mb-3 font-semibold">Crafted with care</p>
+                <p class="text-[10px] uppercase tracking-[.35em] text-accent mb-3 font-semibold">Crafted with care</p>
                 <h2 class="font-serif text-3xl lg:text-4xl text-white leading-snug">
-                    Every piece holds<br><span class="italic text-[#a8be78]">the earth's memory.</span>
+                    Every piece holds<br><span class="italic text-accent">the earth's memory.</span>
                 </h2>
                 <p class="text-white/60 text-[13px] mt-3">Come see our process in person — at a Bacera workshop.</p>
             </div>
             <a href="<?php echo esc_url($home_url . 'workshop/'); ?>"
-               class="relative z-10 shrink-0 inline-flex items-center gap-3 text-xs uppercase tracking-[.2em] text-textmain bg-white hover:bg-[#a8be78] hover:text-white px-8 py-4 rounded-full transition-all duration-300 font-semibold shadow-lg">
+               class="relative z-10 shrink-0 inline-flex items-center gap-3 text-xs uppercase tracking-[.2em] text-textmain bg-white hover:bg-bgtheme hover:text-textmain px-8 py-4 rounded-full transition-all duration-300 font-semibold shadow-lg">
                 Explore Workshops
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>

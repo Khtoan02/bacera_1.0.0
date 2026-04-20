@@ -184,23 +184,24 @@ function bacera_img_rewrite_is_flushed() {
 }
 
 /**
- * Logo header/footer: proxy /bacera-img/… khi rewrite đã flush; nếu chưa flush thì dùng URL gốc Pancake CDN
- * (tránh ảnh vỡ trên server mới). Fallback file upload / theme.
+ * Logo sáng (dùng trên nền trắng / header cuộn).
+ * Ưu tiên: Admin upload → Pancake proxy → Fallback hardcode.
  *
  * @return string
  */
 function bacera_get_brand_logo_url() {
-    $upload     = wp_upload_dir();
-    $upload_rel = '/2026/03/Logo.png';
-    $upload_abs = isset( $upload['basedir'] ) ? $upload['basedir'] . $upload_rel : '';
-    $upload_url = isset( $upload['baseurl'] ) ? $upload['baseurl'] . $upload_rel : '';
+    // 1. Admin upload via Bacera Cấu hình → Giao diện
+    $light_id = (int) get_option( 'bacera_logo_light_id', 0 );
+    if ( $light_id ) {
+        $url = wp_get_attachment_image_url( $light_id, 'full' );
+        if ( $url ) return $url;
+    }
 
+    // 2. Pancake shop logo proxy
     if ( class_exists( 'Bacera_Utils' ) ) {
         $proxy = Bacera_Utils::get_pancake_shop_logo_proxy_url();
         if ( is_string( $proxy ) && $proxy !== '' ) {
-            if ( bacera_img_rewrite_is_flushed() ) {
-                return $proxy;
-            }
+            if ( bacera_img_rewrite_is_flushed() ) return $proxy;
             $direct = get_option( 'bacera_pancake_shop_avatar_source_url', '' );
             if ( is_string( $direct ) && $direct !== '' && function_exists( 'wp_http_validate_url' ) && wp_http_validate_url( $direct ) ) {
                 return $direct;
@@ -209,11 +210,46 @@ function bacera_get_brand_logo_url() {
         }
     }
 
-    if ( $upload_abs !== '' && file_exists( $upload_abs ) ) {
-        return $upload_url;
-    }
-
+    // 3. Hardcode fallback (file upload tháng 3/2026)
+    $upload     = wp_upload_dir();
+    $upload_rel = '/2026/03/Logo.png';
+    $upload_url = isset( $upload['baseurl'] ) ? $upload['baseurl'] . $upload_rel : '';
     return $upload_url;
+}
+
+/**
+ * Logo tối (dùng trên nền đen / hero / mobile menu tối).
+ * Nếu chưa upload dark logo → dùng light logo (filter CSS sẽ đảo màu ở header).
+ *
+ * @return string
+ */
+function bacera_get_brand_logo_dark_url() {
+    $dark_id = (int) get_option( 'bacera_logo_dark_id', 0 );
+    if ( $dark_id ) {
+        $url = wp_get_attachment_image_url( $dark_id, 'full' );
+        if ( $url ) return $url;
+    }
+    // Fallback: dùng light logo (header.php sẽ áp dụng filter: brightness(0) invert(1))
+    return bacera_get_brand_logo_url();
+}
+
+/**
+ * Favicon URL từ admin (hoặc WP site icon nếu chưa upload riêng).
+ *
+ * @return string
+ */
+function bacera_get_favicon_url() {
+    $fav_id = (int) get_option( 'bacera_favicon_id', 0 );
+    if ( $fav_id ) {
+        $url = wp_get_attachment_image_url( $fav_id, 'full' );
+        if ( $url ) return $url;
+    }
+    // Fallback: WP site icon
+    $site_icon_id = (int) get_option( 'site_icon', 0 );
+    if ( $site_icon_id ) {
+        return wp_get_attachment_image_url( $site_icon_id, 'full' );
+    }
+    return '';
 }
 
 // Boot the main controller
@@ -394,3 +430,6 @@ function bacera_ajax_get_blog_posts(): void {
 }
 add_action( 'wp_ajax_bacera_get_blog_posts',        'bacera_ajax_get_blog_posts' );
 add_action( 'wp_ajax_nopriv_bacera_get_blog_posts', 'bacera_ajax_get_blog_posts' );
+
+// Load Theme Customizer settings
+require_once BACERA_THEME_DIR . 'inc/customizer.php';

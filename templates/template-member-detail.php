@@ -50,8 +50,7 @@ $team_url  = home_url( '/our-team/' );
 // ── If member not found, show graceful 404 ──────────────────────
 if ( ! $member ):
 ?>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{colors:{bgtheme:'#f8f7f3',textmain:'#3d2f26',textmuted:'#6b5344',accent:'#c0a28e',terracotta:'#d95f47'},fontFamily:{serif:['"Gowun Batang"','serif'],sans:['"Bricolage Grotesque"','sans-serif']}}}}</script>
+
 <div class="font-sans antialiased min-h-[60vh] flex items-center justify-center" style="background:#f8f7f3;">
     <div class="text-center px-6">
         <p class="text-8xl mb-6">👤</p>
@@ -68,38 +67,7 @@ if ( ! $member ):
 <!-- ═══════════════════════════════════════════════════════════════
      FOUND: Render member detail
 ═══════════════════════════════════════════════════════════════ -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-        },
-    },
-}
-</script>
 
-<style>
-.bg-texture {
-    background-color: #F7F6F0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-}
-.divider-art {
-    background-image: linear-gradient(to right, #D0BCA0 50%, transparent 50%);
-    background-size: 10px 1px;
-    background-repeat: repeat-x;
-}
 </style>
 
 <?php
@@ -135,7 +103,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
 <div class="font-sans antialiased bg-texture text-textmain selection:bg-accentdark selection:text-white w-full overflow-hidden">
 
     <!-- ═══ 1. BREADCRUMB ═══════════════════════════════════════ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-12 pb-0">
+    <div class="bacera-container pt-12 pb-0">
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-10 tracking-wide">
             <a href="<?php echo esc_url( $home_url ); ?>" class="text-textmain font-medium hover:text-terracotta transition-colors">Homepage</a>
             <span class="text-accent/60">/</span>
@@ -146,7 +114,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
     </div>
 
     <!-- ═══ 2. HERO — Photo + Info ══════════════════════════════ -->
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-24">
+    <section class="bacera-container pb-24">
         <div class="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
 
             <!-- Portrait -->
@@ -462,7 +430,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
         #glbClose:hover { opacity: 1; }
     </style>
 
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-6">
+    <section class="bacera-container pb-6">
         <!-- Header -->
         <div class="text-center mb-2">
             <p class="text-[10px] uppercase tracking-[.25em] text-textmuted mb-2">Gallery pictures</p>
@@ -554,7 +522,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
 
     <!-- ═══ 3. SAME DEPARTMENT ══════════════════════════════════ -->
     <?php if ( ! empty( $companions ) ): ?>
-    <section class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-24">
+    <section class="bacera-container pb-24">
         <div class="w-full h-[1px] divider-art opacity-40 mb-16"></div>
 
         <div class="flex items-center gap-4 mb-10">
@@ -592,7 +560,7 @@ $fallback_photo = 'https://images.unsplash.com/photo-1580489944761-15a19d654956?
     <?php endif; ?>
 
     <!-- ═══ 4. CTA BANNER ═══════════════════════════════════════ -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14
                     flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10 pointer-events-none"></div>

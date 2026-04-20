@@ -29,7 +29,7 @@ $brand_colors = [
 ];
 ?>
 
-<main class="min-h-screen bg-gray-50/50 py-20 font-sans selection:bg-primary-500/10 selection:text-primary-800">
+<main class="min-h-screen bg-gray-50/50 section-pad font-sans selection:bg-primary-500/10 selection:text-primary-800">
     <div class="max-w-[85rem] mx-auto px-4 md:px-6 lg:px-8">
         
         <header class="mb-20 text-center relative z-10 rounded-[3rem] bg-white p-12 md:p-20 shadow-sm border border-gray-100 overflow-hidden">

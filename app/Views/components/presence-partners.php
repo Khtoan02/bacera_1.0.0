@@ -1,6 +1,7 @@
 <?php
 /**
  * Component: Bacera's Presence (Partners)
+ * Redesigned: static grid + horizontal scroll on mobile, no Swiper overflow issues.
  */
 
 $partners_query = new WP_Query([
@@ -8,100 +9,259 @@ $partners_query = new WP_Query([
     'posts_per_page' => -1,
     'post_status'    => 'publish',
     'orderby'        => 'menu_order title',
-    'order'          => 'ASC'
+    'order'          => 'ASC',
 ]);
-
 $has_partners = $partners_query->have_posts();
-?>
-<div class="bacera-partners-wrapper relative w-full overflow-hidden py-12 md:py-20 border-t border-accent/20">
-    <!-- Ambient Ceramic Orbs - Bounded tightly to the wrapper -->
-    <div class="absolute inset-0 pointer-events-none overflow-hidden">
-        <div class="absolute top-[10%] right-[-5%] w-[300px] h-[300px] md:w-[400px] md:h-[400px] bg-accent/30 blur-[80px] md:blur-[100px] rounded-full mix-blend-multiply"></div>
-        <div class="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] md:w-[500px] md:h-[500px] bg-terracotta/15 blur-[100px] md:blur-[120px] rounded-full mix-blend-multiply"></div>
-    </div>
 
-    <!-- Inner Container – matches other sections (max-w-7xl) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-    <!-- Text Header -->
-    <div class="text-center w-full mb-10 md:mb-16">
-        <p class="text-[10px] md:text-sm uppercase tracking-[0.3em] text-accentdark mb-4 md:mb-6 font-medium">Bacera's Presence</p>
-        <h2 class="font-serif text-2xl md:text-3xl lg:text-4xl text-textmain font-light leading-snug">
-            Our creations accompany the most luxurious <br class="hidden sm:block">and culturally rich spaces.
-        </h2>
-    </div>
-    
-    <!-- Swiper Slider with Glass Cards -->
-    <div class="swiper partner-swiper w-full overflow-hidden py-8">
-        <div class="swiper-wrapper items-stretch">
-            <?php if ( $has_partners ) : ?>
-                <?php 
-                while ( $partners_query->have_posts() ) : $partners_query->the_post(); ?>
-                    <div class="swiper-slide h-auto px-2 md:px-3">
-                        <div class="h-full flex justify-center items-center py-6 px-6 backdrop-blur-xl bg-white/40 border border-white/60 shadow-[0_8px_30px_-5px_rgba(0,0,0,0.05)] rounded-[1.5rem] hover:-translate-y-3 lg:hover:-translate-y-4 hover:bg-white/70 hover:shadow-[0_20px_40px_-5px_rgba(0,0,0,0.12)] transition-all duration-500 relative overflow-hidden group">
-                            <!-- Inner Glare -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-white/10 pointer-events-none opacity-50"></div>
-                            
-                            <div class="relative z-10 w-full flex justify-center">
-                            <?php
-                            if ( has_post_thumbnail() ) {
-                                $img_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
-                                $alt = get_post_meta( get_post_thumbnail_id(), '_wp_attachment_image_alt', true ) ?: get_the_title();
-                                echo '<img src="' . esc_url( $img_url ) . '" alt="' . esc_attr( $alt ) . '" class="h-16 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105">';
-                            } else {
-                                echo '<span class="font-serif text-2xl md:text-3xl lg:text-4xl tracking-[0.2em] text-textmain text-center transition-transform duration-500 inline-block group-hover:scale-105">' . esc_html( get_the_title() ) . '</span>';
-                            }
-                            ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endwhile;
-                wp_reset_postdata();
-                ?>
-            <?php else : ?>
-                <!-- Fallback Demo Data -->
-                <?php 
-                $demos = [
-                    '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Marriott_Logo.svg/1024px-Marriott_Logo.svg.png" alt="Marriott" class="h-16 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105">',
-                    '<span class="font-serif text-2xl md:text-3xl lg:text-4xl tracking-[0.2em] text-textmain text-center transition-transform duration-500 inline-block group-hover:scale-105">HERITAGE</span>',
-                    '<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Accor_logo.svg/1024px-Accor_logo.svg.png" alt="Accor" class="h-16 md:h-20 lg:h-24 w-auto object-contain transition-transform duration-500 group-hover:scale-105">',
-                    '<span class="font-serif text-2xl md:text-3xl lg:text-4xl tracking-[0.2em] text-textmain text-center transition-transform duration-500 inline-block group-hover:scale-105">THE ARTIS</span>',
-                    '<span class="font-serif text-2xl md:text-3xl lg:text-4xl tracking-[0.2em] text-textmain text-center transition-transform duration-500 inline-block group-hover:scale-105">L\'USINE</span>'
-                ];
-                foreach ($demos as $demo): ?>
-                    <div class="swiper-slide h-auto px-2 md:px-3">
-                        <div class="h-full flex justify-center items-center py-6 px-6 backdrop-blur-xl bg-white/40 border border-white/60 shadow-[0_8px_30px_-5px_rgba(0,0,0,0.05)] rounded-[1.5rem] hover:-translate-y-3 lg:hover:-translate-y-4 hover:bg-white/70 hover:shadow-[0_20px_40px_-5px_rgba(0,0,0,0.12)] transition-all duration-500 relative overflow-hidden group">
-                            <!-- Inner Glare -->
-                            <div class="absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-white/10 pointer-events-none opacity-50"></div>
-                            <div class="relative z-10 w-full flex justify-center">
-                                <?php echo $demo; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-    </div>
-    </div><!-- /.max-w-7xl inner container -->
-</div><!-- /.bacera-partners-wrapper -->
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof Swiper !== 'undefined') {
-        new Swiper('.partner-swiper', {
-            slidesPerView: 2,
-            spaceBetween: 30,
-            loop: true,
-            grabCursor: true,
-            autoplay: {
-                delay: 2000,
-                disableOnInteraction: false,
-            },
-            breakpoints: {
-                640: { slidesPerView: 3, spaceBetween: 40 },
-                1024: { slidesPerView: 4, spaceBetween: 60 }
-            }
-        });
+// Collect items
+$items = [];
+if ($has_partners) {
+    while ($partners_query->have_posts()) {
+        $partners_query->the_post();
+        $items[] = [
+            'type'  => 'image',
+            'img'   => has_post_thumbnail() ? get_the_post_thumbnail_url(get_the_ID(), 'full') : '',
+            'name'  => get_the_title(),
+        ];
     }
-});
-</script>
+    wp_reset_postdata();
+} else {
+    // Fallback demo
+    $items = [
+        ['type' => 'image', 'img' => '', 'name' => 'MARRIOTT'],
+        ['type' => 'image', 'img' => '', 'name' => 'THE JAHAN'],
+        ['type' => 'image', 'img' => '', 'name' => 'ACCOR'],
+        ['type' => 'image', 'img' => '', 'name' => 'HERITAGE'],
+        ['type' => 'image', 'img' => '', 'name' => "L'USINE"],
+    ];
+}
+?>
+
+<section class="bacera-presence-section">
+    <style>
+    /* ── Bacera's Presence ────────────────────────────────────────── */
+    .bacera-presence-section {
+        position: relative;
+        padding: clamp(4rem, 6vw, 7rem) 0;
+        border-top: 1px solid rgba(217,95,71,.15);
+        /* No background — inherits the page background seamlessly */
+    }
+
+    /* Decorative ambient blobs — self-contained, no overflow leaking */
+    .bacera-presence-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+    .presence-orb {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(90px);
+        mix-blend-mode: multiply;
+    }
+    .presence-orb-1 {
+        width: 500px; height: 500px;
+        top: -100px; right: -80px;
+        background: rgba(217,95,71,.12);
+    }
+    .presence-orb-3 {
+        width: 300px; height: 200px;
+        top: 50%; left: 50%;
+        transform: translate(-50%,-50%);
+        background: rgba(217,95,71,.07);
+    }
+
+    /* ── Header ── */
+    .bacera-presence-header {
+        text-align: center;
+        margin-bottom: clamp(2.5rem, 4vw, 4rem);
+        position: relative;
+        z-index: 1;
+    }
+    .bacera-presence-eyebrow {
+        font-size: 10px;
+        letter-spacing: .3em;
+        text-transform: uppercase;
+        color: var(--theme-primary, #8d6a54);
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+    .bacera-presence-title {
+        font-family: 'Gowun Batang', serif;
+        font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+        font-weight: 400;
+        color: #3d2f26;
+        line-height: 1.3;
+    }
+
+    /* ── Grid Track ── */
+    .bacera-presence-track {
+        position: relative;
+        z-index: 1;                  /* above blobs */
+        /* !! KEY: NO overflow:hidden on this element !! */
+    }
+
+    .bacera-presence-grid {
+        display: flex;
+        gap: 1.25rem;
+        /* Mobile: scroll horizontally */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 1.5rem 1rem 2.5rem; /* bottom padding = space for hover lift shadow */
+        /* Desktop: wrap into grid */
+    }
+    .bacera-presence-grid::-webkit-scrollbar { display: none; }
+
+    @media (min-width: 768px) {
+        .bacera-presence-grid {
+            overflow-x: visible;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 1.5rem 0 2.5rem;
+        }
+    }
+
+    /* ── Glass Card ── */
+    .partner-card {
+        /* Fixed width so flex-scroll works on mobile */
+        flex: 0 0 clamp(160px, 40vw, 200px);
+        min-height: 120px;
+
+        /* Glassmorphism */
+        background: rgba(255,255,255,.55);
+        backdrop-filter: blur(18px) saturate(180%);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
+        border: 1px solid rgba(255,255,255,.7);
+        border-radius: 1.5rem;
+        box-shadow:
+            0 4px 24px rgba(0,0,0,.06),
+            0 1px 2px rgba(0,0,0,.04),
+            inset 0 1px 0 rgba(255,255,255,.8);
+
+        /* Layout */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1.75rem;
+        position: relative;
+
+        /* Transition — transform only, so nothing clips */
+        transition: transform .35s cubic-bezier(.22,.68,0,1.2),
+                    box-shadow .35s ease,
+                    background .2s ease;
+        will-change: transform;
+        cursor: default;
+    }
+
+    /* Glare overlay — inside, uses border-radius, no overflow needed */
+    .partner-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255,255,255,.7) 0%,
+            rgba(255,255,255,.1) 50%,
+            rgba(255,255,255,0) 100%
+        );
+        pointer-events: none;
+    }
+
+    /* Bottom edge shimmer */
+    .partner-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 10%; right: 10%;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
+        border-radius: 9999px;
+    }
+
+    /* !! Hover — translate ONLY, no overflow issues !! */
+    .partner-card:hover {
+        transform: translateY(-12px);
+        background: rgba(255,255,255,.75);
+        box-shadow:
+            0 20px 48px rgba(61,47,38,.12),
+            0 8px 16px rgba(61,47,38,.08),
+            inset 0 1px 0 rgba(255,255,255,.9);
+    }
+
+    .partner-card img {
+        max-height: 80px;
+        width: auto;
+        object-fit: contain;
+        transition: transform .35s ease;
+        filter: grayscale(20%);
+        position: relative;
+        z-index: 1;
+    }
+    .partner-card:hover img {
+        transform: scale(1.06);
+        filter: grayscale(0%);
+    }
+
+    .partner-card .partner-name {
+        font-family: 'Gowun Batang', serif;
+        font-size: clamp(1.1rem, 2vw, 1.5rem);
+        letter-spacing: .15em;
+        color: #3d2f26;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+        transition: transform .35s ease;
+    }
+    .partner-card:hover .partner-name {
+        transform: scale(1.05);
+    }
+
+    @media (min-width: 768px) {
+        .partner-card {
+            flex: 0 0 clamp(180px, 22%, 220px);
+            min-height: 140px;
+        }
+        .partner-card img { max-height: 96px; }
+    }
+    </style>
+
+    <!-- Decorative background (self-contained overflow) -->
+    <div class="bacera-presence-bg" aria-hidden="true">
+        <div class="presence-orb presence-orb-1"></div>
+        <div class="presence-orb presence-orb-3"></div>
+    </div>
+
+    <!-- Inner container -->
+    <div class="bacera-container">
+
+        <!-- Header -->
+        <div class="bacera-presence-header">
+            <p class="bacera-presence-eyebrow">Bacera's Presence</p>
+            <h2 class="bacera-presence-title">
+                Our creations accompany the most luxurious<br>
+                and culturally rich spaces.
+            </h2>
+        </div>
+
+        <!-- Partner grid / scroll track -->
+        <div class="bacera-presence-track">
+            <div class="bacera-presence-grid">
+                <?php foreach ($items as $item): ?>
+                <div class="partner-card">
+                    <?php if (!empty($item['img'])): ?>
+                        <img src="<?php echo esc_url($item['img']); ?>"
+                             alt="<?php echo esc_attr($item['name']); ?>"
+                             loading="lazy">
+                    <?php else: ?>
+                        <span class="partner-name"><?php echo esc_html($item['name']); ?></span>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+    </div>
+</section>

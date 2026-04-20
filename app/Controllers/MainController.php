@@ -46,6 +46,7 @@ class MainController {
             new AdminPaymentController();   // Payment methods + promo codes
             new AdminTeamController();      // Our Team member management
             new AdminVideoController();     // Video library & categories
+            new AdminSyncController();      // Auto-sync pages & menu
         }
     }
 

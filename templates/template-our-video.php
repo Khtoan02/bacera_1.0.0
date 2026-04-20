@@ -35,34 +35,7 @@ if ( ! $active_cat && ! empty( $cats ) ) {
 }
 ?>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-        },
-    },
-}
-</script>
-
 <style>
-.bg-texture {
-    background-color: #F7F6F0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-}
 .divider-art {
     background-image: linear-gradient(to right, #D0BCA0 50%, transparent 50%);
     background-size: 10px 1px; background-repeat: repeat-x;
@@ -205,7 +178,7 @@ tailwind.config = {
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
 
     <!-- ── HEADER ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-8">
+    <div class="bacera-container pt-14 pb-8">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-4 tracking-wide">
@@ -227,7 +200,7 @@ tailwind.config = {
 
     <!-- ── CATEGORY TABS ── -->
     <?php if ( ! empty( $cats ) ): ?>
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-10">
+    <div class="bacera-container mb-10">
         <div class="vt-tabs" id="vt-tabs" role="tablist">
             <?php
             // "All" tab
@@ -258,7 +231,7 @@ tailwind.config = {
     <?php endif; ?>
 
     <!-- ── VIDEO GRID ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
 
         <!-- Count + view info -->
         <div class="flex items-center justify-between mb-8">
@@ -337,12 +310,17 @@ tailwind.config = {
     </div>
 
     <!-- ── DIVIDER ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 mb-16">
+    <div class="bacera-container mb-16">
         <div class="w-full h-[1px] divider-art opacity-40"></div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+         SEO CONTENT BLOCK
+    ═══════════════════════════════════════════════════════ -->
+    <?php get_template_part('app/Views/components/seo-content', null, ['title' => 'Our Video']); ?>
+
     <!-- ── CTA ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10"></div>
             <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10"></div>

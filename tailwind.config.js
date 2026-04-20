@@ -19,20 +19,26 @@ module.exports = {
           300: '#d3bfb1',
           200: '#ded5cd',
           100: '#e9e1d9',
-          DEFAULT: '#8d6a54',
+          DEFAULT: 'var(--theme-primary, #8d6a54)',
         },
         neutral: {
           300: '#eae3d1',
           200: '#f1eee1',
           100: '#f8f7f3',
-          DEFAULT: '#eae3d1',
+          DEFAULT: 'var(--theme-neutral, #eae3d1)',
         },
         accent: {
           600: '#c8513b',
           500: '#d95f47',
           400: '#e67258',
-          DEFAULT: '#d95f47',
-        }
+          DEFAULT: 'var(--theme-accent, #d95f47)',
+        },
+        // Cross-template compatibility aliases
+        textmain: '#3d2f26', // primary.900 equivalent used in About/Blog
+        textmuted: '#6b5344', // primary.700 equivalent
+        bgtheme: 'var(--theme-neutral, #f8f7f3)',
+        accentdark: 'var(--theme-primary, #8d6a54)',
+        terracotta: 'var(--theme-accent, #d95f47)',
       },
       fontFamily: {
         sans: ['"Bricolage Grotesque"', 'sans-serif'],

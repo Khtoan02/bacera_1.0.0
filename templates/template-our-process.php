@@ -9,34 +9,8 @@ get_header();
 $home_url = home_url('/');
 ?>
 
-<!-- Tailwind -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                bgtheme:    '#f8f7f3',
-                textmain:   '#3d2f26',
-                textmuted:  '#6b5344',
-                accent:     '#c0a28e',
-                accentdark: '#8d6a54',
-                terracotta: '#d95f47',
-            },
-            fontFamily: {
-                serif: ['"Gowun Batang"', 'serif'],
-                sans:  ['"Bricolage Grotesque"', 'sans-serif'],
-            },
-        },
-    },
-}
-</script>
 
 <style>
-.bg-texture {
-    background-color:#F7F6F0;
-    background-image:url("data:image/svg+xml,%3Csvg viewBox=%270 0 200 200%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.9%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27 opacity=%270.03%27/%3E%3C/svg%3E");
-}
 .divider-art {
     background-image:linear-gradient(to right, #D0BCA0 50%, transparent 50%);
     background-size:10px 1px; background-repeat:repeat-x;
@@ -118,7 +92,7 @@ tailwind.config = {
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
 
     <!-- ── HERO ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pt-14 pb-16">
+    <div class="bacera-container pt-14 pb-16">
 
         <!-- Breadcrumb -->
         <nav class="flex items-center gap-2 text-xs text-textmuted mb-5 tracking-wide">
@@ -152,18 +126,35 @@ tailwind.config = {
             </div>
 
             <!-- Right: collage of 3 images -->
+            <?php
+            // Pull 3 recent images from media library
+            $hero_images = get_posts([
+                'post_type'      => 'attachment',
+                'post_mime_type' => 'image',
+                'post_status'    => 'inherit',
+                'posts_per_page' => 3,
+                'orderby'        => 'rand',
+            ]);
+            $img_urls = array_map(fn($a) => wp_get_attachment_image_url($a->ID, 'large'), $hero_images);
+            while (count($img_urls) < 3) { $img_urls[] = ''; }
+            $img_alts = ['Throwing clay on wheel', 'Natural clay', 'Finished ceramics'];
+            $bg_fallbacks = ['background: linear-gradient(135deg,#e8d5c4,#d0bca0)','background:linear-gradient(135deg,#c5b19a,#a8907c)','background:linear-gradient(135deg,#d9c8b2,#bca88e)'];
+            ?>
             <div class="fade-up relative grid grid-cols-2 gap-3" style="animation-delay:.12s">
-                <div class="rounded-2xl overflow-hidden aspect-[3/4] col-span-1 row-span-2">
-                    <img src="https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=500"
-                         alt="Throwing clay on wheel" class="w-full h-full object-cover">
+                <div class="rounded-2xl overflow-hidden aspect-[3/4] col-span-1 row-span-2" style="<?php echo $img_urls[0] ? '' : $bg_fallbacks[0]; ?>">
+                    <?php if ($img_urls[0]): ?>
+                    <img src="<?php echo esc_url($img_urls[0]); ?>" alt="<?php echo esc_attr($img_alts[0]); ?>" class="w-full h-full object-cover">
+                    <?php endif; ?>
                 </div>
-                <div class="rounded-2xl overflow-hidden aspect-square">
-                    <img src="https://images.unsplash.com/photo-1560707854-fb9a46c26736?auto=format&fit=crop&q=80&w=400"
-                         alt="Natural clay" class="w-full h-full object-cover">
+                <div class="rounded-2xl overflow-hidden aspect-square" style="<?php echo $img_urls[1] ? '' : $bg_fallbacks[1]; ?>">
+                    <?php if ($img_urls[1]): ?>
+                    <img src="<?php echo esc_url($img_urls[1]); ?>" alt="<?php echo esc_attr($img_alts[1]); ?>" class="w-full h-full object-cover">
+                    <?php endif; ?>
                 </div>
-                <div class="rounded-2xl overflow-hidden aspect-square">
-                    <img src="https://images.unsplash.com/photo-1495121605193-b116b5b9c5e8?auto=format&fit=crop&q=80&w=400"
-                         alt="Finished ceramics" class="w-full h-full object-cover">
+                <div class="rounded-2xl overflow-hidden aspect-square" style="<?php echo $img_urls[2] ? '' : $bg_fallbacks[2]; ?>">
+                    <?php if ($img_urls[2]): ?>
+                    <img src="<?php echo esc_url($img_urls[2]); ?>" alt="<?php echo esc_attr($img_alts[2]); ?>" class="w-full h-full object-cover">
+                    <?php endif; ?>
                 </div>
                 <!-- Overlay badge -->
                 <div class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-3 shadow-lg">
@@ -171,11 +162,42 @@ tailwind.config = {
                     <div class="font-serif text-2xl text-textmain font-bold">3–7 <span class="text-base font-sans text-terracotta">weeks</span></div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <!-- ── PROCESS STEPS ── -->
     <?php
+    // Fetch images from media library for each step
+    $all_media = get_posts([
+        'post_type'      => 'attachment',
+        'post_mime_type' => 'image',
+        'post_status'    => 'inherit',
+        'posts_per_page' => -1,
+        'orderby'        => 'rand',
+        'fields'         => 'ids',
+    ]);
+    $media_pool = array_values($all_media);
+    $step_img_fn = function(int $i) use ($media_pool): string {
+        if (!empty($media_pool)) {
+            $id = $media_pool[ $i % count($media_pool) ];
+            $url = wp_get_attachment_image_url($id, 'large');
+            if ($url) return $url;
+        }
+        return '';
+    };
+    // Step bg-gradient fallbacks
+    $step_bg_fallbacks = [
+        'linear-gradient(135deg,#e8d5c4,#d5bfa8)',
+        'linear-gradient(135deg,#ddd8cc,#c3bbb0)',
+        'linear-gradient(135deg,#e5d3c5,#c8b09a)',
+        'linear-gradient(135deg,#d9cfc8,#c0b5a8)',
+        'linear-gradient(135deg,#f0e0d8,#d9c5ba)',
+        'linear-gradient(135deg,#ede5f8,#d9cce8)',
+        'linear-gradient(135deg,#f5e8e2,#dcc8c0)',
+        'linear-gradient(135deg,#e8e0d8,#cfc8be)',
+    ];
+
     $steps = [
         [
             'num'    => 1,
@@ -187,7 +209,6 @@ tailwind.config = {
             'desc'   => 'We source stoneware and porcelain clays from trusted Vietnamese quarries. Each batch is tested for plasticity, shrinkage, and mineral content before it enters our studio. The right clay is the foundation of everything.',
             'detail' => 'Clay is never just dirt. Different clay bodies behave differently in the kiln, respond differently to the wheel, and accept glazes in their own way. We select each type for its intended use.',
             'tools'  => ['Vietnamese red stoneware', 'White porcelain', 'Grog (crushed fired clay)', 'Moisture testing'],
-            'img'    => 'https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?auto=format&fit=crop&q=80&w=800',
             'duration' => '1–2 days',
         ],
         [
@@ -200,7 +221,6 @@ tailwind.config = {
             'desc'   => 'Before any clay touches the wheel, it must be wedged — a process of rhythmically pressing and folding the clay to remove air pockets. Air bubbles left inside can cause cracks or even explosions in the kiln.',
             'detail' => 'Wedging is meditative and physical. A seasoned potter can feel when the clay is ready — it takes on a silky, uniform resistance. We typically wedge 5–10 minutes per piece of clay.',
             'tools'  => ['Wire cutter', 'Canvas work surface', 'Hands (always)', 'Water bowl'],
-            'img'    => 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&q=80&w=800',
             'duration' => '10–20 min',
         ],
         [
@@ -213,7 +233,6 @@ tailwind.config = {
             'desc'   => 'The pottery wheel is the heartbeat of our studio. Clay is centred, opened, and pulled up into form using water and careful pressure. Every motion counts — too much and the wall collapses, too little and the form won\'t rise.',
             'detail' => 'Throwing is the most skill-intensive step. Our artisans have years of muscle memory. What looks effortless is the result of thousands of hours. Each piece is thrown one at a time, by one person.',
             'tools'  => ['Electric kick wheel', 'Throwing ribs', 'Sponge', 'Water, and patience'],
-            'img'    => 'https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=800',
             'duration' => '15–60 min',
         ],
         [
@@ -226,7 +245,6 @@ tailwind.config = {
             'desc'   => 'Once leather-hard (partially dry), each piece is trimmed on the wheel to refine its profile, thin the walls evenly, and carve the foot ring at its base. This defines how the piece sits and feels in the hand.',
             'detail' => 'Trimming requires the same attention as throwing, but in reverse — you\'re removing clay rather than building. The foot ring is a signature: in ceramics, you can often identify the maker\'s hand from the foot alone.',
             'tools'  => ['Loop trimming tools', 'Turning tool', 'Calipers', 'Needle tool'],
-            'img'    => 'https://images.unsplash.com/photo-1552423314-cf29ab68ad73?auto=format&fit=crop&q=80&w=800',
             'duration' => '20–40 min',
         ],
         [
@@ -239,7 +257,6 @@ tailwind.config = {
             'desc'   => 'Bone-dry pieces are loaded into the kiln and fired to around 1000°C. This first firing — called bisque — transforms raw clay into porous ceramic. The piece is now permanent but still unglazed and fragile.',
             'detail' => 'The kiln rises slowly: too fast and the remaining moisture creates steam that cracks the piece. Bisque firings take 8–12 hours in the kiln, then cool slowly overnight before the door is opened.',
             'tools'  => ['Electric kiln', 'Kiln shelves & stilts', 'Pyrometer', 'Kiln wash'],
-            'img'    => 'https://images.unsplash.com/photo-1590512668977-a6e2ddf5e1ed?auto=format&fit=crop&q=80&w=800',
             'duration' => '12–16 hours',
         ],
         [
@@ -252,7 +269,6 @@ tailwind.config = {
             'desc'   => 'Bisqueware is dipped, poured, or brushed with our house-made glazes — all natural mineral recipes developed in-studio. Glaze is applied with intention: thickness determines colour depth, flow and texture.',
             'detail' => 'Glazing is chemistry and intuition combined. Our glazes are made from feldspar, wood ash, silica, and natural colourants. We maintain a library of over 40 unique glaze recipes developed over years of studio testing.',
             'tools'  => ['Dipping tongs', 'Glaze brush', 'Latex resist', 'Wax resist for foot'],
-            'img'    => 'https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?auto=format&fit=crop&q=80&w=800',
             'duration' => '30–90 min',
         ],
         [
@@ -265,7 +281,6 @@ tailwind.config = {
             'desc'   => 'Glazed pieces are fired a second time, now to 1220–1280°C — high-fire stoneware temperatures. The glaze melts, flows, and fuses permanently to the clay body. Each piece emerges unique from the heat.',
             'detail' => 'This is the moment of mystery. We load the kiln with care but accept that the fire has its own will. Some glazes shift colour under heat. Surfaces that appeared uniform can develop texture, pools, or movement.',
             'tools'  => ['Electric kiln', 'Kiln furniture', 'Temperature controller', 'Patient waiting'],
-            'img'    => 'https://images.unsplash.com/photo-1570779367011-1d7498d1af88?auto=format&fit=crop&q=80&w=800',
             'duration' => '18–24 hours',
         ],
         [
@@ -278,7 +293,6 @@ tailwind.config = {
             'desc'   => 'Each cooled piece is unloaded from the kiln, inspected, and its foot ground smooth. We test food safety, water tightness, and structural soundness. Only pieces that meet our standards are released.',
             'detail' => 'We reject more than most people expect. A crack that appeared in the drying, a glaze crawl, a foot that\'s slightly off — these send a piece to the seconds shelf or back to clay. The ones that make it are right.',
             'tools'  => ['Diamond grinding disc', 'Quality inspection', 'Food-safe sealant test', 'Felt protectors'],
-            'img'    => 'https://images.unsplash.com/photo-1495121605193-b116b5b9c5e8?auto=format&fit=crop&q=80&w=800',
             'duration' => '1–2 hours',
         ],
     ];
@@ -286,19 +300,24 @@ tailwind.config = {
     foreach ($steps as $i => $step):
         $odd = $i % 2 === 0;
         $anchor = 'step-' . $step['num'];
+        $step_img_url = $step_img_fn($i);
+        $step_bg_style = $step_img_url ? '' : 'background:' . $step_bg_fallbacks[$i % count($step_bg_fallbacks)] . ';';
     ?>
     <!-- Step <?php echo $step['num']; ?> -->
     <div id="<?php echo $anchor; ?>"
          class="<?php echo ($i % 2 === 1) ? 'bg-[#F3F5EE] border-y border-[#DDD8CC]' : ''; ?>">
-        <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-16 lg:py-20">
+        <div class="bacera-container section-pad">
             <div class="grid lg:grid-cols-2 gap-10 lg:gap-20 items-center <?php echo $odd ? '' : 'lg:[direction:rtl]'; ?>">
 
                 <!-- Image -->
-                <div class="step-img-wrap <?php echo $odd ? '' : 'lg:[direction:ltr]'; ?> fade-up">
-                    <img src="<?php echo esc_url($step['img']); ?>"
+                <div class="step-img-wrap <?php echo $odd ? '' : 'lg:[direction:ltr]'; ?> fade-up" style="<?php echo $step_bg_style; ?>">
+                    <?php if ($step_img_url): ?>
+                    <img src="<?php echo esc_url($step_img_url); ?>"
+
                          alt="<?php echo esc_attr($step['title']); ?>"
                          loading="lazy"
                          class="aspect-[4/3] object-cover">
+                    <?php endif; ?>
                     <div class="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent pointer-events-none rounded-2xl"></div>
                     <!-- Step number badge -->
                     <div class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/95 backdrop-blur flex items-center justify-center">
@@ -309,6 +328,7 @@ tailwind.config = {
                         ⏱ <?php echo esc_html($step['duration']); ?>
                     </div>
                 </div>
+
 
                 <!-- Text -->
                 <div class="<?php echo $odd ? '' : 'lg:[direction:ltr]'; ?> fade-up" style="animation-delay:.1s">
@@ -355,12 +375,17 @@ tailwind.config = {
     <?php endforeach; ?>
 
     <!-- ── DIVIDER ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 py-12">
+    <div class="bacera-container py-12">
         <div class="w-full h-[1px] divider-art opacity-40"></div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════
+         SEO CONTENT BLOCK
+    ═══════════════════════════════════════════════════════ -->
+    <?php get_template_part('app/Views/components/seo-content', null, ['title' => get_the_title()]); ?>
+
     <!-- ── CTA ── -->
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0 pb-20">
+    <div class="bacera-container pb-20">
         <div class="bg-textmain rounded-2xl lg:rounded-3xl px-8 lg:px-16 py-14 flex flex-col lg:flex-row items-center justify-between gap-8 relative overflow-hidden">
             <div class="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-accent/10"></div>
             <div class="absolute -left-8 -bottom-10 w-32 h-32 rounded-full bg-terracotta/10"></div>

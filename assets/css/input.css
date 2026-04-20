@@ -7,12 +7,56 @@
 /* Add your custom layer rules below */
 @layer base {
   body {
-    @apply font-sans text-body-reg text-gray-800 antialiased;
+    @apply font-sans text-textmain bg-bgtheme antialiased;
+    font-size: clamp(1rem, 0.95vw + 0.75rem, 1.125rem);
+    line-height: 1.6;
+  }
+  h1, .h1 {
+    font-family: 'Gowun Batang', serif;
+    font-size: clamp(2.5rem, 4vw + 1.5rem, 4.5rem);
+    line-height: 1.05;
+    font-weight: 500;
+  }
+  h2, .h2 {
+    font-family: 'Gowun Batang', serif;
+    font-size: clamp(2rem, 3vw + 1rem, 3.5rem);
+    line-height: 1.15;
+    font-weight: 500;
+  }
+  h3, .h3 {
+    font-family: 'Gowun Batang', serif;
+    font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+    line-height: 1.25;
+    font-weight: 500;
+  }
+  p {
+    @apply text-textmuted;
   }
 }
 
 /* Shop PLP: split trái ~20% / phải ~80% — dùng CSS thuần vì class arbitrary grid có thể không được JIT ghi vào main.css khi build cũ. */
 @layer components {
+  .bacera-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: var(--bacera-container, 1232px);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  
+  @media (min-width: 1024px) {
+    .bacera-container {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  .section-pad {
+    padding-top: clamp(4rem, 5vw + 2rem, 7rem);
+    padding-bottom: clamp(4rem, 5vw + 2rem, 7rem);
+  }
+
   .bacera-shop-split {
     @apply grid grid-cols-1 gap-8 items-start lg:gap-10 xl:gap-12;
   }
@@ -22,4 +66,22 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
     }
   }
+
+  /* Glassmorphism System */
+  .glass {
+    @apply bg-white/40 backdrop-blur-lg border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.04)] rounded-2xl;
+  }
+  
+  .glass-dark {
+    @apply bg-textmain/60 backdrop-blur-lg border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.15)] rounded-2xl;
+  }
+  
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-sm rounded-3xl overflow-hidden;
+  }
+  
+  .glass-hover {
+    @apply transition-all duration-300 hover:bg-white/60 hover:shadow-md;
+  }
 }
+

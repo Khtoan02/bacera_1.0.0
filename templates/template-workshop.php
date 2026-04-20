@@ -147,7 +147,7 @@ if ($use_fallback) {
     </div>
 
     <!-- Content -->
-    <div class="relative z-10 w-full max-w-[1232px] mx-auto px-6 lg:px-0">
+    <div class="relative z-10 w-full bacera-container">
         <div class="max-w-xl flex flex-col gap-6 items-start">
 
             <!-- Eyebrow -->
@@ -200,8 +200,8 @@ if ($use_fallback) {
 <!-- ══════════════════════════════════════════════════════════════════
      §2  WORKSHOP CARDS — Light section for maximum card contrast
 ══════════════════════════════════════════════════════════════════════ -->
-<section id="workshop-grid" class="py-20 md:py-28 bg-neutral-100">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+<section id="workshop-grid" class="section-pad bg-neutral-100">
+    <div class="bacera-container">
 
         <!-- Section header -->
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
@@ -289,7 +289,7 @@ if ($use_fallback) {
      §3  VALUE Props — Split layout with editorial photography
 ══════════════════════════════════════════════════════════════════════ -->
 <section id="workshop-why" class="py-24 md:py-32 bg-stone-50 border-t border-stone-200/50">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+    <div class="bacera-container">
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
 
@@ -372,8 +372,8 @@ if ($use_fallback) {
 <!-- ══════════════════════════════════════════════════════════════════
      §4  HOW IT WORKS — Numbered timeline on primary-900
 ══════════════════════════════════════════════════════════════════════ -->
-<section id="workshop-how" class="py-20 md:py-28 bg-primary-900">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+<section id="workshop-how" class="section-pad bg-primary-900">
+    <div class="bacera-container">
 
         <div class="text-center mb-16 flex flex-col items-center gap-3">
             <span class="text-accent-400 text-xs font-sans font-medium tracking-[0.2em] uppercase flex items-center gap-2">
@@ -440,8 +440,8 @@ if ($use_fallback) {
 <!-- ══════════════════════════════════════════════════════════════════
      §5  SOCIAL PROOF — Testimonials with large quote treatment
 ══════════════════════════════════════════════════════════════════════ -->
-<section id="workshop-reviews" class="py-20 md:py-28 bg-neutral-200 border-t border-stone-200">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+<section id="workshop-reviews" class="section-pad bg-neutral-200 border-t border-stone-200">
+    <div class="bacera-container">
 
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
             <div class="flex flex-col gap-3">
@@ -552,7 +552,7 @@ if ($use_fallback) {
         <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(45,36,30) 0%, rgba(45,36,30,0.85) 40%, rgba(45,36,30,0.4) 100%);"></div>
     </div>
 
-    <div class="relative z-10 max-w-[1232px] mx-auto px-6 lg:px-0">
+    <div class="relative z-10 bacera-container">
         <div class="max-w-2xl flex flex-col gap-8 items-start">
             <span class="text-accent-400 text-sm font-sans font-semibold tracking-[0.2em] uppercase flex items-center gap-3">
                 <span class="w-8 h-[2px] bg-accent-400 rounded-full"></span>Ready to begin
@@ -581,9 +581,9 @@ if ($use_fallback) {
 <!-- ══════════════════════════════════════════════════════════════════
      §7  FAQ — Clean accordion on white
 ══════════════════════════════════════════════════════════════════════ -->
-<section id="workshop-faq" class="py-20 md:py-28 bg-white border-t border-stone-100"
+<section id="workshop-faq" class="section-pad bg-white border-t border-stone-100"
          x-data="{ opened: 0 }">
-    <div class="max-w-[1232px] mx-auto px-6 lg:px-0">
+    <div class="bacera-container">
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
@@ -664,6 +664,12 @@ if ($use_fallback) {
     </div>
 </section>
 
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SEO CONTENT BLOCK
+═══════════════════════════════════════════════════════ -->
+<?php get_template_part('app/Views/components/seo-content', null, ['title' => 'Workshop']); ?>
 
 </main>
 
