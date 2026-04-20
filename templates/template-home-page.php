@@ -300,16 +300,18 @@ if ($hp_video_url && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]
 
             <!-- CTAs -->
             <div class="flex flex-wrap gap-3 mt-1 hero-fade-4">
-                <a href="<?php echo esc_url($hp_shop_url); ?>"
-                   class="group inline-flex items-center gap-2.5 px-7 py-[15px] bg-terracotta text-white text-[15px] font-semibold font-sans rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(217,95,71,.4)]">
-                    <svg class="w-4 h-4 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    Shop our Collection
-                </a>
-                <a href="<?php echo esc_url($hp_workshop_url); ?>"
-                   class="inline-flex items-center gap-2.5 px-7 py-[15px] text-white text-[15px] font-medium font-sans rounded-xl border border-white/25 hover:bg-white/10 hover:border-white/45 transition-all duration-300 backdrop-blur-sm">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Join a Workshop
-                </a>
+                <?php get_template_part('app/Views/components/button', null, [
+                    'text'    => 'Shop our Collection',
+                    'variant' => 'primary',
+                    'link'    => $hp_shop_url,
+                    'icon'    => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>',
+                ]); ?>
+                <?php get_template_part('app/Views/components/button', null, [
+                    'text'    => 'Join a Workshop',
+                    'variant' => 'outline-light',
+                    'link'    => $hp_workshop_url,
+                    'icon'    => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
+                ]); ?>
             </div>
 
             <!-- Stats row -->
@@ -350,10 +352,13 @@ if ($hp_video_url && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]
                 <h2 class="text-textmain text-4xl font-serif font-normal leading-10">New Arrivals</h2>
                 <p class="text-textmuted text-body-reg font-sans leading-relaxed max-w-md">Freshly crafted. New stories waiting to be part of your everyday rituals.</p>
             </div>
-            <a href="<?php echo esc_url($hp_shop_url); ?>"
-               class="shrink-0 inline-flex items-center gap-1.5 px-5 py-3 bg-terracotta hover:bg-accentdark text-white text-body-small font-medium font-sans rounded-xl transition-colors">
-                View all <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            <?php get_template_part('app/Views/components/button', null, [
+                'text'    => 'View all',
+                'variant' => 'primary',
+                'link'    => $hp_shop_url,
+                'icon'    => '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+                'class'   => 'shrink-0',
+            ]); ?>
         </div>
 
         <?php if (!empty($hp_new_arrivals)): ?>
@@ -402,10 +407,13 @@ if ($hp_video_url && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]
                 <h2 class="text-textmain text-4xl font-serif font-normal leading-10 mt-1">New collection</h2>
                 <p class="text-textmuted text-body-reg font-sans mt-1">Loved by many, cherished by more — find your everyday favorites here.</p>
             </div>
-            <a href="<?php echo esc_url($hp_shop_url); ?>"
-               class="shrink-0 inline-flex items-center gap-1.5 px-5 py-3 bg-terracotta hover:bg-accentdark text-white text-body-small font-medium font-sans rounded-xl transition-colors">
-                View all <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            <?php get_template_part('app/Views/components/button', null, [
+                'text'    => 'View all',
+                'variant' => 'primary',
+                'link'    => $hp_shop_url,
+                'icon'    => '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+                'class'   => 'shrink-0',
+            ]); ?>
         </div>
 
         <?php if (!empty($hp_featured)): ?>
@@ -475,10 +483,13 @@ if ($hp_video_url && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]
                 <span class="text-terracotta text-[11px] font-medium font-sans tracking-[0.2em] uppercase">Top picks</span>
                 <h2 class="text-textmain text-4xl font-serif font-normal leading-10 mt-1">Best seller</h2>
             </div>
-            <a href="<?php echo esc_url($hp_shop_url); ?>"
-               class="shrink-0 inline-flex items-center gap-1.5 px-5 py-3 bg-terracotta hover:bg-accentdark text-white text-body-small font-medium font-sans rounded-xl transition-colors">
-                View all <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            <?php get_template_part('app/Views/components/button', null, [
+                'text'    => 'View all',
+                'variant' => 'primary',
+                'link'    => $hp_shop_url,
+                'icon'    => '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+                'class'   => 'shrink-0',
+            ]); ?>
         </div>
 
         <!-- Category filter pills -->
@@ -740,9 +751,13 @@ if (!$hp_video_url && $hp_video_att_id) {
                 <h2 class="text-textmain text-4xl font-serif font-normal leading-10 mt-1">Shop by Collection</h2>
                 <p class="text-textmuted text-body-reg font-sans mt-1 opacity-75">Each collection tells a unique story.</p>
             </div>
-            <a href="<?php echo esc_url($hp_shop_url); ?>" class="shrink-0 inline-flex items-center gap-1.5 px-5 py-3 bg-terracotta hover:bg-accentdark text-white text-body-small font-medium font-sans rounded-xl transition-colors">
-                View all <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            <?php get_template_part('app/Views/components/button', null, [
+                'text'    => 'View all',
+                'variant' => 'primary',
+                'link'    => $hp_shop_url,
+                'icon'    => '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+                'class'   => 'shrink-0',
+            ]); ?>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
             <?php $col_spans_r1 = ['md:col-span-7','md:col-span-5']; ?>
@@ -793,10 +808,12 @@ if (!$hp_video_url && $hp_video_att_id) {
             <?php endforeach; ?>
         </div>
         <div class="mt-12 flex justify-center">
-            <a href="<?php echo esc_url($hp_workshop_url); ?>"
-               class="inline-flex items-center gap-2.5 px-8 py-4 bg-terracotta hover:bg-accentdark text-white text-[15px] font-semibold font-sans rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-xl shadow-terracotta/30">
-                Xem tất cả workshop <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            <?php get_template_part('app/Views/components/button', null, [
+                'text'    => 'Xem tất cả workshop',
+                'variant' => 'primary',
+                'link'    => $hp_workshop_url,
+                'icon'    => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+            ]); ?>
         </div>
     </div>
 </section>
@@ -869,19 +886,17 @@ $_about_img = content_url('uploads/2026/04/about-us-1.png');
                 </div>
 
                 <div class="flex flex-wrap gap-3">
-                    <a href="<?php echo esc_url($hp_about_url); ?>"
-                       class="group inline-flex items-center gap-2 px-6 py-3.5 bg-terracotta hover:bg-accentdark
-                              text-white text-[15px] font-semibold font-sans rounded-xl
-                              transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-terracotta/30">
-                        Our Story
-                        <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="<?php echo esc_url($hp_team_url); ?>"
-                       class="inline-flex items-center gap-2 px-6 py-3.5 bg-transparent border border-stone-300
-                              text-textmain hover:border-terracotta hover:text-terracotta
-                              text-[15px] font-medium font-sans rounded-xl transition-all duration-200">
-                        Meet our team
-                    </a>
+                    <?php get_template_part('app/Views/components/button', null, [
+                        'text'    => 'Our Story',
+                        'variant' => 'primary',
+                        'link'    => $hp_about_url,
+                        'icon'    => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+                    ]); ?>
+                    <?php get_template_part('app/Views/components/button', null, [
+                        'text'    => 'Meet our team',
+                        'variant' => 'outline',
+                        'link'    => $hp_team_url,
+                    ]); ?>
                 </div>
             </div>
 
@@ -903,10 +918,12 @@ $_about_img = content_url('uploads/2026/04/about-us-1.png');
                 <span class="text-terracotta text-[11px] font-medium font-sans tracking-[0.2em] uppercase">From the studio</span>
                 <h2 class="text-textmain text-4xl font-serif font-normal leading-10 mt-2">Latest from Blog</h2>
             </div>
-            <a href="<?php echo esc_url($hp_blog_url); ?>" class="group inline-flex items-center gap-1.5 px-5 py-3 rounded-xl border border-stone-200 text-textmuted text-[13px] font-medium font-sans hover:border-terracotta hover:text-terracotta transition-all">
-                View all
-                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+            <?php get_template_part('app/Views/components/button', null, [
+                'text'    => 'View all',
+                'variant' => 'outline',
+                'link'    => $hp_blog_url,
+                'icon'    => '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>',
+            ]); ?>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <?php foreach ($hp_blog_posts as $idx => $post):
