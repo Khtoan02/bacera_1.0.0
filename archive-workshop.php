@@ -134,58 +134,6 @@ if ($use_fallback) {
         <div class="absolute inset-0" style="background: linear-gradient(to top, rgb(61,47,38) 0%, rgba(61,47,38,0.65) 50%, rgba(61,47,38,0.2) 100%);"></div>
         <div class="absolute inset-0" style="background: linear-gradient(to right, rgba(61,47,38,0.8) 0%, rgba(61,47,38,0.3) 60%, transparent 100%);"></div>
     </div>
-
-    <!-- Floating stat pills — desktop only -->
-    <div class="absolute hidden lg:flex flex-col gap-3 z-10 right-8" style="top:50%; transform:translateY(-50%)">
-        <?php
-        $stats = [['6+', 'Years of craft'], ['500+', 'Pieces made'], ['1,200+', 'Happy makers']];
-        foreach ($stats as $s):
-        ?>
-        <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/20
-                    hover:bg-white/20 transition-colors duration-300">
-            <span class="text-stone-200 text-xl font-serif font-normal leading-none"><?php echo $s[0]; ?></span>
-            <span class="text-primary-300 text-xs font-sans tracking-wide"><?php echo $s[1]; ?></span>
-        </div>
-        <?php endforeach; ?>
-    </div>
-
-    <!-- Content -->
-    <div class="relative z-10 w-full max-w-[1232px] mx-auto px-6 lg:px-0">
-        <div class="max-w-xl flex flex-col gap-6 items-start">
-
-            <!-- Eyebrow -->
-            <div class="flex items-center gap-3">
-                <span class="inline-block w-6 h-px bg-accent-400"></span>
-                <span class="text-accent-400 text-xs font-sans font-medium tracking-[0.2em] uppercase">
-                    Bacera Workshops · Hà Nội
-                </span>
-            </div>
-
-            <!-- H1 -->
-            <h1 class="text-stone-200 font-serif font-normal tracking-tight" style="font-size:clamp(36px,5vw,68px); line-height:1.1">
-                Shape Your<br>Story with Clay
-            </h1>
-
-            <!-- Sub -->
-            <p class="text-primary-200 text-base md:text-lg font-sans font-normal leading-relaxed opacity-90 max-w-lg">
-                Step into a space where time slows, hands listen, and clay breathes. Every session is a story waiting to be shaped.
-            </p>
-
-            <!-- CTAs -->
-            <div class="flex flex-wrap items-center gap-3 pt-2">
-                <a href="#workshop-grid"
-                   class="inline-flex items-center gap-2.5 px-6 py-4 bg-accent-500 hover:bg-accent-600 text-white text-[15px] font-medium font-sans rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg shadow-accent-500/30">
-                    Browse Workshops
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" transform="rotate(-90 12 12)"/>
-                    </svg>
-                </a>
-                <a href="#workshop-faq"
-                   class="inline-flex items-center gap-2 px-6 py-4 text-stone-200 text-[15px] font-medium font-sans rounded-xl border border-white/30 hover:border-white/60 hover:bg-white/10 transition-all duration-300">
-                    Learn more
-                </a>
-            </div>
-        </div>
     </div>
 
     <!-- Scroll indicator -->

@@ -313,33 +313,7 @@ if ($hp_video_url && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]
                     'icon'    => '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
                 ]); ?>
             </div>
-
-            <!-- Stats row -->
-            <div class="flex items-center gap-0 mt-3 hero-fade-5">
-                <?php
-                $hero_stats = [
-                    [$hp_stat_years.'+', 'Years of craft'],
-                    [$hp_stat_products > 0 ? hp_fmt($hp_stat_products) : '100+', 'Pieces crafted'],
-                    [$hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+', 'Happy customers'],
-                ];
-                foreach($hero_stats as $i => $s):
-                ?>
-                <?php if($i > 0): ?><div class="w-px h-8 bg-white/15 mx-6"></div><?php endif; ?>
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-white text-[1.6rem] font-serif leading-none"><?php echo $s[0]; ?></span>
-                    <span class="text-stone-400/80 text-[11px] font-sans tracking-wide mt-0.5"><?php echo $s[1]; ?></span>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2" aria-hidden="true">
-        <span class="text-white/30 text-[9px] font-sans tracking-[0.2em] uppercase">Scroll</span>
-        <div class="w-px h-10 overflow-hidden">
-            <div class="w-full h-full bg-gradient-to-b from-white/40 to-transparent scroll-line"></div>
-        </div>
+</div>
     </div>
 </section>
 
@@ -834,21 +808,6 @@ $_about_img = content_url('uploads/2026/04/about-us-1.png');
                          class="w-full h-[480px] lg:h-[560px] object-cover"
                          loading="lazy">
                 </div>
-
-                <!-- Floating stat card -->
-                <div class="absolute -bottom-5 left-6 z-10
-                            bg-white rounded-2xl p-4 flex items-center gap-3
-                            shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-stone-100">
-                    <div class="w-10 h-10 rounded-xl bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-textmain text-xl font-serif leading-none"><?php echo $hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+'; ?></p>
-                        <p class="text-stone-400 text-[11px] font-sans mt-0.5">Happy customers</p>
-                    </div>
-                </div>
             </div>
 
             <!-- ── TEXT ── -->
@@ -868,23 +827,6 @@ $_about_img = content_url('uploads/2026/04/about-us-1.png');
                     <p>Our hands move not to rush, but to listen — to the clay, to the wheel, and to the spaces in between. Each creation is shaped through patient hands, fired through ancient techniques, and glazed with emotions that words can hardly capture.</p>
                     <p>No two pieces are exactly alike, just as no two moments in life are ever the same.</p>
                 </div>
-
-                <div class="grid grid-cols-3 divide-x divide-accent/20 py-5 border-y border-accent/20">
-                    <?php
-                    $about_stats = [
-                        [$hp_stat_years . '+', 'Years of craft'],
-                        [$hp_stat_products > 0 ? hp_fmt($hp_stat_products) : '100+', 'Pieces crafted'],
-                        [$hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+', 'Customers'],
-                    ];
-                    foreach ($about_stats as $st):
-                    ?>
-                    <div class="flex flex-col gap-1 px-4 first:pl-0">
-                        <span class="text-textmain text-[2rem] font-serif font-normal leading-none"><?php echo $st[0]; ?></span>
-                        <span class="text-stone-400 text-[11.5px] font-sans mt-1"><?php echo $st[1]; ?></span>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-
                 <div class="flex flex-wrap gap-3">
                     <?php get_template_part('app/Views/components/button', null, [
                         'text'    => 'Our Story',
