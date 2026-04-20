@@ -802,30 +802,59 @@ if (!$hp_video_url && $hp_video_att_id) {
 </section>
 
 <!-- ════════════════ ABOUT / OUR STORY ══════════════════════════════════════ -->
+<?php
+// About section images — use real uploaded images from media library
+$hp_about_img_base = content_url('uploads/2026/04/');
+$hp_about_img_1 = $hp_about_img_base . 'about-us-1.png';
+$hp_about_img_2 = $hp_about_img_base . 'about-us-2.png';
+$hp_about_img_3 = $hp_about_img_base . 'about-us-3.png';
+?>
 <section id="about" class="section-pad bg-white border-t border-accent/20">
     <div class="bacera-container">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div class="relative">
-                <div class="relative rounded-2xl overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=900"
-                         alt="Bacera Studio" class="w-full h-[500px] lg:h-[620px] object-cover" loading="lazy">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+
+            <!-- ── Image column ── -->
+            <div class="relative pr-0 lg:pr-12">
+                <!-- Main tall image -->
+                <div class="relative rounded-2xl overflow-hidden shadow-xl">
+                    <img src="<?php echo esc_url($hp_about_img_1); ?>"
+                         alt="Bacera Studio"
+                         class="w-full h-[480px] lg:h-[580px] object-cover" loading="lazy">
                     <div class="absolute inset-0 bg-gradient-to-t from-primary-900/20 to-transparent pointer-events-none"></div>
                 </div>
-                <div class="absolute -top-5 -right-5 w-24 h-24 bg-terracotta rounded-full flex flex-col items-center justify-center shadow-xl shadow-terracotta/30">
-                    <span class="text-white/80 text-[10px] font-sans text-center leading-tight">Since</span>
-                    <strong class="text-white text-xl font-serif font-normal">2018</strong>
+
+                <!-- "Since" badge -->
+                <div class="absolute -top-4 -right-4 lg:right-12 w-20 h-20 bg-terracotta rounded-full flex flex-col items-center justify-center shadow-lg shadow-terracotta/30 z-10">
+                    <span class="text-white/75 text-[9px] font-sans text-center leading-tight">Since</span>
+                    <strong class="text-white text-lg font-serif font-normal">2018</strong>
                 </div>
-                <div class="absolute -bottom-6 left-8 bg-white rounded-2xl shadow-xl p-5 flex items-center gap-4 border border-accent/10">
-                    <div class="w-12 h-12 rounded-xl bg-terracotta/10 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+
+                <!-- Two small inset images bottom-right (desktop only) -->
+                <div class="absolute bottom-6 right-0 lg:right-8 hidden lg:flex flex-col gap-2 z-10">
+                    <div class="w-28 h-20 rounded-xl overflow-hidden border-2 border-white shadow-lg">
+                        <img src="<?php echo esc_url($hp_about_img_2); ?>" alt="Bacera Workshop"
+                             class="w-full h-full object-cover" loading="lazy">
+                    </div>
+                    <div class="w-28 h-20 rounded-xl overflow-hidden border-2 border-white shadow-lg">
+                        <img src="<?php echo esc_url($hp_about_img_3); ?>" alt="Bacera Craft"
+                             class="w-full h-full object-cover" loading="lazy">
+                    </div>
+                </div>
+
+                <!-- Floating happy customers card -->
+                <div class="absolute -bottom-6 left-6 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 border border-accent/10 z-10">
+                    <div class="w-10 h-10 rounded-xl bg-terracotta/10 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </div>
                     <div>
-                        <div class="text-textmain text-2xl font-serif"><?php echo $hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+'; ?></div>
-                        <div class="text-textmuted text-sm font-sans">Happy customers</div>
+                        <div class="text-textmain text-xl font-serif"><?php echo $hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+'; ?></div>
+                        <div class="text-textmuted text-xs font-sans">Happy customers</div>
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col gap-7 pt-6 lg:pt-0">
+
+            <!-- ── Text column ── -->
+            <div class="flex flex-col gap-7 pt-10 lg:pt-0">
                 <div class="flex flex-col gap-3">
                     <span class="text-terracotta text-[11px] font-medium font-sans tracking-[0.2em] uppercase">Our Story</span>
                     <h2 class="text-textmain text-4xl font-serif font-normal leading-snug">A memory, a breath, a quiet story waiting to be shaped.</h2>
@@ -841,8 +870,8 @@ if (!$hp_video_url && $hp_video_att_id) {
                     <?php endforeach; ?>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <a href="<?php echo esc_url($hp_about_url); ?>" class="inline-flex items-center gap-2 px-5 py-3 bg-primary-700 hover:bg-primary-800 text-white text-[15px] font-medium font-sans rounded-xl transition-colors">About us</a>
-                    <a href="<?php echo esc_url($hp_team_url); ?>" class="inline-flex items-center gap-2 px-5 py-3 bg-transparent border border-primary-300 text-primary-700 hover:bg-primary-50 text-[15px] font-medium font-sans rounded-xl transition-colors">Meet our team</a>
+                    <a href="<?php echo esc_url($hp_about_url); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-textmain hover:bg-primary-800 text-white text-[15px] font-medium font-sans rounded-xl transition-colors">About us</a>
+                    <a href="<?php echo esc_url($hp_team_url); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-transparent border border-stone-300 text-textmain hover:bg-stone-50 text-[15px] font-medium font-sans rounded-xl transition-colors">Meet our team</a>
                 </div>
             </div>
         </div>
