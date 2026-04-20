@@ -803,98 +803,64 @@ if (!$hp_video_url && $hp_video_att_id) {
 
 <!-- ════════════════ ABOUT / OUR STORY ══════════════════════════════════════ -->
 <?php
-// About section images — real uploads, no hardcoded external URLs
-$_about_base = content_url('uploads/2026/04/');
-$_about_img1 = $_about_base . 'about-us-1.png';
-$_about_img2 = $_about_base . 'about-us-2.png';
-$_about_img3 = $_about_base . 'about-us-3.png';
+$_about_img = content_url('uploads/2026/04/about-us-1.png');
 ?>
-<section id="about" class="section-pad bg-white border-t border-accent/20 overflow-hidden">
+<section id="about" class="section-pad bg-white border-t border-accent/20">
     <div class="bacera-container">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20 items-center">
 
-            <!-- ── IMAGE COLUMN ── -->
-            <div class="relative mt-6 mb-10 lg:my-0">
-
-                <!-- Main image -->
-                <div class="relative rounded-3xl overflow-hidden shadow-2xl">
-                    <img src="<?php echo esc_url($_about_img1); ?>"
+            <!-- ── IMAGE ── -->
+            <div class="relative">
+                <div class="rounded-2xl overflow-hidden shadow-xl">
+                    <img src="<?php echo esc_url($_about_img); ?>"
                          alt="Bacera Studio — Crafting Ceramics"
-                         class="w-full h-[460px] lg:h-[560px] object-cover transition-transform duration-700 hover:scale-[1.02]"
+                         class="w-full h-[480px] lg:h-[560px] object-cover"
                          loading="lazy">
-                    <!-- subtle vignette -->
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20 pointer-events-none"></div>
                 </div>
 
-                <!-- "Since 2018" badge — top right of main image -->
-                <div class="absolute top-5 right-5 w-[72px] h-[72px] rounded-full bg-terracotta
-                            flex flex-col items-center justify-center z-20
-                            shadow-lg shadow-terracotta/40
-                            ring-4 ring-white">
-                    <span class="text-white/70 text-[8.5px] font-sans uppercase tracking-wide leading-none">Since</span>
+                <!-- "Since 2018" badge -->
+                <div class="absolute top-5 right-5 w-[68px] h-[68px] rounded-full bg-terracotta
+                            flex flex-col items-center justify-center
+                            shadow-lg shadow-terracotta/40 ring-4 ring-white z-10">
+                    <span class="text-white/70 text-[8px] font-sans uppercase tracking-wide leading-none">Since</span>
                     <strong class="text-white text-[1.1rem] font-serif font-normal leading-none mt-0.5">2018</strong>
                 </div>
 
-                <!-- Two small accent images — stacked, overlapping bottom-right corner -->
-                <div class="absolute -bottom-4 -right-4 sm:-right-6 hidden sm:flex flex-col gap-2 z-10">
-                    <div class="w-32 h-[88px] rounded-2xl overflow-hidden border-[3px] border-white shadow-xl">
-                        <img src="<?php echo esc_url($_about_img2); ?>" alt="Workshop"
-                             class="w-full h-full object-cover" loading="lazy">
-                    </div>
-                    <div class="w-32 h-[88px] rounded-2xl overflow-hidden border-[3px] border-white shadow-xl">
-                        <img src="<?php echo esc_url($_about_img3); ?>" alt="Craft"
-                             class="w-full h-full object-cover" loading="lazy">
-                    </div>
-                </div>
-
-                <!-- Floating stat card — bottom-left -->
-                <div class="absolute -bottom-5 left-5 sm:left-8 z-20
+                <!-- Floating stat card -->
+                <div class="absolute -bottom-5 left-6 z-10
                             bg-white rounded-2xl p-4 flex items-center gap-3
-                            shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-stone-100">
+                            shadow-[0_8px_30px_rgba(0,0,0,0.1)] border border-stone-100">
                     <div class="w-10 h-10 rounded-xl bg-terracotta/10 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        <svg class="w-5 h-5 text-terracotta" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <p class="text-textmain text-xl font-serif leading-none">
-                            <?php echo $hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+'; ?>
-                        </p>
+                        <p class="text-textmain text-xl font-serif leading-none"><?php echo $hp_stat_customers > 0 ? hp_fmt($hp_stat_customers) : '1.2K+'; ?></p>
                         <p class="text-stone-400 text-[11px] font-sans mt-0.5">Happy customers</p>
                     </div>
                 </div>
-
-                <!-- Decorative dot pattern BG (top-left) -->
-                <div class="absolute -top-6 -left-6 w-28 h-28 opacity-20 pointer-events-none hidden lg:block"
-                     style="background-image:radial-gradient(circle, #c07a5a 1px, transparent 1px);background-size:10px 10px;">
-                </div>
             </div>
 
-            <!-- ── TEXT COLUMN ── -->
-            <div class="flex flex-col gap-7 pb-4 lg:pb-0">
+            <!-- ── TEXT ── -->
+            <div class="flex flex-col gap-7 pt-8 lg:pt-0">
 
-                <!-- Eyebrow -->
                 <div class="flex items-center gap-3">
                     <span class="w-8 h-px bg-terracotta"></span>
                     <span class="text-terracotta text-[11px] font-semibold font-sans tracking-[0.24em] uppercase">Our Story</span>
                 </div>
 
-                <!-- Heading -->
                 <h2 class="text-textmain text-3xl md:text-4xl font-serif font-normal leading-[1.25] -mt-2">
                     A memory, a breath,<br>
                     <em class="italic text-terracotta/80">a quiet story</em> waiting to be shaped.
                 </h2>
 
-                <!-- Body -->
                 <div class="flex flex-col gap-4 text-stone-600 text-[15.5px] font-sans leading-relaxed -mt-2">
                     <p>Our hands move not to rush, but to listen — to the clay, to the wheel, and to the spaces in between. Each creation is shaped through patient hands, fired through ancient techniques, and glazed with emotions that words can hardly capture.</p>
                     <p>No two pieces are exactly alike, just as no two moments in life are ever the same.</p>
                 </div>
 
-                <!-- Stats row -->
-                <div class="grid grid-cols-3 divide-x divide-accent/20 py-5 border-y border-accent/20 -mx-1">
+                <div class="grid grid-cols-3 divide-x divide-accent/20 py-5 border-y border-accent/20">
                     <?php
                     $about_stats = [
                         [$hp_stat_years . '+', 'Years of craft'],
@@ -903,23 +869,20 @@ $_about_img3 = $_about_base . 'about-us-3.png';
                     ];
                     foreach ($about_stats as $st):
                     ?>
-                    <div class="flex flex-col gap-1 px-2 sm:px-4 first:pl-1">
-                        <span class="text-textmain text-[2rem] font-serif font-normal leading-none">
-                            <?php echo $st[0]; ?>
-                        </span>
+                    <div class="flex flex-col gap-1 px-4 first:pl-0">
+                        <span class="text-textmain text-[2rem] font-serif font-normal leading-none"><?php echo $st[0]; ?></span>
                         <span class="text-stone-400 text-[11.5px] font-sans mt-1"><?php echo $st[1]; ?></span>
                     </div>
                     <?php endforeach; ?>
                 </div>
 
-                <!-- CTAs -->
                 <div class="flex flex-wrap gap-3">
                     <a href="<?php echo esc_url($hp_about_url); ?>"
                        class="group inline-flex items-center gap-2 px-6 py-3.5 bg-terracotta hover:bg-accentdark
                               text-white text-[15px] font-semibold font-sans rounded-xl
                               transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-terracotta/30">
                         Our Story
-                        <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        <svg class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
                     <a href="<?php echo esc_url($hp_team_url); ?>"
                        class="inline-flex items-center gap-2 px-6 py-3.5 bg-transparent border border-stone-300
@@ -933,6 +896,7 @@ $_about_img3 = $_about_base . 'about-us-3.png';
         </div>
     </div>
 </section>
+
 
 
 <!-- ════════════════ PARTNERS ════════════════════════════════════════════════ -->
