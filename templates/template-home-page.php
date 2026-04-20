@@ -818,14 +818,6 @@ $_about_img = content_url('uploads/2026/04/about-us-1.png');
                          loading="lazy">
                 </div>
 
-                <!-- "Since 2018" badge -->
-                <div class="absolute top-5 right-5 w-[68px] h-[68px] rounded-full bg-terracotta
-                            flex flex-col items-center justify-center
-                            shadow-lg shadow-terracotta/40 ring-4 ring-white z-10">
-                    <span class="text-white/70 text-[8px] font-sans uppercase tracking-wide leading-none">Since</span>
-                    <strong class="text-white text-[1.1rem] font-serif font-normal leading-none mt-0.5">2018</strong>
-                </div>
-
                 <!-- Floating stat card -->
                 <div class="absolute -bottom-5 left-6 z-10
                             bg-white rounded-2xl p-4 flex items-center gap-3
