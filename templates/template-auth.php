@@ -220,27 +220,27 @@ $auth_config = [
                 <nav class="auth-breadcrumb">
                     <a href="<?php echo esc_url($home_url); ?>">Homepage</a>
                     <span class="sep">/</span>
-                    <span class="current">Đăng nhập</span>
+                    <span class="current">Sign in</span>
                 </nav>
-                <h1 class="auth-title">Đăng nhập</h1>
+                <h1 class="auth-title">Sign in</h1>
 
                 <div id="error-login" class="auth-error"></div>
 
                 <div class="auth-form-group">
                     <div class="auth-field-group">
-                        <p class="auth-section-label">Thông tin đăng nhập</p>
+                        <p class="auth-section-label">Login details</p>
                         <div>
-                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Số điện thoại hoặc Email</label>
-                            <input id="login-identifier" type="text" placeholder="Nhập email hoặc SĐT" class="auth-input">
+                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Phone number or Email</label>
+                            <input id="login-identifier" type="text" placeholder="Enter your email or phone" class="auth-input">
                         </div>
                         <div>
                             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                                <label style="font-size:14px;font-weight:500;color:#44403c;">Mật khẩu</label>
-                                <a href="#" style="font-size:13px;color:#E15D43;text-decoration:none;">Quên mật khẩu?</a>
+                                <label style="font-size:14px;font-weight:500;color:#44403c;">Password</label>
+                                <a href="#" style="font-size:13px;color:#E15D43;text-decoration:none;">Forgot password?</a>
                             </div>
                             <div class="pw-wrap">
-                                <input id="login-password" type="password" placeholder="Nhập mật khẩu" class="auth-input">
-                                <button type="button" class="pw-toggle" onclick="baceraTogglePw(this,'login-password')" aria-label="Hiện mật khẩu">
+                                <input id="login-password" type="password" placeholder="Enter your password" class="auth-input">
+                                <button type="button" class="pw-toggle" onclick="baceraTogglePw(this,'login-password')" aria-label="Show password">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </button>
                             </div>
@@ -258,29 +258,29 @@ $auth_config = [
 
                     <div class="auth-actions">
                         <button type="button" id="btn-login" class="auth-btn-primary" onclick="baceraDoLogin()">
-                            Đăng nhập
+                            Sign in
                         </button>
 
-                        <div class="auth-divider"><hr><span>Hoặc đăng nhập với</span><hr></div>
+                        <div class="auth-divider"><hr><span>Or sign in with</span><hr></div>
 
                         <div class="auth-socials" id="social-login">
                             <?php if ($auth_config['googleEnabled']): ?>
                             <button type="button" class="auth-btn-social" onclick="window.location.href='<?php echo esc_js($auth_config['googleAuthUrl']); ?>'">
                                 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                                Đăng nhập với Google
+                                Sign in with Google
                             </button>
                             <?php endif; ?>
                             <?php if ($auth_config['facebookEnabled']): ?>
                             <button type="button" class="auth-btn-social" onclick="window.location.href='<?php echo esc_js($auth_config['facebookAuthUrl']); ?>'">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                                Đăng nhập với Facebook
+                                Sign in with Facebook
                             </button>
                             <?php endif; ?>
                         </div>
 
                         <p class="auth-link-text">
-                            Chưa có tài khoản?
-                            <button type="button" onclick="baceraShowScreen('register')">Đăng ký</button>
+                            Don't have an account?
+                            <button type="button" onclick="baceraShowScreen('register')">Sign up</button>
                         </p>
                     </div>
                 </div>
@@ -291,43 +291,43 @@ $auth_config = [
                 <nav class="auth-breadcrumb">
                     <a href="<?php echo esc_url($home_url); ?>">Homepage</a>
                     <span class="sep">/</span>
-                    <a href="#" onclick="baceraShowScreen('login');return false;">Đăng nhập</a>
+                    <a href="#" onclick="baceraShowScreen('login');return false;">Sign in</a>
                     <span class="sep">/</span>
-                    <span class="current">Đăng ký</span>
+                    <span class="current">Sign up</span>
                 </nav>
-                <h1 class="auth-title">Đăng ký</h1>
+                <h1 class="auth-title">Create account</h1>
 
                 <div id="error-register" class="auth-error"></div>
 
                 <div class="auth-form-group">
                     <div class="auth-field-group">
-                        <p class="auth-section-label">Thông tin tài khoản</p>
+                        <p class="auth-section-label">Account information</p>
                         <div>
-                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Họ và tên <span style="color:#E15D43;">*</span></label>
-                            <input id="reg-name" type="text" placeholder="Nhập họ và tên của bạn" class="auth-input">
+                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Full name <span style="color:#E15D43;">*</span></label>
+                            <input id="reg-name" type="text" placeholder="Enter your full name" class="auth-input">
                         </div>
                         <div>
-                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Số điện thoại</label>
-                            <input id="reg-phone" type="tel" placeholder="Nhập số điện thoại" class="auth-input">
+                            <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Phone number</label>
+                            <input id="reg-phone" type="tel" placeholder="Enter your phone number" class="auth-input">
                         </div>
                         <div>
                             <label style="display:block;font-size:14px;font-weight:500;color:#44403c;margin-bottom:6px;">Email</label>
-                            <input id="reg-email" type="email" placeholder="Nhập địa chỉ email" class="auth-input">
+                            <input id="reg-email" type="email" placeholder="Enter your email address" class="auth-input">
                         </div>
-                        <p style="font-size:12px;color:#78716c;margin:0;">※ Vui lòng nhập ít nhất một trong hai: Số điện thoại hoặc Email.</p>
+                        <p style="font-size:12px;color:#78716c;margin:0;">※ Please provide at least one: Phone number or Email.</p>
                     </div>
 
                     <div class="auth-field-group">
-                        <p class="auth-section-label">Mật khẩu</p>
+                        <p class="auth-section-label">Password</p>
                         <div class="pw-wrap">
-                            <input id="reg-password" type="password" placeholder="Nhập mật khẩu của bạn" class="auth-input">
-                            <button type="button" class="pw-toggle" onclick="baceraTogglePw(this,'reg-password')" aria-label="Hiện mật khẩu">
+                            <input id="reg-password" type="password" placeholder="Enter your password" class="auth-input">
+                            <button type="button" class="pw-toggle" onclick="baceraTogglePw(this,'reg-password')" aria-label="Show password">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
                         </div>
                         <div class="pw-wrap">
-                            <input id="reg-confirm" type="password" placeholder="Nhập lại mật khẩu" class="auth-input">
-                            <button type="button" class="pw-toggle" onclick="baceraTogglePw(this,'reg-confirm')" aria-label="Hiện mật khẩu">
+                            <input id="reg-confirm" type="password" placeholder="Confirm password" class="auth-input">
+                            <button type="button" class="pw-toggle" onclick="baceraTogglePw(this,'reg-confirm')" aria-label="Show password">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
                         </div>
@@ -344,24 +344,24 @@ $auth_config = [
 
                     <div class="auth-actions">
                         <button type="button" id="btn-register" class="auth-btn-primary" onclick="baceraDoRegister()">
-                            Đăng ký
+                            Sign up
                         </button>
 
                         <?php if ($auth_config['googleEnabled'] || $auth_config['facebookEnabled']): ?>
-                        <div class="auth-divider"><hr><span>Hoặc đăng nhập với</span><hr></div>
+                        <div class="auth-divider"><hr><span>Or sign up with</span><hr></div>
                         <div class="auth-socials">
                             <?php if ($auth_config['googleEnabled']): ?>
                             <button type="button" class="auth-btn-social" onclick="window.location.href='<?php echo esc_js($auth_config['googleAuthUrl']); ?>'">
                                 <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/></svg>
-                                Đăng nhập với Google
+                                Sign up with Google
                             </button>
                             <?php endif; ?>
                         </div>
                         <?php endif; ?>
 
                         <p class="auth-link-text">
-                            Đã có tài khoản?
-                            <button type="button" onclick="baceraShowScreen('login')">Đăng nhập</button>
+                            Already have an account?
+                            <button type="button" onclick="baceraShowScreen('login')">Sign in</button>
                         </p>
                     </div>
                 </div>
@@ -371,11 +371,11 @@ $auth_config = [
             <div id="screen-otp" class="auth-screen">
                 <button type="button" class="auth-back-btn" onclick="baceraShowScreen(baceraState.prevScreen)">
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    Quay lại
+                    Back
                 </button>
-                <h1 class="auth-title">Xác thực OTP</h1>
+                <h1 class="auth-title">OTP Verification</h1>
                 <p style="color:#78716c;font-size:14px;margin:0 0 6px;">
-                    Nhập mã 6 chữ số được gửi tới<br>
+                    Enter the 6-digit code sent to<br>
                     <strong id="otp-target" style="color:#1c1917;font-size:15px;"></strong>
                 </p>
                 <div id="otp-hint" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;margin:12px 0 24px;"></div>
@@ -393,11 +393,11 @@ $auth_config = [
 
                 <div style="display:flex;flex-direction:column;gap:12px;">
                     <button type="button" id="btn-otp" class="auth-btn-primary" onclick="baceraDoOtp()">
-                        Xác nhận
+                        Verify
                     </button>
                     <p style="text-align:center;font-size:14px;color:#78716c;margin:0;">
-                        Chưa nhận được mã?
-                        <button type="button" style="color:#E15D43;font-weight:500;background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;padding:0;">Gửi lại</button>
+                        Didn't receive the code?
+                        <button type="button" style="color:#E15D43;font-weight:500;background:none;border:none;cursor:pointer;font-family:inherit;font-size:14px;padding:0;">Resend</button>
                     </p>
                 </div>
             </div>
@@ -407,26 +407,26 @@ $auth_config = [
                 <div style="width:64px;height:64px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
                     <svg width="32" height="32" fill="none" stroke="#16a34a" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 </div>
-                <h1 class="auth-title">Thành công!</h1>
-                <p style="color:#78716c;font-size:15px;margin:0 0 28px;">Bạn đã đăng nhập thành công. Tiếp tục khám phá Bacera.</p>
+                <h1 class="auth-title">Welcome!</h1>
+                <p style="color:#78716c;font-size:15px;margin:0 0 28px;">You've signed in successfully. Explore Bacera now.</p>
 
                 <div style="display:flex;flex-direction:column;gap:10px;">
                     <a href="<?php echo esc_url($home_url); ?>" class="auth-link-row">
-                        <span>Trang chủ</span>
+                        <span>Homepage</span>
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                     <a href="#" class="auth-link-row">
-                        <span>Tài khoản của tôi</span>
+                        <span>My Account</span>
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                     <a href="#" class="auth-link-row">
-                        <span>Đăng ký Workshop</span>
+                        <span>Book a Workshop</span>
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </a>
                     <a href="<?php echo esc_url($logout_url); ?>"
                        style="margin-top:12px;color:#a8a29e;font-size:14px;text-align:center;display:block;text-decoration:none;"
                        onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#a8a29e'">
-                        Đăng xuất
+                        Sign out
                     </a>
                 </div>
             </div>
@@ -509,7 +509,7 @@ function baceraPost(action, data) {
     Object.keys(data).forEach(function(k) { fd.append(k, data[k]); });
     return fetch(AJAX_URL, { method: 'POST', body: fd })
         .then(function(r) { return r.json(); })
-        .catch(function() { return { success: false, data: { message: 'Lỗi kết nối. Vui lòng thử lại.' } }; });
+        .catch(function() { return { success: false, data: { message: 'Connection error. Please try again.' } }; });
 }
 
 /* ── DO LOGIN ────────────────────────────────────────── */
@@ -519,12 +519,12 @@ window.baceraDoLogin = function() {
     var password   = document.getElementById('login-password').value;
 
     if (!identifier || !password) {
-        showError('error-login', 'Vui lòng điền đầy đủ thông tin.');
+        showError('error-login', 'Please fill in all fields.');
         return;
     }
 
     if (TURNSTILE_ENABLED && !baceraState.turnstileLoginToken) {
-        showError('error-login', 'Vui lòng hoàn thành xác minh CAPTCHA.');
+        showError('error-login', 'Please complete the CAPTCHA verification.');
         return;
     }
 
@@ -537,7 +537,7 @@ window.baceraDoLogin = function() {
     }).then(function(res) {
         setLoading('btn-login', false);
         if (!res || !res.success) {
-            var msg = (res && res.data && res.data.message) ? res.data.message : 'Đăng nhập thất bại.';
+            var msg = (res && res.data && res.data.message) ? res.data.message : 'Sign in failed.';
             showError('error-login', msg);
             if (res && res.data && res.data.action_needed === 'register') {
                 setTimeout(function() { baceraShowScreen('register'); }, 1500);
@@ -551,8 +551,8 @@ window.baceraDoLogin = function() {
             if (devOtp) {
                 // No SMTP — show OTP directly on screen (dev mode)
                 document.getElementById('otp-hint').innerHTML =
-                    '🛠️ <strong>Chế độ phát triển</strong>: Chưa cấu hình SMTP nên email chưa được gửi.<br>' +
-                    'Mã OTP của bạn là: <span style="font-size:22px;font-weight:700;color:#1c1917;letter-spacing:6px;display:inline-block;margin-top:6px;">' + devOtp + '</span>';
+                    '🛠️ <strong>Dev mode</strong>: SMTP not configured, email was not sent.<br>' +
+                    'Your OTP code is: <span style="font-size:22px;font-weight:700;color:#1c1917;letter-spacing:6px;display:inline-block;margin-top:6px;">' + devOtp + '</span>';
                 document.getElementById('otp-hint').style.cssText = 'background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:12px 14px;font-size:13px;color:#713f12;margin:12px 0 24px;';
                 // Auto-fill OTP boxes
                 var boxes = document.querySelectorAll('#otp-boxes .otp-input');
@@ -560,8 +560,8 @@ window.baceraDoLogin = function() {
             } else {
                 var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
                 document.getElementById('otp-hint').textContent = isEmail
-                    ? '📨 Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư (kể cả thư mục Spam).'
-                    : '🔒 Mã OTP gồm 6 chữ số. Vui lòng liên hệ admin để lấy mã nếu đăng nhập bằng SĐT.';
+                    ? '📨 OTP code sent to your email. Please check your inbox (including Spam folder).'
+                    : '🔒 Your 6-digit OTP code. Please contact admin if signing in by phone number.';
                 document.getElementById('otp-hint').style.cssText = '';
             }
             baceraShowScreen('otp');
@@ -579,24 +579,24 @@ window.baceraDoRegister = function() {
     var confirm  = document.getElementById('reg-confirm').value;
 
     if (!name) {
-        showError('error-register', 'Vui lòng nhập họ và tên.');
+        showError('error-register', 'Please enter your full name.');
         return;
     }
     if (!phone && !email) {
-        showError('error-register', 'Vui lòng nhập Số điện thoại hoặc Email.');
+        showError('error-register', 'Please enter a Phone number or Email.');
         return;
     }
     if (!password) {
-        showError('error-register', 'Vui lòng nhập mật khẩu.');
+        showError('error-register', 'Please enter a password.');
         return;
     }
     if (password !== confirm) {
-        showError('error-register', 'Mật khẩu nhập lại không khớp.');
+        showError('error-register', 'Passwords do not match.');
         return;
     }
 
     if (TURNSTILE_ENABLED && !baceraState.turnstileRegisterToken) {
-        showError('error-register', 'Vui lòng hoàn thành xác minh CAPTCHA.');
+        showError('error-register', 'Please complete the CAPTCHA verification.');
         return;
     }
 
@@ -611,7 +611,7 @@ window.baceraDoRegister = function() {
     }).then(function(res) {
         setLoading('btn-register', false);
         if (!res || !res.success) {
-            var msg = (res && res.data && res.data.message) ? res.data.message : 'Đăng ký thất bại.';
+            var msg = (res && res.data && res.data.message) ? res.data.message : 'Sign up failed.';
             showError('error-register', msg);
             if (res && res.data && res.data.action_needed === 'login') {
                 setTimeout(function() { baceraShowScreen('login'); }, 1500);
@@ -624,8 +624,8 @@ window.baceraDoRegister = function() {
             var devOtp = res.data && res.data.dev_otp;
             if (devOtp) {
                 document.getElementById('otp-hint').innerHTML =
-                    '🛠️ <strong>Chế độ phát triển</strong>: Chưa cấu hình SMTP nên email chưa được gửi.<br>' +
-                    'Mã OTP của bạn là: <span style="font-size:22px;font-weight:700;color:#1c1917;letter-spacing:6px;display:inline-block;margin-top:6px;">' + devOtp + '</span>';
+                    '🛠️ <strong>Dev mode</strong>: SMTP not configured, email was not sent.<br>' +
+                    'Your OTP code is: <span style="font-size:22px;font-weight:700;color:#1c1917;letter-spacing:6px;display:inline-block;margin-top:6px;">' + devOtp + '</span>';
                 document.getElementById('otp-hint').style.cssText = 'background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:12px 14px;font-size:13px;color:#713f12;margin:12px 0 24px;';
                 // Auto-fill OTP boxes
                 var boxes = document.querySelectorAll('#otp-boxes .otp-input');
@@ -633,8 +633,8 @@ window.baceraDoRegister = function() {
             } else {
                 var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
                 document.getElementById('otp-hint').textContent = isEmail
-                    ? '📨 Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư (kể cả thư mục Spam).'
-                    : '🔒 Mã OTP gồm 6 chữ số. Vui lòng liên hệ admin để lấy mã nếu đăng ký bằng SĐT.';
+                    ? '📨 OTP code sent to your email. Please check your inbox (including Spam folder).'
+                    : '🔒 Your 6-digit OTP code. Please contact admin if registering by phone number.';
                 document.getElementById('otp-hint').style.cssText = '';
             }
             baceraShowScreen('otp');
@@ -650,7 +650,7 @@ window.baceraDoOtp = function() {
     boxes.forEach(function(b) { code += b.value; });
 
     if (code.length !== 6) {
-        showError('error-otp', 'Vui lòng nhập đủ 6 số.');
+        showError('error-otp', 'Please enter all 6 digits.');
         return;
     }
 
@@ -661,7 +661,7 @@ window.baceraDoOtp = function() {
     }).then(function(res) {
         setLoading('btn-otp', false);
         if (!res || !res.success) {
-            var msg = (res && res.data && res.data.message) ? res.data.message : 'Mã OTP không đúng.';
+            var msg = (res && res.data && res.data.message) ? res.data.message : 'Invalid OTP code.';
             showError('error-otp', msg);
         } else {
             baceraShowScreen('success');

@@ -124,7 +124,11 @@ if ( have_posts() ) :
 			return '';
 		};
 
-		$pancake_variation_id = (string) get_post_meta( $product_id, '_pancake_id', true );
+		$pancake_variation_id      = (string) get_post_meta( $product_id, '_pancake_id', true );
+		$current_pancake_product_id = (string) get_post_meta( $product_id, '_pancake_product_id', true );
+		if ( $current_pancake_product_id === '' && isset( $api_product['id'] ) ) {
+			$current_pancake_product_id = (string) $api_product['id'];
+		}
 
 		if ( function_exists( 'get_field' ) ) {
 			$acf_sale       = get_field( 'gia_khuyen_mai', $product_id );
@@ -446,1062 +450,865 @@ if ( have_posts() ) :
 
 		?>
 
-<main class="bacera-product-detail bacera-pdp-main bg-neutral-100 font-sans text-primary-900 selection:bg-primary-500/10 selection:text-primary-800">
-	<style>
-		/* Tách nội dung khỏi header — không phụ thuộc class Tailwind có được build hay không */
-		.bacera-pdp-main > .bacera-container {
-			padding-top: 2.5rem;
-			padding-bottom: 2rem;
-		}
-		@media (min-width: 768px) {
-			.bacera-pdp-main > .bacera-container {
-				padding-top: 5rem;
-				padding-bottom: 3rem;
-			}
-		}
-		@media (min-width: 1024px) {
-			.bacera-pdp-main > .bacera-container {
-				padding-top: 6.5rem;
-				padding-bottom: 3.5rem;
-			}
-		}
-		/* Khối gallery: ảnh chính + thumbnail — bám mép trái cột (trùng với lề nội dung bên dưới) */
-		.bacera-pdp-main .bacera-pdp-gallery-block {
-			width: 100%;
-			max-width: min(100%, 44rem);
-			margin-left: 0;
-			margin-right: auto;
-		}
-		@media (min-width: 640px) {
-			.bacera-pdp-main .bacera-pdp-gallery-block {
-				max-width: min(100%, 42rem);
-			}
-		}
-		@media (min-width: 768px) {
-			.bacera-pdp-main .bacera-pdp-gallery-block {
-				max-width: min(100%, 34rem);
-			}
-		}
-		@media (min-width: 1024px) {
-			.bacera-pdp-main .bacera-pdp-gallery-block {
-				max-width: min(100%, 32rem);
-			}
-		}
-		.bacera-pdp-main .bacera-pdp-gallery-block .main-image {
-			width: 100%;
-			max-width: none;
-		}
-		/* Ảnh phụ (thumbnail) — lớn hơn, xếp trái */
-		.bacera-pdp-main .bacera-pdp-thumb {
-			width: 6.25rem;
-			height: 6.25rem;
-			flex-shrink: 0;
-		}
-		@media (min-width: 768px) {
-			.bacera-pdp-main .bacera-pdp-thumb {
-				width: 7.5rem;
-				height: 7.5rem;
-			}
-		}
-		@media (min-width: 1024px) {
-			.bacera-pdp-main .bacera-pdp-thumb {
-				width: 8.25rem;
-				height: 8.25rem;
-			}
-		}
-		.bacera-pdp-main .bacera-pdp-thumbs-strip {
-			-webkit-overflow-scrolling: touch;
-			scroll-snap-type: x mandatory;
-			scrollbar-width: thin;
-			scrollbar-color: rgba(61, 47, 38, 0.25) transparent;
-		}
-		.bacera-pdp-main .bacera-pdp-thumbs-strip::-webkit-scrollbar {
-			height: 6px;
-		}
-		.bacera-pdp-main .bacera-pdp-thumbs-strip::-webkit-scrollbar-thumb {
-			border-radius: 9999px;
-			background: rgba(61, 47, 38, 0.22);
-		}
-		.bacera-pdp-main .bacera-pdp-thumbs-strip .bacera-pdp-thumb {
-			scroll-snap-align: start;
-		}
-		/* Nội dung phía dưới hero: căn trái thống nhất */
-		.bacera-pdp-main .bacera-product-story,
-		.bacera-pdp-main .bacera-related-products,
-		.bacera-pdp-main .product-accordions {
-			text-align: left;
-		}
-		.bacera-pdp-main .bacera-product-story p,
-		.bacera-pdp-main .bacera-related-products .info {
-			text-align: left;
-		}
-		/* Khoảng cách giữa khối hero (ảnh phụ / nội dung mua) và tab «Chi tiết sản phẩm» */
-		.bacera-pdp-main section.bacera-product-story {
-			margin-top: 2.25rem;
-		}
-		@media (min-width: 768px) {
-			.bacera-pdp-main section.bacera-product-story {
-				margin-top: 3.25rem;
-			}
-		}
-		@media (min-width: 1024px) {
-			.bacera-pdp-main section.bacera-product-story {
-				margin-top: 4rem;
-			}
-		}
-		/* Mini giỏ — giống template-shop.php */
-		.bacera-cart-overlay {
-			position: fixed;
-			inset: 0;
-			background: rgb(0 0 0 / 0.28);
-			opacity: 0;
-			pointer-events: none;
-			transition: opacity 0.25s ease;
-			z-index: 60;
-		}
-		.bacera-cart-overlay.is-open {
-			opacity: 1;
-			pointer-events: auto;
-		}
-		.bacera-cart-drawer {
-			position: fixed;
-			top: 0;
-			right: 0;
-			height: 100vh;
-			width: min(560px, 92vw);
-			background: #fff;
-			box-shadow: -10px 0 28px rgb(41 37 36 / 0.18);
-			transform: translateX(100%);
-			transition: transform 0.28s ease;
-			display: flex;
-			flex-direction: column;
-			z-index: 70;
-		}
-		.bacera-cart-drawer.is-open {
-			transform: translateX(0);
-		}
-		.bacera-cart-drawer-head {
-			padding: 2.5rem 1.25rem 1.25rem;
-			border-bottom: 1px solid rgb(231 229 228);
-		}
-		.bacera-cart-items {
-			flex: 1;
-			overflow-y: auto;
-			padding: 1.75rem 1.25rem 2.5rem;
-		}
-		.bacera-cart-item {
-			display: grid;
-			grid-template-columns: 96px minmax(0, 1fr);
-			gap: 0.9rem;
-			padding: 1.25rem 0;
-			border-bottom: 1px solid rgb(231 229 228);
-		}
-		.bacera-cart-item img {
-			width: 96px;
-			height: 96px;
-			border-radius: 0.65rem;
-			object-fit: cover;
-			background: rgb(245 245 244);
-		}
-		.bacera-cart-item-main {
-			display: flex;
-			align-items: flex-start;
-			justify-content: space-between;
-			gap: 0.5rem;
-			min-width: 0;
-		}
-		.bacera-cart-item-text {
-			min-width: 0;
-			flex: 1;
-		}
-		.bacera-cart-variant-line {
-			margin: 0.375rem 0 0;
-			font-size: 0.9375rem;
-			line-height: 1.45;
-			color: rgb(87 83 78);
-		}
-		.bacera-cart-qty {
-			display: inline-flex;
-			align-items: center;
-			border: 1px solid rgb(214 211 209);
-			border-radius: 0.5rem;
-			overflow: hidden;
-		}
-		.bacera-cart-qty button {
-			width: 2rem;
-			height: 2rem;
-			border: 0;
-			background: #fff;
-			color: rgb(87 83 78);
-			cursor: pointer;
-		}
-		.bacera-cart-qty span {
-			min-width: 2rem;
-			text-align: center;
-			font-variant-numeric: tabular-nums;
-			color: rgb(41 37 36);
-		}
-		.bacera-cart-remove {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-			width: 2.25rem;
-			height: 2.25rem;
-			padding: 0;
-			border: 0;
-			border-radius: 0.5rem;
-			background: transparent;
-			color: rgb(168 162 158);
-			cursor: pointer;
-			transition: color 0.15s ease, background-color 0.15s ease;
-		}
-		.bacera-cart-remove:hover {
-			color: rgb(87 83 78);
-			background: rgb(245 245 244);
-		}
-		.bacera-cart-remove svg {
-			display: block;
-		}
-		.bacera-cart-footer {
-			border-top: 1px solid rgb(231 229 228);
-			padding: 1.75rem 1.25rem 2.5rem;
-			background: #fff;
-		}
-		.bacera-cart-empty {
-			padding: 2.5rem 1.25rem;
-			color: rgb(120 113 108);
-			font-size: 0.95rem;
-		}
-	</style>
-	<div class="bacera-container mx-auto max-w-7xl px-4 text-left text-primary-900">
+<main class="bacera-pdp-page" style="background:#F8F4EE;min-height:100vh;font-family:inherit;">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+<style id="bacera-pdp-redesign-css">
+:root{
+	--pdp-cream:#F8F4EE; --pdp-cream2:#F2EDE5; --pdp-sand:#E8DFD3;
+	--pdp-clay1:#E5D8CC; --pdp-clay3:#C0A28E; --pdp-clay5:#A9846B;
+	--pdp-clay6:#8D6A54; --pdp-clay7:#6B5344; --pdp-clay8:#4d3d32;
+	--pdp-accent:#C06B3A; --pdp-text:#2A1F17; --pdp-sec:#6B5344; --pdp-muted:#9A8478;
+	--pdp-border:#DDD5CB; --pdp-blt:#EDE6DD; --pdp-white:#FFFFFF;
+}
+.pdp-container{ max-width:1440px; margin:0 auto; padding:1.5rem clamp(1.25rem,4vw,3rem) 0; }
+/* breadcrumb */
+.pdp-breadcrumb{ display:flex; gap:.5rem; align-items:center; list-style:none; flex-wrap:wrap; margin-bottom:2rem; }
+.pdp-breadcrumb li{ font-size:.75rem; color:var(--pdp-muted); }
+.pdp-breadcrumb li a{ color:var(--pdp-muted); text-decoration:none; transition:color .15s; }
+.pdp-breadcrumb li a:hover{ color:var(--pdp-text); }
+/* Hero grid */
+.pdp-hero{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:3rem; align-items:start; }
+@media(max-width:900px){ .pdp-hero{grid-template-columns:1fr;} .pdp-gallery{position:static!important;} }
+/* Gallery */
+.pdp-gallery{ position:sticky; top:88px; display:flex; flex-direction:column; gap:.75rem; }
+.pdp-main-wrap{
+	width:100%; aspect-ratio:4/5; border-radius:20px; overflow:hidden;
+	background:var(--pdp-cream2); position:relative; cursor:zoom-in;
+}
+.pdp-main-img{ width:100%; height:100%; object-fit:cover; transition:transform .5s cubic-bezier(.4,0,.2,1); }
+.pdp-main-wrap:hover .pdp-main-img{ transform:scale(1.04); }
+.pdp-gallery-badge-sale{
+	position:absolute; left:1rem; top:1rem; z-index:5;
+	background:var(--pdp-accent); color:#fff;
+	font-size:.68rem; font-weight:700; padding:5px 10px; border-radius:7px; letter-spacing:.04em;
+}
+.pdp-gallery-nav{
+	position:absolute; top:50%; transform:translateY(-50%); z-index:5;
+	width:36px; height:36px; border-radius:50%;
+	background:rgba(255,255,255,.88); border:1px solid var(--pdp-blt);
+	cursor:pointer; display:flex; align-items:center; justify-content:center;
+	color:var(--pdp-text); transition:all .2s; backdrop-filter:blur(4px);
+	font-size:.9rem;
+}
+.pdp-gallery-nav:hover{ background:#fff; box-shadow:0 4px 12px rgba(42,31,23,.1); }
+.pdp-gallery-nav.prev{ left:.75rem; }
+.pdp-gallery-nav.next{ right:.75rem; }
+/* Thumbs */
+.pdp-thumbs{ display:flex; gap:.5rem; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; scroll-snap-type:x mandatory; }
+.pdp-thumbs::-webkit-scrollbar{ display:none; }
+.pdp-thumb{
+	flex-shrink:0; width:72px; height:75px; border-radius:10px; overflow:hidden;
+	border:2px solid transparent; background:var(--pdp-cream2); cursor:pointer;
+	transition:all .15s; scroll-snap-align:start;
+}
+.pdp-thumb:hover:not(.is-active){ border-color:var(--pdp-clay3); }
+.pdp-thumb.is-active{ border-color:var(--pdp-clay7); }
+.pdp-thumb img{ width:100%; height:100%; object-fit:cover; }
+/* Info column */
+.pdp-info{ display:flex; flex-direction:column; gap:1.1rem; }
+.pdp-collection-tag{ font-size:.65rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--pdp-clay5); }
+.pdp-title{ font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,3.5vw,2.75rem); font-weight:400; line-height:1.15; color:var(--pdp-text); }
+.pdp-title em{ font-style:italic; }
+/* Rating */
+.pdp-rating{ display:flex; align-items:center; gap:.75rem; padding-bottom:1.1rem; border-bottom:1px solid var(--pdp-blt); flex-wrap:wrap; }
+.pdp-stars{ color:var(--pdp-accent); font-size:.9rem; letter-spacing:-.03em; cursor:pointer; }
+.pdp-rating-score{ font-size:.85rem; font-weight:600; color:var(--pdp-text); }
+.pdp-rating-count{ font-size:.8rem; color:var(--pdp-muted); cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+/* Price */
+.pdp-price-block{ display:flex; align-items:baseline; gap:.75rem; flex-wrap:wrap; }
+.pdp-price{ font-family:'Cormorant Garamond',Georgia,serif; font-size:2rem; font-weight:500; color:var(--pdp-text); }
+.pdp-price-old{ font-size:1rem; color:var(--pdp-muted); text-decoration:line-through; }
+.pdp-disc-badge{ background:var(--pdp-accent); color:#fff; font-size:.68rem; font-weight:700; letter-spacing:.05em; padding:4px 9px; border-radius:6px; }
+.pdp-savings{ font-size:.78rem; color:var(--pdp-accent); font-weight:500; margin-top:.1rem; }
+/* Excerpt */
+.pdp-excerpt{ font-size:.88rem; color:var(--pdp-sec); line-height:1.8; }
+/* Swatches */
+.pdp-variant-section{ display:flex; flex-direction:column; gap:.4rem; }
+.pdp-variant-row{ display:flex; align-items:center; justify-content:space-between; }
+.pdp-variant-label{ font-size:.78rem; font-weight:500; color:var(--pdp-sec); }
+.pdp-variant-val{ font-size:.78rem; font-weight:600; color:var(--pdp-text); }
+.pdp-swatches{ display:flex; gap:.5rem; flex-wrap:wrap; }
+.pdp-swatch{
+	width:34px; height:34px; border-radius:50%; border:2px solid transparent;
+	cursor:pointer; position:relative; transition:all .2s;
+	box-shadow:0 0 0 1px rgba(0,0,0,.12);
+}
+.pdp-swatch.is-active{ box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--pdp-clay7); }
+.pdp-swatch:hover:not(.is-active){ transform:scale(1.12); }
+/* Size pills */
+.pdp-sizes{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.pdp-size-pill{
+	padding:.38rem .9rem; border-radius:999px; border:1.5px solid var(--pdp-border);
+	background:#fff; font-size:.78rem; color:var(--pdp-sec); cursor:pointer; transition:all .15s; font-family:inherit;
+}
+.pdp-size-pill.is-active{ border-color:var(--pdp-clay8); background:var(--pdp-clay8); color:#fff; }
+.pdp-size-pill:hover:not(.is-active){ border-color:var(--pdp-clay5); color:var(--pdp-text); }
+/* Stock */
+.pdp-stock{ display:flex; align-items:center; gap:.4rem; font-size:.78rem; color:var(--pdp-sec); }
+.pdp-stock-dot{ width:7px; height:7px; border-radius:50%; background:#52b754; }
+.pdp-stock-dot.low{ background:var(--pdp-accent); }
+/* ATC row */
+.pdp-atc-row{ display:grid; grid-template-columns:auto 1fr auto; gap:.6rem; align-items:stretch; }
+.pdp-qty{ display:flex; align-items:center; border:1.5px solid var(--pdp-border); border-radius:12px; overflow:hidden; background:#fff; height:50px; }
+.pdp-qty-btn{ width:42px; height:100%; border:none; background:transparent; font-size:1.1rem; color:var(--pdp-sec); cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; }
+.pdp-qty-btn:hover{ background:var(--pdp-cream2); }
+.pdp-qty-val{ min-width:38px; text-align:center; font-size:.9rem; font-weight:600; color:var(--pdp-text); }
+.pdp-btn-atc{
+	height:50px; border-radius:12px; background:var(--pdp-clay8); color:#fff;
+	font-family:inherit; font-size:.88rem; font-weight:500; border:none; cursor:pointer;
+	letter-spacing:.03em; transition:background .2s,transform .1s; padding:0 1.5rem;
+}
+.pdp-btn-atc:hover{ background:var(--pdp-clay7); }
+.pdp-btn-atc:active{ transform:scale(.98); }
+.pdp-btn-wish{
+	width:50px; height:50px; border-radius:12px; border:1.5px solid var(--pdp-border);
+	background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+	font-size:1.2rem; color:var(--pdp-clay5); transition:all .2s;
+}
+.pdp-btn-wish:hover{ border-color:var(--pdp-accent); color:var(--pdp-accent); }
+/* Trust */
+.pdp-trust{ display:flex; gap:.875rem; flex-wrap:wrap; padding:1rem 0; border-top:1px solid var(--pdp-blt); border-bottom:1px solid var(--pdp-blt); }
+.pdp-trust-item{ display:flex; align-items:center; gap:.35rem; font-size:.72rem; color:var(--pdp-sec); flex:1; min-width:110px; }
+/* Accordions */
+.pdp-accordions{ display:flex; flex-direction:column; }
+.pdp-acc{ border-bottom:1px solid var(--pdp-blt); }
+.pdp-acc-btn{
+	width:100%; display:flex; align-items:center; justify-content:space-between;
+	padding:.85rem 0; background:none; border:none; cursor:pointer;
+	font-family:inherit; font-size:.875rem; font-weight:500; color:var(--pdp-text); text-align:left;
+	transition:color .15s;
+}
+.pdp-acc-btn:hover{ color:var(--pdp-clay6); }
+.pdp-acc-chevron{ font-size:.7rem; color:var(--pdp-muted); transition:transform .25s; }
+.pdp-acc.is-open .pdp-acc-chevron{ transform:rotate(180deg); }
+.pdp-acc-body{ overflow:hidden; max-height:0; transition:max-height .3s ease; font-size:.83rem; color:var(--pdp-sec); line-height:1.75; }
+.pdp-acc.is-open .pdp-acc-body{ max-height:400px; padding-bottom:1rem; }
+.pdp-spec-table{ width:100%; border-collapse:collapse; font-size:.82rem; }
+.pdp-spec-table tr{ border-bottom:1px solid var(--pdp-blt); }
+.pdp-spec-table tr:last-child{ border-bottom:none; }
+.pdp-spec-table td{ padding:.4rem 0; vertical-align:top; }
+.pdp-spec-table td:first-child{ color:var(--pdp-muted); width:45%; padding-right:1rem; }
+.pdp-spec-table td:last-child{ color:var(--pdp-text); font-weight:500; }
+/* Lower tabs */
+.pdp-lower{ max-width:1440px; margin:0 auto; padding:3.5rem clamp(1.25rem,4vw,3rem) 0; }
+.pdp-tabs-nav{ display:flex; border-bottom:1px solid var(--pdp-blt); gap:0; margin-bottom:2.25rem; overflow-x:auto; scrollbar-width:none; }
+.pdp-tabs-nav::-webkit-scrollbar{ display:none; }
+.pdp-tab-btn{
+	background:none; border:none; cursor:pointer; font-family:inherit;
+	font-size:.875rem; font-weight:400; color:var(--pdp-muted);
+	padding:.8rem 1.4rem; border-bottom:2px solid transparent; margin-bottom:-1px;
+	transition:all .2s; white-space:nowrap;
+}
+.pdp-tab-btn.is-active{ color:var(--pdp-text); font-weight:600; border-color:var(--pdp-clay7); }
+.pdp-tab-btn:hover:not(.is-active){ color:var(--pdp-sec); }
+.pdp-tab-panel{ display:none; }
+.pdp-tab-panel.is-active{ display:block; }
+/* Detail tab */
+.pdp-detail-grid{ display:grid; grid-template-columns:1.4fr .6fr; gap:2.5rem; align-items:start; }
+@media(max-width:900px){ .pdp-detail-grid{ grid-template-columns:1fr; } .pdp-reviews-grid{ grid-template-columns:1fr; } }
+.pdp-rich-text{ font-size:.88rem; color:var(--pdp-sec); line-height:1.85; }
+.pdp-rich-text h2{ font-family:'Cormorant Garamond',Georgia,serif; font-size:1.5rem; color:var(--pdp-text); margin:1.5rem 0 .6rem; }
+.pdp-rich-text h2:first-child{ margin-top:0; }
+.pdp-rich-text p{ margin-bottom:.8rem; }
+.pdp-rich-text ul{ padding-left:1.25rem; margin-bottom:.8rem; }
+.pdp-rich-text li{ margin-bottom:.25rem; }
+.pdp-craft-box{ background:var(--pdp-cream2); border-radius:var(--pdp-r-lg,20px); padding:1.5rem; border:1px solid var(--pdp-blt); display:flex; flex-direction:column; gap:.75rem; }
+.pdp-craft-icon{ font-size:2.25rem; }
+.pdp-craft-label{ font-size:.62rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--pdp-clay5); }
+.pdp-craft-title{ font-family:'Cormorant Garamond',Georgia,serif; font-size:1.3rem; color:var(--pdp-text); }
+.pdp-craft-body{ font-size:.82rem; color:var(--pdp-sec); line-height:1.75; }
+/* Reviews tab */
+.pdp-reviews-grid{ display:grid; grid-template-columns:.85fr 2fr; gap:2.5rem; align-items:start; }
+.pdp-rating-summary{ background:#fff; border-radius:20px; border:1px solid var(--pdp-blt); padding:1.5rem; box-shadow:0 1px 3px rgba(42,31,23,.06); text-align:center; display:flex; flex-direction:column; align-items:center; gap:.4rem; position:sticky; top:88px; }
+.pdp-rating-big{ font-family:'Cormorant Garamond',Georgia,serif; font-size:3.75rem; line-height:1; color:var(--pdp-text); }
+.pdp-rating-bar-row{ width:100%; display:flex; flex-direction:column; gap:.35rem; margin-top:.6rem; }
+.pdp-rbar{ display:flex; align-items:center; gap:.4rem; font-size:.7rem; color:var(--pdp-muted); }
+.pdp-rbar-track{ flex:1; height:5px; background:var(--pdp-sand); border-radius:999px; overflow:hidden; }
+.pdp-rbar-fill{ height:100%; background:var(--pdp-accent); border-radius:999px; }
+.pdp-write-review-btn{ display:flex; align-items:center; gap:.4rem; padding:.5rem 1.1rem; border-radius:8px; border:1.5px solid var(--pdp-clay7); background:transparent; color:var(--pdp-clay7); font-family:inherit; font-size:.78rem; font-weight:500; cursor:pointer; transition:all .15s; margin-top:.6rem; }
+.pdp-write-review-btn:hover{ background:var(--pdp-clay7); color:#fff; }
+.pdp-reviews-list{ display:flex; flex-direction:column; gap:1rem; }
+.pdp-review-card{ background:#fff; border:1px solid var(--pdp-blt); border-radius:14px; padding:1.2rem 1.4rem; box-shadow:0 1px 3px rgba(42,31,23,.06); }
+.pdp-review-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:.75rem; margin-bottom:.5rem; }
+.pdp-review-author{ display:flex; align-items:center; gap:.5rem; }
+.pdp-review-avatar{ width:34px; height:34px; border-radius:50%; background:var(--pdp-sand); display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:600; color:var(--pdp-clay6); flex-shrink:0; }
+.pdp-review-name{ font-size:.85rem; font-weight:600; color:var(--pdp-text); }
+.pdp-review-date{ font-size:.7rem; color:var(--pdp-muted); }
+.pdp-review-stars{ color:var(--pdp-accent); font-size:.78rem; letter-spacing:-.02em; }
+.pdp-review-title{ font-size:.85rem; font-weight:600; color:var(--pdp-text); margin-bottom:.25rem; }
+.pdp-review-body{ font-size:.82rem; color:var(--pdp-sec); line-height:1.7; }
+.pdp-review-verified{ display:inline-flex; align-items:center; gap:.25rem; font-size:.67rem; color:#52b754; margin-top:.4rem; }
+.pdp-review-form{ background:#fff; border:1px solid var(--pdp-blt); border-radius:14px; padding:1.4rem; box-shadow:0 1px 3px rgba(42,31,23,.06); }
+.pdp-review-form input, .pdp-review-form textarea, .pdp-review-form select{
+	width:100%; border:1px solid var(--pdp-border); border-radius:9px;
+	padding:.55rem .8rem; font-family:inherit; font-size:.83rem; color:var(--pdp-text);
+	outline:none; transition:border-color .2s; background:#fff;
+}
+.pdp-review-form input:focus, .pdp-review-form textarea:focus, .pdp-review-form select:focus{ border-color:var(--pdp-clay5); }
+.pdp-review-form label{ font-size:.75rem; font-weight:500; color:var(--pdp-sec); margin-bottom:.3rem; display:block; }
+.pdp-form-grid{ display:flex; flex-direction:column; gap:.75rem; }
+.pdp-form-submit{ width:100%; height:46px; border-radius:10px; background:var(--pdp-clay8); color:#fff; border:none; font-family:inherit; font-size:.875rem; font-weight:500; cursor:pointer; transition:background .2s; margin-top:.75rem; }
+.pdp-form-submit:hover{ background:var(--pdp-clay7); }
+/* Related */
+.pdp-related{ max-width:1440px; margin:0 auto; padding:3.5rem clamp(1.25rem,4vw,3rem) 5rem; }
+.pdp-related-hdr{ text-align:center; margin-bottom:2rem; }
+.pdp-related-title{ font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(1.75rem,3vw,2.4rem); font-weight:400; color:var(--pdp-text); }
+.pdp-related-sub{ font-size:.83rem; color:var(--pdp-muted); margin-top:.35rem; }
+.pdp-related-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.1rem; }
+@media(max-width:900px){ .pdp-related-grid{ grid-template-columns:repeat(2,1fr); } }
+/* Cart drawer */
+.bacera-cart-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.28); opacity:0; pointer-events:none; transition:opacity .25s; z-index:60; }
+.bacera-cart-overlay.is-open{ opacity:1; pointer-events:auto; }
+.bacera-cart-drawer{ position:fixed; top:0; right:0; height:100vh; width:min(520px,93vw); background:#fff; box-shadow:-8px 0 28px rgba(42,31,23,.14); transform:translateX(100%); transition:transform .28s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; z-index:70; }
+.bacera-cart-drawer.is-open{ transform:translateX(0); }
+.bacera-cart-drawer-head{ padding:2rem 1.5rem 1.25rem; border-bottom:1px solid #EDE6DD; }
+.bacera-cart-items{ flex:1; overflow-y:auto; padding:1.5rem; }
+.bacera-cart-item{ display:grid; grid-template-columns:88px minmax(0,1fr); gap:.85rem; padding:1rem 0; border-bottom:1px solid #EDE6DD; }
+.bacera-cart-item img{ width:88px; height:88px; border-radius:10px; object-fit:cover; background:#F2EDE5; }
+.bacera-cart-item-main{ display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; min-width:0; }
+.bacera-cart-item-text{ min-width:0; flex:1; }
+.bacera-cart-variant-line{ margin:.3rem 0 0; font-size:.82rem; line-height:1.45; color:#6B5344; }
+.bacera-cart-qty{ display:inline-flex; align-items:center; border:1px solid #DDD5CB; border-radius:8px; overflow:hidden; }
+.bacera-cart-qty button{ width:2rem; height:2rem; border:0; background:#fff; color:#6B5344; cursor:pointer; font-size:1rem; }
+.bacera-cart-qty span{ min-width:2rem; text-align:center; font-variant-numeric:tabular-nums; color:#2A1F17; font-size:.875rem; font-weight:600; }
+.bacera-cart-remove{ display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:2rem; height:2rem; padding:0; border:0; border-radius:8px; background:transparent; color:#9A8478; cursor:pointer; transition:color .15s,background .15s; }
+.bacera-cart-remove:hover{ color:#6B5344; background:#F2EDE5; }
+.bacera-cart-footer{ border-top:1px solid #EDE6DD; padding:1.5rem; background:#fff; }
+.bacera-cart-empty{ padding:2.5rem 1rem; color:#9A8478; font-size:.9rem; text-align:center; }
+</style>
 
-		<section class="bacera-product-hero grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
-			<div class="product-gallery flex min-w-0 w-full flex-col items-stretch">
-				<div class="bacera-pdp-gallery-block">
-					<div class="main-image mb-4 w-full overflow-hidden rounded-lg bg-neutral-100 aspect-[4/5]">
-						<img id="bacera-pdp-main-img" src="<?php echo esc_url( $main_image_url ); ?>" alt="<?php echo esc_attr( $product_title ); ?>" class="h-full w-full object-cover" />
-					</div>
-					<div id="bacera-pdp-thumbs" class="bacera-pdp-thumbs-strip thumbnail-list flex w-full max-w-full flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-1 md:gap-4" role="list" aria-label="<?php esc_attr_e( 'Ảnh sản phẩm', 'bacera' ); ?>">
-					<?php
-					$thumb_selected_index = 0;
-					if ( $main_image_url !== '' && ! empty( $gallery_urls ) ) {
-						$found_thumb = array_search( $main_image_url, $gallery_urls, true );
-						if ( $found_thumb !== false ) {
-							$thumb_selected_index = (int) $found_thumb;
-						}
-					}
-					$t = 0;
-					foreach ( $gallery_urls as $gurl ) :
-						$sel = ( (int) $t === $thumb_selected_index );
-						?>
-					<button type="button" data-src="<?php echo esc_url( $gurl ); ?>" class="bacera-pdp-thumb group relative overflow-hidden rounded border-2 transition <?php echo $sel ? 'border-primary-800' : 'border-transparent hover:border-primary-400'; ?>">
-						<img src="<?php echo esc_url( $gurl ); ?>" alt="" class="h-full w-full object-cover" loading="lazy" />
-					</button>
-						<?php
-						++$t;
-					endforeach;
-					if ( $t === 0 ) :
-						?>
-					<span class="text-sm text-primary-500"><?php esc_html_e( 'No images', 'bacera' ); ?></span>
-					<?php endif; ?>
-					</div>
-				</div>
+<div class="pdp-container">
+
+	<?php /* Breadcrumb */ ?>
+	<ol class="pdp-breadcrumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'bacera' ); ?>">
+		<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Homepage', 'bacera' ); ?></a></li>
+		<li style="color:#DDD5CB;">›</li>
+		<li><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Store', 'bacera' ); ?></a></li>
+		<li style="color:#DDD5CB;">›</li>
+		<li><a href="<?php echo esc_url( add_query_arg( 'filter_collection', rawurlencode( $api_product['category_ids'][0] ?? '' ), $shop_url ) ); ?>"><?php echo esc_html( $breadcrumb_collection ); ?></a></li>
+		<li style="color:#DDD5CB;">›</li>
+		<li style="color:var(--pdp-text,#2A1F17);font-weight:500;"><?php echo esc_html( $product_title ); ?></li>
+	</ol>
+
+	<?php /* Hero grid */ ?>
+	<div class="pdp-hero">
+
+		<?php /* Gallery column */ ?>
+		<div class="pdp-gallery">
+			<div class="pdp-main-wrap">
+				<img id="bacera-pdp-main-img"
+					src="<?php echo esc_url( $main_image_url ); ?>"
+					alt="<?php echo esc_attr( $product_title ); ?>"
+					class="pdp-main-img" />
+
+				<?php if ( $discount_pct > 0 ) : ?>
+				<span class="pdp-gallery-badge-sale"><?php echo esc_html( '-' . $discount_pct . '%' ); ?></span>
+				<?php endif; ?>
+
+				<?php if ( count( $gallery_urls ) > 1 ) : ?>
+				<button class="pdp-gallery-nav prev" id="pdp-nav-prev" aria-label="<?php esc_attr_e( 'Previous image', 'bacera' ); ?>">‹</button>
+				<button class="pdp-gallery-nav next" id="pdp-nav-next" aria-label="<?php esc_attr_e( 'Next image', 'bacera' ); ?>">›</button>
+				<?php endif; ?>
 			</div>
 
-			<div class="product-info flex min-w-0 w-full flex-col items-stretch justify-start self-start text-left">
-				<nav class="bacera-breadcrumbs mb-3 text-sm text-primary-600" aria-label="<?php esc_attr_e( 'Breadcrumb', 'bacera' ); ?>">
-					<a class="hover:text-primary-800" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Homepage', 'bacera' ); ?></a>
-					<span class="mx-2">/</span>
-					<a class="hover:text-primary-800" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Store', 'bacera' ); ?></a>
-					<span class="mx-2">/</span>
-					<span class="text-primary-700"><?php echo esc_html( $breadcrumb_collection ); ?></span>
-					<span class="mx-2">/</span>
-					<span class="text-primary-900"><?php echo esc_html( $product_title ); ?></span>
-				</nav>
-				<h1 class="mb-3 font-serif text-3xl font-normal tracking-tight text-primary-900 md:text-4xl"><?php echo esc_html( $product_title ); ?></h1>
+			<?php /* Thumbnails */ ?>
+			<?php if ( ! empty( $gallery_urls ) ) : ?>
+			<div class="pdp-thumbs" id="bacera-pdp-thumbs" role="list" aria-label="<?php esc_attr_e( 'Product images', 'bacera' ); ?>">
+				<?php
+				$t = 0;
+				$thumb_selected_index = 0;
+				if ( $main_image_url !== '' && ! empty( $gallery_urls ) ) {
+					$found_thumb = array_search( $main_image_url, $gallery_urls, true );
+					if ( $found_thumb !== false ) { $thumb_selected_index = (int) $found_thumb; }
+				}
+				foreach ( $gallery_urls as $gurl ) :
+					$sel = ( (int) $t === $thumb_selected_index );
+				?>
+				<button type="button"
+					class="pdp-thumb <?php echo $sel ? 'is-active' : ''; ?>"
+					data-src="<?php echo esc_url( $gurl ); ?>"
+					data-thumb-idx="<?php echo esc_attr( (string) $t ); ?>"
+					role="listitem"
+					aria-label="<?php echo esc_attr( sprintf( __( 'Image %d', 'bacera' ), $t + 1 ) ); ?>">
+					<img src="<?php echo esc_url( $gurl ); ?>" alt="" loading="lazy" />
+				</button>
+				<?php $t++; endforeach; ?>
+			</div>
+			<?php endif; ?>
+		</div>
 
+		<?php /* Info column */ ?>
+		<div class="pdp-info">
+			<div class="pdp-collection-tag"><?php echo esc_html( $breadcrumb_collection ); ?> · <?php esc_html_e( 'Handcrafted in Vietnam', 'bacera' ); ?></div>
+
+			<h1 class="pdp-title"><?php echo esc_html( $product_title ); ?></h1>
+
+			<?php /* Rating */ ?>
+			<div class="pdp-rating">
 				<?php
 				if ( $reviews_total === 0 ) {
 					$hero_rating_rounded = 0;
-					$hero_rating_label   = __( 'Chưa có đánh giá', 'bacera' );
+					$hero_rating_label   = __( 'No reviews yet', 'bacera' );
 				} elseif ( $ratings_count > 0 ) {
 					$hero_rating_rounded = (int) round( $avg_rating );
-					$hero_rating_label   = sprintf(
-						/* translators: 1: average rating (e.g. 4,9), 2: review count */
-						__( '%1$s/5 - %2$s lượt đánh giá', 'bacera' ),
-						number_format( (float) $avg_rating, 1, ',', '' ),
-						number_format_i18n( (int) $reviews_total )
-					);
+					$hero_rating_label   = sprintf( __( '%1$s/5 · %2$s reviews', 'bacera' ), number_format( (float) $avg_rating, 1, '.', '' ), number_format_i18n( $reviews_total ) );
 				} else {
 					$hero_rating_rounded = 0;
-					$hero_rating_label   = sprintf(
-						/* translators: %s: review count */
-						__( '%s lượt đánh giá (chưa có điểm sao)', 'bacera' ),
-						number_format_i18n( (int) $reviews_total )
-					);
+					$hero_rating_label   = sprintf( __( '%s reviews', 'bacera' ), number_format_i18n( $reviews_total ) );
 				}
 				?>
-				<div
-					class="product-rating mb-5 flex flex-wrap items-center gap-2 text-sm"
-					aria-label="<?php echo esc_attr( $hero_rating_label ); ?>"
-				>
-					<span class="inline-flex items-center gap-px" aria-hidden="true">
-						<?php
-						for ( $ri = 1; $ri <= 5; $ri++ ) {
-							$star_class = $ri <= $hero_rating_rounded ? 'text-accent-500' : 'text-primary-300';
-							echo '<span class="' . esc_attr( $star_class ) . '">★</span>';
-						}
-						?>
-					</span>
-					<span class="text-primary-600"><?php echo esc_html( $hero_rating_label ); ?></span>
-				</div>
+				<span class="pdp-stars" aria-hidden="true">
+					<?php for ( $ri = 1; $ri <= 5; $ri++ ) { echo $ri <= $hero_rating_rounded ? '★' : '☆'; } ?>
+				</span>
+				<?php if ( $ratings_count > 0 ) : ?>
+				<span class="pdp-rating-score"><?php echo esc_html( number_format( (float) $avg_rating, 1, '.', '' ) ); ?></span>
+				<?php endif; ?>
+				<a class="pdp-rating-count" href="#pdp-tab-reviews" onclick="switchPdpTab('reviews');return false;">
+					<?php echo esc_html( $hero_rating_label ); ?>
+				</a>
+			</div>
 
-				<div class="product-excerpt mb-6 text-left text-base leading-relaxed text-primary-800 [&_p]:text-left [&_p]:text-primary-800">
-					<?php echo wp_kses_post( wpautop( $short_desc ) ); ?>
-				</div>
-
-				<div class="product-price mb-6 flex flex-wrap items-center gap-3">
-					<span id="bacera-pdp-price-sale" class="price-sale text-2xl font-semibold text-primary-900 tabular-nums"><?php echo esc_html( number_format( $sale_price, 0, ',', '.' ) ); ?>₫</span>
+			<?php /* Price */ ?>
+			<div>
+				<div class="pdp-price-block">
+					<span class="pdp-price" id="bacera-pdp-price-sale"><?php echo esc_html( number_format( $sale_price, 0, ',', '.' ) ); ?>₫</span>
 					<?php if ( $discount_pct > 0 ) : ?>
-					<span id="bacera-pdp-discount-badge" class="discount-badge rounded bg-primary-900 px-2.5 py-1 text-xs font-medium text-white"><?php echo esc_html( '-' . $discount_pct . '%' ); ?></span>
-					<span id="bacera-pdp-price-regular" class="price-regular text-sm text-primary-400 line-through tabular-nums"><?php echo esc_html( number_format( $regular_price, 0, ',', '.' ) ); ?>₫</span>
+					<span class="pdp-price-old" id="bacera-pdp-price-regular"><?php echo esc_html( number_format( $regular_price, 0, ',', '.' ) ); ?>₫</span>
+					<span class="pdp-disc-badge" id="bacera-pdp-discount-badge">-<?php echo esc_html( $discount_pct ); ?>%</span>
 					<?php else : ?>
-					<span id="bacera-pdp-discount-badge" class="hidden"></span>
-					<span id="bacera-pdp-price-regular" class="price-regular hidden text-sm text-primary-400 line-through tabular-nums"></span>
+					<span id="bacera-pdp-price-regular" class="pdp-price-old" style="display:none;"></span>
+					<span id="bacera-pdp-discount-badge" style="display:none;"></span>
+					<?php endif; ?>
+				</div>
+				<?php if ( $discount_pct > 0 ) : ?>
+				<p class="pdp-savings"><?php echo esc_html( sprintf( __( 'You save %s₫', 'bacera' ), number_format( $regular_price - $sale_price, 0, ',', '.' ) ) ); ?></p>
+				<?php endif; ?>
+			</div>
+
+			<?php /* Description */ ?>
+			<?php if ( $short_desc !== '' ) : ?>
+			<div class="pdp-excerpt"><?php echo wp_kses_post( wpautop( $short_desc ) ); ?></div>
+			<?php endif; ?>
+
+			<?php /* Color variant picker */ ?>
+			<?php if ( ! empty( $variations ) ) : ?>
+			<div class="pdp-variant-section">
+				<div class="pdp-variant-row">
+					<span class="pdp-variant-label"><?php esc_html_e( 'Color:', 'bacera' ); ?></span>
+					<span class="pdp-variant-val" id="bacera-pdp-color-label"><?php echo esc_html( $color_label ); ?></span>
+				</div>
+				<div class="pdp-swatches" id="bacera-pdp-color-swatches">
+					<?php
+					$swatch_palette = [ '#3d2f26', '#4d3d32', '#6b5344', '#8d6a54', '#a9846b', '#c0a28e' ];
+					foreach ( $variations as $vi => $_v ) :
+						$col    = $swatch_palette[ (int) $vi % count( $swatch_palette ) ];
+						$active = ( (int) $vi === $current_vi );
+					?>
+					<button type="button"
+						class="pdp-swatch bacera-pdp-swatch <?php echo $active ? 'is-active' : ''; ?>"
+						data-variant-index="<?php echo esc_attr( (string) (int) $vi ); ?>"
+						style="background-color:<?php echo esc_attr( $col ); ?>;"
+						aria-label="<?php echo esc_attr( sprintf( __( 'Color option %d', 'bacera' ), (int) $vi + 1 ) ); ?>">
+					</button>
+					<?php endforeach; ?>
+				</div>
+			</div>
+			<?php endif; ?>
+
+			<?php /* Size / Capacity */ ?>
+			<?php if ( ! empty( $capacity_options ) ) : ?>
+			<div class="pdp-variant-section">
+				<span class="pdp-variant-label"><?php esc_html_e( 'Capacity:', 'bacera' ); ?></span>
+				<div class="pdp-sizes">
+					<?php foreach ( $capacity_options as $opt ) : ?>
+					<button type="button" class="pdp-size-pill <?php echo $opt === $capacity_options[0] ? 'is-active' : ''; ?>"
+						onclick="document.querySelectorAll('.pdp-size-pill').forEach(function(b){b.classList.remove('is-active');}); this.classList.add('is-active');">
+						<?php echo esc_html( $opt ); ?>
+					</button>
+					<?php endforeach; ?>
+				</div>
+			</div>
+			<?php endif; ?>
+
+			<?php /* Stock */ ?>
+			<div class="pdp-stock">
+				<?php if ( $stock_quantity > 5 ) : ?>
+				<span class="pdp-stock-dot"></span>
+				<span><?php echo esc_html( sprintf( __( '%d in stock', 'bacera' ), $stock_quantity ) ); ?></span>
+				<?php elseif ( $stock_quantity > 0 ) : ?>
+				<span class="pdp-stock-dot low"></span>
+				<span><?php echo esc_html( sprintf( __( 'Only %d left', 'bacera' ), $stock_quantity ) ); ?></span>
+				<?php else : ?>
+				<span class="pdp-stock-dot" style="background:#ccc;"></span>
+				<span><?php esc_html_e( 'Out of stock', 'bacera' ); ?></span>
+				<?php endif; ?>
+			</div>
+
+			<?php /* Add to cart row */ ?>
+			<form id="bacera-pdp-add-form" action="#" method="post" onsubmit="return false;">
+				<div class="pdp-atc-row">
+					<button type="button" class="pdp-btn-wish" id="bacera-pdp-wish-btn" aria-label="<?php esc_attr_e( 'Wishlist', 'bacera' ); ?>">♡</button>
+					<div class="pdp-qty">
+						<button type="button" class="pdp-qty-btn bacera-pdp-qty-minus" aria-label="<?php esc_attr_e( 'Decrease', 'bacera' ); ?>">−</button>
+						<input id="bacera-pdp-qty" type="text" readonly value="01" class="pdp-qty-val" style="border:none;background:transparent;width:38px;text-align:center;font-weight:600;color:var(--pdp-text,#2A1F17);font-size:.9rem;outline:none;cursor:default;" />
+						<button type="button" class="pdp-qty-btn bacera-pdp-qty-plus" aria-label="<?php esc_attr_e( 'Increase', 'bacera' ); ?>">+</button>
+					</div>
+					<button type="button" id="bacera-pdp-add-cart-btn" class="pdp-btn-atc">
+						<?php esc_html_e( 'Add to cart', 'bacera' ); ?>
+					</button>
+				</div>
+			</form>
+
+			<?php /* Trust bar */ ?>
+			<div class="pdp-trust">
+				<div class="pdp-trust-item">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+					<?php esc_html_e( 'Free ship over 2,000,000₫', 'bacera' ); ?>
+				</div>
+				<div class="pdp-trust-item">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+					<?php esc_html_e( '30-day returns', 'bacera' ); ?>
+				</div>
+				<div class="pdp-trust-item">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+					<?php esc_html_e( 'Handcrafted · unique piece', 'bacera' ); ?>
+				</div>
+			</div>
+
+			<?php /* Accordions */ ?>
+			<div class="pdp-accordions">
+				<?php /* Dimensions */ ?>
+				<div class="pdp-acc is-open" id="pdp-acc-dims">
+					<button class="pdp-acc-btn" onclick="togglePdpAcc('pdp-acc-dims')">
+						<?php esc_html_e( 'Dimensions & Specifications', 'bacera' ); ?>
+						<span class="pdp-acc-chevron">▾</span>
+					</button>
+					<div class="pdp-acc-body">
+						<?php if ( ! empty( $dimensions_lines ) ) : ?>
+						<table class="pdp-spec-table">
+							<?php foreach ( $dimensions_lines as $row ) : ?>
+							<tr>
+								<td><?php echo esc_html( $row['label'] ); ?></td>
+								<td><?php echo esc_html( $row['value'] ); ?></td>
+							</tr>
+							<?php endforeach; ?>
+						</table>
+						<?php else : ?>
+						<p><?php esc_html_e( 'Size information will be updated soon.', 'bacera' ); ?></p>
+						<?php endif; ?>
+					</div>
+				</div>
+
+				<div class="pdp-acc" id="pdp-acc-ship">
+					<button class="pdp-acc-btn" onclick="togglePdpAcc('pdp-acc-ship')">
+						<?php esc_html_e( 'Shipping & Returns', 'bacera' ); ?>
+						<span class="pdp-acc-chevron">▾</span>
+					</button>
+					<div class="pdp-acc-body">
+						<?php esc_html_e( 'Orders are carefully packed with recycled materials. Standard delivery 3–5 days within Vietnam. Free returns within 30 days if item arrives damaged.', 'bacera' ); ?>
+					</div>
+				</div>
+
+				<div class="pdp-acc" id="pdp-acc-care">
+					<button class="pdp-acc-btn" onclick="togglePdpAcc('pdp-acc-care')">
+						<?php esc_html_e( 'Care Instructions', 'bacera' ); ?>
+						<span class="pdp-acc-chevron">▾</span>
+					</button>
+					<div class="pdp-acc-body">
+						<?php esc_html_e( 'Hand wash with warm water and mild soap. Avoid abrasive cleaners. Dry with a soft cloth to preserve the glaze finish.', 'bacera' ); ?>
+					</div>
+				</div>
+			</div>
+
+		</div><?php /* .pdp-info */ ?>
+	</div><?php /* .pdp-hero */ ?>
+
+</div><?php /* .pdp-container */ ?>
+
+<?php /* ── JS for variants, gallery, qty ── */ ?>
+<?php if ( ! empty( $pdp_js_variants ) ) : ?>
+<script type="application/json" id="bacera-pdp-variants-json"><?php echo wp_json_encode( $pdp_js_variants ); ?></script>
+<script type="application/json" id="bacera-pdp-cart-meta-json"><?php echo wp_json_encode( [ 'brand' => $breadcrumb_collection, 'productName' => $product_title, 'permalink' => get_permalink( $product_id ) ] ); ?></script>
+<script>
+(function(){
+	var jsonEl = document.getElementById('bacera-pdp-variants-json');
+	if (!jsonEl) return;
+	var variants;
+	try { variants = JSON.parse(jsonEl.textContent); } catch(e) { return; }
+
+	var galleryUrls = <?php echo wp_json_encode( array_values( $gallery_urls ) ); ?>;
+	var currentThumbIdx = <?php echo (int) $thumb_selected_index; ?>;
+
+	var mainImg   = document.getElementById('bacera-pdp-main-img');
+	var priceSale = document.getElementById('bacera-pdp-price-sale');
+	var priceReg  = document.getElementById('bacera-pdp-price-regular');
+	var discBadge = document.getElementById('bacera-pdp-discount-badge');
+	var colorLbl  = document.getElementById('bacera-pdp-color-label');
+	var stockEl   = document.querySelector('.pdp-stock');
+
+	function setMainImg(src, thumbIdx) {
+		if (mainImg && src) mainImg.src = src;
+		currentThumbIdx = (typeof thumbIdx !== 'undefined') ? thumbIdx : currentThumbIdx;
+		document.querySelectorAll('.pdp-thumb').forEach(function(t) {
+			var idx = parseInt(t.getAttribute('data-thumb-idx'), 10);
+			t.classList.toggle('is-active', idx === currentThumbIdx);
+		});
+	}
+
+	function applyVariant(i) {
+		if (!variants[i]) return;
+		var v = variants[i];
+		var img = v.mainImage || (galleryUrls && galleryUrls[0]) || '';
+		var tidx = galleryUrls ? galleryUrls.indexOf(img) : -1;
+		setMainImg(img, tidx >= 0 ? tidx : 0);
+		if (priceSale) priceSale.textContent = v.priceFormatted;
+		if (priceReg) {
+			if (v.regularFormatted) { priceReg.textContent = v.regularFormatted; priceReg.style.display = ''; }
+			else { priceReg.textContent = ''; priceReg.style.display = 'none'; }
+		}
+		if (discBadge) {
+			if (v.discountPercent > 0) { discBadge.textContent = '-' + v.discountPercent + '%'; discBadge.style.display = ''; }
+			else { discBadge.style.display = 'none'; }
+		}
+		if (colorLbl) colorLbl.textContent = v.colorLabel || '—';
+	}
+
+	/* Swatches */
+	document.querySelectorAll('.bacera-pdp-swatch').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			var i = parseInt(this.getAttribute('data-variant-index'), 10);
+			if (isNaN(i) || i < 0 || i >= variants.length) return;
+			document.querySelectorAll('.bacera-pdp-swatch').forEach(function(s) {
+				s.classList.toggle('is-active', parseInt(s.getAttribute('data-variant-index'),10) === i);
+			});
+			applyVariant(i);
+		});
+	});
+
+	/* Thumbnails */
+	document.querySelectorAll('.pdp-thumb').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			var src = this.getAttribute('data-src');
+			var idx = parseInt(this.getAttribute('data-thumb-idx'), 10);
+			setMainImg(src, idx);
+		});
+	});
+
+	/* Gallery nav arrows */
+	var prevBtn = document.getElementById('pdp-nav-prev');
+	var nextBtn = document.getElementById('pdp-nav-next');
+	if (prevBtn && galleryUrls && galleryUrls.length > 1) {
+		prevBtn.addEventListener('click', function() {
+			var ni = (currentThumbIdx - 1 + galleryUrls.length) % galleryUrls.length;
+			setMainImg(galleryUrls[ni], ni);
+		});
+	}
+	if (nextBtn && galleryUrls && galleryUrls.length > 1) {
+		nextBtn.addEventListener('click', function() {
+			var ni = (currentThumbIdx + 1) % galleryUrls.length;
+			setMainImg(galleryUrls[ni], ni);
+		});
+	}
+
+	/* Qty */
+	var qEl = document.getElementById('bacera-pdp-qty');
+	function qVal() { var n = parseInt(qEl && qEl.value ? qEl.value : '1', 10); return isNaN(n) || n < 1 ? 1 : n; }
+	function setQ(n) { if (qEl) qEl.value = n < 10 ? '0' + n : String(n); }
+	var qmin = document.querySelector('.bacera-pdp-qty-minus');
+	var qpls = document.querySelector('.bacera-pdp-qty-plus');
+	if (qmin) qmin.addEventListener('click', function() { setQ(Math.max(1, qVal() - 1)); });
+	if (qpls) qpls.addEventListener('click', function() { setQ(qVal() + 1); });
+})();
+</script>
+<?php endif; ?>
+
+<script>
+function togglePdpAcc(id) {
+	var el = document.getElementById(id);
+	if (el) el.classList.toggle('is-open');
+}
+var pdpWish = false;
+var wishBtn = document.getElementById('bacera-pdp-wish-btn');
+if (wishBtn) { wishBtn.addEventListener('click', function() { pdpWish = !pdpWish; this.textContent = pdpWish ? '♥' : '♡'; this.style.color = pdpWish ? '#C06B3A' : ''; this.style.borderColor = pdpWish ? '#C06B3A' : ''; }); }
+function switchPdpTab(name) {
+	document.querySelectorAll('.pdp-tab-btn').forEach(function(b){ b.classList.toggle('is-active', b.getAttribute('data-tab') === name); });
+	document.querySelectorAll('.pdp-tab-panel').forEach(function(p){ p.classList.toggle('is-active', p.getAttribute('data-tab') === name); });
+}
+</script>
+
+<?php /* ─── LOWER TABS ─── */ ?>
+<div class="pdp-lower">
+	<div class="pdp-tabs-nav" role="tablist">
+		<button class="pdp-tab-btn is-active" data-tab="details" onclick="switchPdpTab('details')"><?php esc_html_e( 'Product Details', 'bacera' ); ?></button>
+		<button class="pdp-tab-btn" data-tab="reviews" onclick="switchPdpTab('reviews')"><?php echo esc_html( sprintf( __( 'Reviews (%d)', 'bacera' ), $reviews_total ) ); ?></button>
+	</div>
+
+	<?php /* Detail tab */ ?>
+	<div class="pdp-tab-panel is-active" data-tab="details" id="pdp-tab-details">
+		<div class="pdp-detail-grid">
+			<div class="pdp-rich-text">
+				<?php
+				$pdp_editor_content = get_post_field( 'post_content', $product_id );
+				if ( $pdp_editor_content === '' || trim( wp_strip_all_tags( $pdp_editor_content ) ) === '' ) {
+					echo '<p style="color:var(--pdp-muted,#9A8478);">' . esc_html__( 'Add detailed content in the post editor (Pancake Products) in admin.', 'bacera' ) . '</p>';
+				} else {
+					echo apply_filters( 'the_content', $pdp_editor_content ); // phpcs:ignore WordPress.Security.EscapeOutput
+				}
+				?>
+			</div>
+			<div class="pdp-craft-box">
+				<div class="pdp-craft-icon">🏺</div>
+				<div class="pdp-craft-label"><?php esc_html_e( 'Behind the piece', 'bacera' ); ?></div>
+				<div class="pdp-craft-title"><?php esc_html_e( 'Crafted with intention, fired with patience', 'bacera' ); ?></div>
+				<div class="pdp-craft-body"><?php esc_html_e( 'Each piece is wheel-thrown by hand in our Hanoi studio using local stoneware clay — a tradition connecting modern craft with centuries of Vietnamese ceramics.', 'bacera' ); ?></div>
+			</div>
+		</div>
+	</div>
+
+	<?php /* Reviews tab */ ?>
+	<div class="pdp-tab-panel" data-tab="reviews" id="pdp-tab-reviews">
+		<div class="pdp-reviews-grid">
+
+			<?php /* Rating summary */ ?>
+			<div class="pdp-rating-summary">
+				<div style="color:var(--pdp-accent,#C06B3A);font-size:1.5rem;letter-spacing:-.02em;">
+					<?php for ( $i = 1; $i <= 5; $i++ ) { echo $i <= (int) round( $avg_rating ) ? '★' : '☆'; } ?>
+				</div>
+				<div class="pdp-rating-big"><?php echo esc_html( $avg_rating > 0 ? number_format( $avg_rating, 1, '.', '' ) : '—' ); ?></div>
+				<div style="font-size:.75rem;color:var(--pdp-muted,#9A8478);">
+					<?php echo esc_html( sprintf( __( 'out of 5 · %d reviews', 'bacera' ), $reviews_total ) ); ?>
+				</div>
+				<?php if ( $reviews_total > 0 ) : ?>
+				<div class="pdp-rating-bar-row">
+					<?php
+					$star_counts = [ 5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0 ];
+					foreach ( $reviews_list as $rev_item ) {
+						$rv = (int) get_comment_meta( (int) $rev_item->comment_ID, 'rating', true );
+						if ( $rv >= 1 && $rv <= 5 ) { $star_counts[ $rv ]++; }
+					}
+					for ( $star = 5; $star >= 1; $star-- ) :
+						$pct = $reviews_total > 0 ? round( ( $star_counts[ $star ] / $reviews_total ) * 100 ) : 0;
+					?>
+					<div class="pdp-rbar">
+						<span><?php echo esc_html( $star ); ?>★</span>
+						<div class="pdp-rbar-track"><div class="pdp-rbar-fill" style="width:<?php echo esc_attr( (string) $pct ); ?>%;"></div></div>
+						<span><?php echo esc_html( $pct ); ?>%</span>
+					</div>
+					<?php endfor; ?>
+				</div>
+				<?php endif; ?>
+				<button class="pdp-write-review-btn" onclick="document.getElementById('pdp-review-form').scrollIntoView({behavior:'smooth'});">
+					✍ <?php esc_html_e( 'Write a review', 'bacera' ); ?>
+				</button>
+			</div>
+
+			<?php /* Reviews list + form */ ?>
+			<div>
+				<div class="pdp-reviews-list">
+					<?php if ( empty( $reviews_list ) ) : ?>
+					<p style="color:var(--pdp-muted,#9A8478);font-size:.875rem;"><?php esc_html_e( 'No reviews yet. Be the first!', 'bacera' ); ?></p>
+					<?php else : ?>
+					<?php foreach ( array_slice( $reviews_list, 0, 6 ) as $review ) :
+						$rev_rating = (int) get_comment_meta( (int) $review->comment_ID, 'rating', true );
+						$rev_title  = (string) get_comment_meta( (int) $review->comment_ID, 'review_title', true );
+						$initials   = mb_strtoupper( mb_substr( $review->comment_author, 0, 1, 'UTF-8' ), 'UTF-8' );
+					?>
+					<article class="pdp-review-card">
+						<div class="pdp-review-header">
+							<div class="pdp-review-author">
+								<div class="pdp-review-avatar"><?php echo esc_html( $initials ); ?></div>
+								<div>
+									<div class="pdp-review-name"><?php echo esc_html( $review->comment_author ); ?></div>
+									<div class="pdp-review-date"><?php echo esc_html( get_comment_date( 'F j, Y', $review ) ); ?></div>
+								</div>
+							</div>
+							<?php if ( $rev_rating >= 1 ) : ?>
+							<div class="pdp-review-stars">
+								<?php for ( $i = 1; $i <= 5; $i++ ) { echo $i <= $rev_rating ? '★' : '☆'; } ?>
+							</div>
+							<?php endif; ?>
+						</div>
+						<?php if ( $rev_title !== '' ) : ?>
+						<div class="pdp-review-title"><?php echo esc_html( $rev_title ); ?></div>
+						<?php endif; ?>
+						<p class="pdp-review-body"><?php echo esc_html( $review->comment_content ); ?></p>
+						<div class="pdp-review-verified">✓ <?php esc_html_e( 'Verified purchase', 'bacera' ); ?></div>
+					</article>
+					<?php endforeach; ?>
 					<?php endif; ?>
 				</div>
 
-				<form class="product-add-to-cart-form" id="bacera-pdp-add-form" action="#" method="post" onsubmit="return false;">
-					<div class="variation-color mb-5">
-						<label class="mb-2 block text-sm text-primary-700">
-							<?php esc_html_e( 'Màu sắc', 'bacera' ); ?>:
-							<strong id="bacera-pdp-color-label"><?php echo esc_html( $color_label ); ?></strong>
-						</label>
-						<div id="bacera-pdp-color-swatches" class="flex flex-wrap gap-2">
-							<?php if ( ! empty( $variations ) ) : ?>
-								<?php foreach ( $variations as $vi => $_v ) : ?>
-									<?php
-									$col    = $swatch_palette[ (int) $vi % count( $swatch_palette ) ];
-									$active = ( (int) $vi === $current_vi );
-									?>
-							<button type="button" data-variant-index="<?php echo esc_attr( (string) (int) $vi ); ?>" class="bacera-pdp-swatch h-9 w-9 rounded-full border-2 transition <?php echo $active ? 'border-primary-800' : 'border-transparent ring-1 ring-primary-200'; ?>" style="background-color: <?php echo esc_attr( $col ); ?>" aria-label="<?php echo esc_attr( sprintf( /* translators: %d: swatch index */ __( 'Color option %d', 'bacera' ), (int) $vi + 1 ) ); ?>"></button>
-								<?php endforeach; ?>
-							<?php else : ?>
-								<?php
-								for ( $si = 0; $si < 3; $si++ ) {
-									$col = $swatch_palette[ $si % count( $swatch_palette ) ];
-									echo '<span class="h-9 w-9 rounded-full ring-1 ring-primary-200" style="background-color:' . esc_attr( $col ) . '"></span>';
-								}
-								?>
-							<?php endif; ?>
+				<?php /* Write review form */ ?>
+				<div id="pdp-review-form" class="pdp-review-form" style="margin-top:1.5rem;">
+					<h3 style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;font-weight:500;color:var(--pdp-text,#2A1F17);margin:0 0 1rem;"><?php esc_html_e( 'Write a review', 'bacera' ); ?></h3>
+					<form action="<?php echo esc_url( site_url( '/wp-comments-post.php' ) ); ?>" method="post" class="pdp-form-grid">
+						<div>
+							<label for="pdp-review-rating"><?php esc_html_e( 'Rating', 'bacera' ); ?></label>
+							<select id="pdp-review-rating" name="rating" required>
+								<option value=""><?php esc_html_e( 'Select rating', 'bacera' ); ?></option>
+								<option value="5">5 ★★★★★</option>
+								<option value="4">4 ★★★★☆</option>
+								<option value="3">3 ★★★☆☆</option>
+								<option value="2">2 ★★☆☆☆</option>
+								<option value="1">1 ★☆☆☆☆</option>
+							</select>
 						</div>
-					</div>
-
-					<div class="variation-size mb-6">
-						<label class="mb-2 block text-sm text-primary-700" for="bacera-pdp-capacity"><?php esc_html_e( 'Dung tích', 'bacera' ); ?></label>
-						<select id="bacera-pdp-capacity" name="capacity" class="w-full rounded-md border border-primary-200 bg-white/90 p-2.5 text-primary-900">
-							<?php foreach ( $capacity_options as $opt ) : ?>
-							<option value="<?php echo esc_attr( $opt ); ?>"><?php echo esc_html( $opt ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</div>
-
-					<p class="stock-status mb-5 text-sm text-primary-700">
-						<?php esc_html_e( 'Còn', 'bacera' ); ?>
-						<span id="bacera-pdp-stock"><?php echo esc_html( (string) (int) $stock_quantity ); ?></span>
-						<?php esc_html_e( ' sản phẩm', 'bacera' ); ?>
-					</p>
-
-					<div class="product-actions mb-8 flex flex-col gap-4 sm:flex-row sm:items-stretch sm:justify-start">
-						<button type="button" class="btn-wishlist flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-primary-200 bg-white text-primary-800 hover:bg-primary-100/60" aria-label="<?php esc_attr_e( 'Wishlist', 'bacera' ); ?>">♡</button>
-						<div class="qty-input flex h-12 items-center justify-center rounded-md border border-primary-200 bg-white">
-							<button type="button" class="bacera-pdp-qty-minus px-3 py-2 text-primary-700 hover:bg-primary-100/80" aria-label="<?php esc_attr_e( 'Decrease quantity', 'bacera' ); ?>">−</button>
-							<input id="bacera-pdp-qty" type="text" readonly value="<?php echo esc_attr( str_pad( (string) 1, 2, '0', STR_PAD_LEFT ) ); ?>" class="w-12 border-0 bg-transparent text-center text-sm tabular-nums text-primary-900 focus:ring-0" />
-							<button type="button" class="bacera-pdp-qty-plus px-3 py-2 text-primary-700 hover:bg-primary-100/80" aria-label="<?php esc_attr_e( 'Increase quantity', 'bacera' ); ?>">+</button>
-						</div>
-						<button type="button" id="bacera-pdp-add-cart-btn" class="btn-add-cart flex-1 rounded-md bg-accent-500 px-6 py-3 font-medium text-white transition-colors hover:bg-accent-600">
-							<?php esc_html_e( 'Thêm vào giỏ hàng', 'bacera' ); ?>
-						</button>
-					</div>
-				</form>
-
-				<div class="product-accordions w-full border-t border-primary-100 text-left">
-					<details class="group border-b border-primary-100 py-4" open>
-						<summary class="flex cursor-pointer list-none items-center justify-between font-medium text-primary-900 [&::-webkit-details-marker]:hidden">
-							<?php esc_html_e( 'Kích thước', 'bacera' ); ?>
-							<span class="text-primary-500 transition group-open:rotate-180">▾</span>
-						</summary>
-						<div class="mt-3 text-sm leading-relaxed text-primary-700">
-							<?php if ( ! empty( $dimensions_lines ) ) : ?>
-							<ul class="list-outside list-disc space-y-1 pl-5 text-left">
-								<?php foreach ( $dimensions_lines as $row ) : ?>
-								<li>
-									<?php if ( $row['label'] !== '' ) : ?>
-									<strong class="font-medium text-primary-900"><?php echo esc_html( $row['label'] ); ?>:</strong>
-									<?php endif; ?>
-									<?php echo esc_html( $row['value'] ); ?>
-								</li>
-								<?php endforeach; ?>
-							</ul>
-							<?php else : ?>
-							<p class="m-0"><?php esc_html_e( 'Thông tin kích thước đang cập nhật.', 'bacera' ); ?></p>
-							<?php endif; ?>
-						</div>
-					</details>
-					<details class="group border-b border-primary-100 py-4">
-						<summary class="flex cursor-pointer list-none items-center justify-between font-medium text-primary-900 [&::-webkit-details-marker]:hidden">
-							<?php esc_html_e( 'Giao hàng & Đổi trả', 'bacera' ); ?>
-							<span class="text-primary-500 transition group-open:rotate-180">▾</span>
-						</summary>
-						<div class="mt-3 text-sm text-primary-700">
-							<?php esc_html_e( 'Chính sách giao hàng và đổi trả theo quy định của Bacera. Liên hệ hỗ trợ nếu bạn cần hỗ trợ thêm.', 'bacera' ); ?>
-						</div>
-					</details>
-				</div>
-
-			</div>
-		</section>
-
-		<?php if ( ! empty( $pdp_js_variants ) ) : ?>
-		<script type="application/json" id="bacera-pdp-variants-json"><?php echo wp_json_encode( $pdp_js_variants ); ?></script>
-		<script type="application/json" id="bacera-pdp-cart-meta-json"><?php echo wp_json_encode( [ 'brand' => $breadcrumb_collection, 'productName' => $product_title, 'permalink' => get_permalink( $product_id ) ] ); ?></script>
-		<script>
-		(function () {
-			var jsonEl = document.getElementById('bacera-pdp-variants-json');
-			if (!jsonEl) return;
-			var variants;
-			try { variants = JSON.parse(jsonEl.textContent); } catch (e) { return; }
-			var mainImg = document.getElementById('bacera-pdp-main-img');
-			var priceSale = document.getElementById('bacera-pdp-price-sale');
-			var priceReg = document.getElementById('bacera-pdp-price-regular');
-			var discBadge = document.getElementById('bacera-pdp-discount-badge');
-			var colorLabel = document.getElementById('bacera-pdp-color-label');
-			var stockEl = document.getElementById('bacera-pdp-stock');
-			var swatches = document.querySelectorAll('.bacera-pdp-swatch');
-			function syncThumbsToMain(src) {
-				if (!src) return;
-				var thumbs = document.querySelectorAll('.bacera-pdp-thumb');
-				thumbs.forEach(function (x) {
-					var ds = x.getAttribute('data-src');
-					var on = (ds === src);
-					x.classList.toggle('border-primary-800', on);
-					x.classList.toggle('border-transparent', !on);
-					if (on) {
-						try {
-							x.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-						} catch (e) {
-							x.scrollIntoView(false);
-						}
-					}
-				});
-			}
-			function applyVariant(i) {
-				if (!variants[i] || !mainImg) return;
-				var v = variants[i];
-				mainImg.src = v.mainImage;
-				syncThumbsToMain(v.mainImage);
-				if (priceSale) priceSale.textContent = v.priceFormatted;
-				if (priceReg) {
-					if (v.regularFormatted) { priceReg.textContent = v.regularFormatted; priceReg.classList.remove('hidden'); }
-					else { priceReg.textContent = ''; priceReg.classList.add('hidden'); }
-				}
-				if (discBadge) {
-					if (v.discountPercent > 0) { discBadge.textContent = '-' + v.discountPercent + '%'; discBadge.classList.remove('hidden'); }
-					else { discBadge.classList.add('hidden'); }
-				}
-				if (colorLabel) colorLabel.textContent = v.colorLabel || '—';
-				if (stockEl) stockEl.textContent = String(v.stock);
-			}
-			swatches.forEach(function (btn) {
-				btn.addEventListener('click', function () {
-					var i = parseInt(btn.getAttribute('data-variant-index'), 10);
-					if (isNaN(i) || i < 0 || i >= variants.length) return;
-					swatches.forEach(function (s) {
-						var si = parseInt(s.getAttribute('data-variant-index'), 10);
-						var on = si === i;
-						s.classList.toggle('border-primary-800', on);
-						s.classList.toggle('border-transparent', !on);
-					});
-					applyVariant(i);
-				});
-			});
-			var thumbs = document.querySelectorAll('.bacera-pdp-thumb');
-			thumbs.forEach(function (t) {
-				t.addEventListener('click', function () {
-					var src = t.getAttribute('data-src');
-					if (src && mainImg) mainImg.src = src;
-					syncThumbsToMain(src || '');
-				});
-			});
-			var q = document.getElementById('bacera-pdp-qty');
-			var qmin = document.querySelector('.bacera-pdp-qty-minus');
-			var qplus = document.querySelector('.bacera-pdp-qty-plus');
-			function qVal() { var n = parseInt((q && q.value) ? q.value : '1', 10); return isNaN(n) ? 1 : n; }
-			function setQ(n) { if (q) q.value = n < 10 ? ('0' + n) : String(n); }
-			if (qmin) qmin.addEventListener('click', function () { var n = Math.max(1, qVal() - 1); setQ(n); });
-			if (qplus) qplus.addEventListener('click', function () { var n = qVal() + 1; setQ(n); });
-		})();
-		</script>
-		<?php endif; ?>
-
-        <section class="bacera-product-story w-full text-left text-primary-900">
-            <div class="tabs-nav mb-8 flex justify-start gap-8 border-b border-primary-100">
-                <button
-					type="button"
-					class="bacera-story-tab border-b-2 pb-2 font-medium <?php echo $review_tab_requested ? 'border-transparent text-primary-600 hover:text-primary-900' : 'border-primary-900 text-primary-900'; ?>"
-					data-target="detail"
-					aria-selected="<?php echo $review_tab_requested ? 'false' : 'true'; ?>">
-					<?php esc_html_e( 'Chi tiết sản phẩm', 'bacera' ); ?>
-				</button>
-                <button
-					type="button"
-					class="bacera-story-tab border-b-2 pb-2 font-medium <?php echo $review_tab_requested ? 'border-primary-900 text-primary-900' : 'border-transparent text-primary-600 hover:text-primary-900'; ?>"
-					data-target="reviews"
-					aria-selected="<?php echo $review_tab_requested ? 'true' : 'false'; ?>">
-					<?php esc_html_e( 'Đánh giá sản phẩm', 'bacera' ); ?>
-				</button>
-            </div>
-
-			<div class="tabs-content w-full max-w-none text-left text-primary-800">
-				<div id="bacera-pdp-tab-detail" class="<?php echo $review_tab_requested ? 'hidden' : ''; ?>">
-					<div class="bacera-pdp-entry-content entry-content rounded-xl border border-primary-100 bg-white p-6 shadow-sm md:p-8 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-lg [&_a]:text-accent-600 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent-500 [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:text-primary-900 [&_h2]:first:mt-0 [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:text-primary-900 [&_p]:mb-4 [&_p]:leading-relaxed [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-primary-200 [&_blockquote]:pl-4 [&_blockquote]:italic">
-						<?php
-						$pdp_editor_content = get_post_field( 'post_content', $product_id );
-						if ( $pdp_editor_content === '' || trim( wp_strip_all_tags( $pdp_editor_content ) ) === '' ) {
-							echo '<p class="m-0 text-primary-600">' . esc_html__( 'Thêm nội dung chi tiết trong trình soạn thảo bài viết (Pancake Products) trong quản trị.', 'bacera' ) . '</p>';
-						} else {
-							echo apply_filters( 'the_content', $pdp_editor_content );
-						}
-						?>
-					</div>
-				</div>
-
-				<?php
-				$commenter = wp_get_current_commenter();
-				?>
-				<div id="bacera-pdp-tab-reviews" class="<?php echo $review_tab_requested ? '' : 'hidden'; ?>">
-					<div class="grid grid-cols-1 gap-4 lg:grid-cols-5 lg:gap-6">
-						<div class="rounded-xl border border-primary-100 bg-white p-6 shadow-sm lg:col-span-3">
-							<h3 class="mb-2 text-3xl font-medium text-primary-900"><?php esc_html_e( 'Đánh giá sản phẩm', 'bacera' ); ?></h3>
-							<div class="mb-6 flex items-center gap-2 text-sm text-primary-700">
-								<span><?php echo esc_html( $avg_rating > 0 ? number_format( $avg_rating, 1 ) : '0.0' ); ?>/5</span>
-								<span>•</span>
-								<span><?php echo esc_html( (string) $reviews_total ); ?> <?php esc_html_e( 'Reviews', 'bacera' ); ?></span>
-								<span class="ml-1 text-[#D46A50]">
-									<?php
-									$avg_star = (int) round( $avg_rating );
-									for ( $i = 1; $i <= 5; $i++ ) {
-										echo $i <= $avg_star ? '★' : '☆';
-									}
-									?>
-								</span>
-							</div>
-
-							<div class="space-y-4">
-								<?php if ( empty( $reviews_list ) ) : ?>
-									<p class="m-0 text-primary-600"><?php esc_html_e( 'Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này.', 'bacera' ); ?></p>
-								<?php else : ?>
-									<?php foreach ( array_slice( $reviews_list, 0, 6 ) as $review ) : ?>
-										<?php
-										$review_rating = (int) get_comment_meta( (int) $review->comment_ID, 'rating', true );
-										$review_title  = (string) get_comment_meta( (int) $review->comment_ID, 'review_title', true );
-										?>
-										<article class="border-b border-primary-100 pb-4 last:border-b-0">
-											<div class="mb-1 text-sm text-[#D46A50]">
-												<?php
-												for ( $i = 1; $i <= 5; $i++ ) {
-													echo $i <= $review_rating ? '★' : '☆';
-												}
-												?>
-											</div>
-											<?php if ( $review_title !== '' ) : ?>
-												<h4 class="mb-1 text-base font-medium text-primary-900"><?php echo esc_html( $review_title ); ?></h4>
-											<?php endif; ?>
-											<p class="m-0 text-base leading-relaxed text-primary-800"><?php echo esc_html( $review->comment_content ); ?></p>
-											<p class="mt-1 text-sm text-primary-600">
-												<?php echo esc_html( $review->comment_author ); ?>
-												<span>•</span>
-												<?php echo esc_html( get_comment_date( 'F j, Y', $review ) ); ?>
-											</p>
-										</article>
-									<?php endforeach; ?>
-								<?php endif; ?>
-							</div>
-						</div>
-
-						<div class="rounded-xl border border-primary-100 bg-white p-6 shadow-sm lg:col-span-2">
-							<h3 class="mb-4 text-3xl font-medium text-primary-900"><?php esc_html_e( 'Viết đánh giá', 'bacera' ); ?></h3>
-							<form action="<?php echo esc_url( site_url( '/wp-comments-post.php' ) ); ?>" method="post" class="flex flex-col">
-								<div class="flex flex-col gap-5">
-									<div>
-										<label for="bacera-review-rating" class="mb-2 block text-sm font-medium text-primary-700"><?php esc_html_e( 'Rating', 'bacera' ); ?></label>
-										<select id="bacera-review-rating" name="rating" required class="w-full rounded-md border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500">
-											<option value=""><?php esc_html_e( 'Select rating', 'bacera' ); ?></option>
-											<option value="5">5 ★</option>
-											<option value="4">4 ★</option>
-											<option value="3">3 ★</option>
-											<option value="2">2 ★</option>
-											<option value="1">1 ★</option>
-										</select>
-									</div>
-									<input type="text" name="author" required value="<?php echo esc_attr( $commenter['comment_author'] ?? '' ); ?>" placeholder="<?php esc_attr_e( 'Name', 'bacera' ); ?>" class="w-full rounded-md border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500" />
-									<input type="email" name="email" required value="<?php echo esc_attr( $commenter['comment_author_email'] ?? '' ); ?>" placeholder="<?php esc_attr_e( 'Email', 'bacera' ); ?>" class="w-full rounded-md border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500" />
-									<input type="text" name="review_title" placeholder="<?php esc_attr_e( 'Title', 'bacera' ); ?>" class="w-full rounded-md border border-primary-200 px-3 py-2.5 text-primary-900 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500" />
-									<textarea name="comment" required rows="5" placeholder="<?php esc_attr_e( 'Write your review', 'bacera' ); ?>" class="min-h-[140px] w-full rounded-md border border-primary-200 px-3 py-3 leading-relaxed text-primary-900 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500"></textarea>
-								</div>
-								<div class="mt-6">
-									<input type="hidden" name="comment_post_ID" value="<?php echo esc_attr( $product_id ); ?>" />
-									<input type="hidden" name="comment_parent" value="0" />
-									<input type="hidden" name="bacera_review_redirect" value="<?php echo esc_url( $review_redirect_url . '#bacera-pdp-tab-reviews' ); ?>" />
-									<?php wp_nonce_field( 'comment_form_' . $product_id ); ?>
-									<button type="submit" class="mt-5 w-full rounded-md bg-accent-500 px-4 py-3 text-base font-medium text-white transition-colors hover:bg-accent-600">
-										<?php esc_html_e( 'Post a review', 'bacera' ); ?>
-									</button>
-								</div>
-							</form>
-						</div>
-					</div>
+						<?php $commenter = wp_get_current_commenter(); ?>
+						<div><label for="pdp-author"><?php esc_html_e( 'Name', 'bacera' ); ?></label><input type="text" id="pdp-author" name="author" required value="<?php echo esc_attr( $commenter['comment_author'] ?? '' ); ?>" placeholder="<?php esc_attr_e( 'Your name', 'bacera' ); ?>" /></div>
+						<div><label for="pdp-email"><?php esc_html_e( 'Email', 'bacera' ); ?></label><input type="email" id="pdp-email" name="email" required value="<?php echo esc_attr( $commenter['comment_author_email'] ?? '' ); ?>" placeholder="<?php esc_attr_e( 'your@email.com', 'bacera' ); ?>" /></div>
+						<div><label for="pdp-review-title"><?php esc_html_e( 'Review title', 'bacera' ); ?></label><input type="text" id="pdp-review-title" name="review_title" placeholder="<?php esc_attr_e( 'In a few words…', 'bacera' ); ?>" /></div>
+						<div><label for="pdp-comment"><?php esc_html_e( 'Your review', 'bacera' ); ?></label><textarea id="pdp-comment" name="comment" required rows="5" placeholder="<?php esc_attr_e( 'Tell us what you think…', 'bacera' ); ?>"></textarea></div>
+						<input type="hidden" name="comment_post_ID" value="<?php echo esc_attr( $product_id ); ?>" />
+						<input type="hidden" name="comment_parent" value="0" />
+						<input type="hidden" name="bacera_review_redirect" value="<?php echo esc_url( add_query_arg( 'tab', 'reviews', get_permalink( $product_id ) ) . '#pdp-tab-reviews' ); ?>" />
+						<?php wp_nonce_field( 'comment_form_' . $product_id ); ?>
+						<button type="submit" class="pdp-form-submit"><?php esc_html_e( 'Post review', 'bacera' ); ?></button>
+					</form>
 				</div>
 			</div>
-			<script>
-			(function () {
-				var tabs = document.querySelectorAll('.bacera-story-tab');
-				var detail = document.getElementById('bacera-pdp-tab-detail');
-				var reviews = document.getElementById('bacera-pdp-tab-reviews');
-				if (!tabs.length || !detail || !reviews) return;
-				function activate(which) {
-					var showReviews = which === 'reviews';
-					detail.classList.toggle('hidden', showReviews);
-					reviews.classList.toggle('hidden', !showReviews);
-					tabs.forEach(function (tab) {
-						var active = tab.getAttribute('data-target') === which;
-						tab.setAttribute('aria-selected', active ? 'true' : 'false');
-						tab.classList.toggle('border-primary-900', active);
-						tab.classList.toggle('text-primary-900', active);
-						tab.classList.toggle('border-transparent', !active);
-						tab.classList.toggle('text-primary-600', !active);
-					});
-				}
-				tabs.forEach(function (tab) {
-					tab.addEventListener('click', function () {
-						activate(tab.getAttribute('data-target'));
-					});
-				});
-			})();
-			</script>
-        </section>
+		</div>
+	</div>
+</div><?php /* .pdp-lower */ ?>
 
-		<?php
-		$current_pancake_product_id = (string) get_post_meta( $product_id, '_pancake_product_id', true );
-		$related_items              = [];
-		if ( class_exists( 'Pancake_API_Client' ) && class_exists( 'Bacera_Utils' ) ) {
-			$api          = new Pancake_API_Client();
-			$rel_endpoint = '/shops/{SHOP_ID}/products/variations?' . http_build_query(
-				[
-					'page_size' => 24,
-					'page'      => 1,
-				]
-			);
-			$rel_resp = $api->request( $rel_endpoint, 'GET' );
-			if ( is_array( $rel_resp ) && ! empty( $rel_resp['success'] ) && ! empty( $rel_resp['data'] ) && is_array( $rel_resp['data'] ) ) {
-				foreach ( $rel_resp['data'] as $item ) {
-					$vid = isset( $item['id'] ) ? (string) $item['id'] : '';
-					$pid = isset( $item['product_id'] ) ? (string) $item['product_id'] : '';
-					if ( $pid === '' && ! empty( $item['product']['id'] ) ) {
-						$pid = (string) $item['product']['id'];
-					}
-					if ( $pancake_variation_id !== '' && $vid === $pancake_variation_id ) {
-						continue;
-					}
-					if ( $current_pancake_product_id !== '' && $pid !== '' && $pid === $current_pancake_product_id ) {
-						continue;
-					}
-					Bacera_Utils::upsert_external_product( $item );
-					$related_items[] = $item;
-					if ( count( $related_items ) >= 4 ) {
-						break;
-					}
-				}
-			}
+<?php /* ─── RELATED PRODUCTS ─── */ ?>
+<?php
+$rel_items = [];
+if ( class_exists( 'Pancake_API_Client' ) && class_exists( 'Bacera_Utils' ) ) {
+	$rel_api   = new Pancake_API_Client();
+	$rel_resp  = $rel_api->request( '/shops/{SHOP_ID}/products/variations?' . http_build_query( [ 'page_size' => 24, 'page' => 1 ] ), 'GET' );
+	if ( is_array( $rel_resp ) && ! empty( $rel_resp['success'] ) && ! empty( $rel_resp['data'] ) && is_array( $rel_resp['data'] ) ) {
+		foreach ( $rel_resp['data'] as $rel_item ) {
+			$vid = isset( $rel_item['id'] ) ? (string) $rel_item['id'] : '';
+			$pid = isset( $rel_item['product_id'] ) ? (string) $rel_item['product_id'] : ( isset( $rel_item['product']['id'] ) ? (string) $rel_item['product']['id'] : '' );
+			if ( $pancake_variation_id !== '' && $vid === $pancake_variation_id ) { continue; }
+			if ( $current_pancake_product_id !== '' && $pid !== '' && $pid === $current_pancake_product_id ) { continue; }
+			Bacera_Utils::upsert_external_product( $rel_item );
+			$rel_items[] = $rel_item;
+			if ( count( $rel_items ) >= 4 ) { break; }
 		}
+	}
+}
+?>
+<div class="pdp-related">
+	<div class="pdp-related-hdr">
+		<h2 class="pdp-related-title"><?php esc_html_e( 'You might also like', 'bacera' ); ?></h2>
+		<p class="pdp-related-sub"><?php esc_html_e( 'Freshly crafted. New stories waiting to be part of your everyday rituals.', 'bacera' ); ?></p>
+	</div>
+	<?php if ( ! empty( $rel_items ) ) : ?>
+	<div class="pdp-related-grid">
+		<?php foreach ( $rel_items as $rp ) :
+			$rname  = $rp['product']['name'] ?? $rp['name'] ?? __( 'Product', 'bacera' );
+			$rimage = Bacera_Utils::get_proxy_url( $rp );
+			if ( $rimage === '' ) { $rimage = $rp['images'][0] ?? $rp['product']['image'] ?? 'https://placehold.co/400x533/f0ece3/8d6a54?text=Bacera'; }
+			$rpat = isset( $rp['price_at_counter'] ) ? (float) $rp['price_at_counter'] : 0;
+			$rrat = isset( $rp['retail_price'] ) ? (float) $rp['retail_price'] : 0;
+			$rprice = $rpat > 0 ? $rpat : $rrat;
+			$rorig  = $rrat > $rprice ? $rrat : 0;
+			$rbrand = $bacera_pdp_related_brand( $rp );
+			if ( $rbrand === '' ) { $rbrand = 'Bacera'; }
+			$rurl = Bacera_Utils::get_product_permalink( $rp );
+			if ( $rurl === '' ) { $rurl = '#'; }
 		?>
-        <section class="bacera-related-products mt-24 mb-12 w-full rounded-[2rem] border border-primary-100 bg-[#F9F7F2] px-4 py-10 text-primary-900 md:px-10">
-            <div class="mx-auto mb-10 max-w-3xl text-center">
-                <h2 class="mb-2 font-serif text-3xl text-primary-900"><?php esc_html_e( 'You might also like', 'bacera' ); ?></h2>
-                <p class="m-0 text-sm leading-relaxed text-primary-600"><?php esc_html_e( 'Freshly crafted. New stories waiting to be part of your everyday rituals.', 'bacera' ); ?></p>
-            </div>
+		<?php get_template_part( 'app/Views/components/product-card', null, [
+			'title'     => $rname,
+			'brand'     => $rbrand,
+			'price'     => number_format( $rprice, 0, ',', '.' ) . ' ₫',
+			'old_price' => $rorig > 0 ? number_format( $rorig, 0, ',', '.' ) . ' ₫' : '',
+			'image'     => $rimage,
+			'url'       => $rurl,
+		] ); ?>
+		<?php endforeach; ?>
+	</div>
+	<?php else : ?>
+	<p style="text-align:center;color:var(--pdp-muted,#9A8478);font-size:.875rem;"><?php esc_html_e( 'No suggestions available yet.', 'bacera' ); ?></p>
+	<?php endif; ?>
+</div>
 
-			<?php if ( empty( $related_items ) ) : ?>
-				<p class="m-0 text-center text-sm text-primary-600"><?php esc_html_e( 'Hiện chưa có sản phẩm gợi ý.', 'bacera' ); ?></p>
-			<?php else : ?>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-					<?php
-					foreach ( $related_items as $p ) :
-						$name = $p['product']['name'] ?? $p['name'] ?? __( 'Product', 'bacera' );
-
-						// Ưu tiên proxy như Shop, fallback qua nhiều key ảnh từ payload.
-						$image_url = Bacera_Utils::get_proxy_url( $p );
-						if ( $image_url === '' ) {
-							$image_url = $p['images'][0]
-								?? $p['product']['images'][0]
-								?? $p['image']
-								?? $p['image_url']
-								?? $p['product']['image']
-								?? $p['product']['image_url']
-								?? '';
-						}
-						if ( $image_url === '' ) {
-							$image_url = 'https://placehold.co/400x533/f0ece3/8d6a54?text=Product';
-						}
-
-						$price_at_counter = isset( $p['price_at_counter'] ) ? (float) $p['price_at_counter'] : ( isset( $p['variations'][0]['price_at_counter'] ) ? (float) $p['variations'][0]['price_at_counter'] : 0 );
-						$retail_price     = isset( $p['retail_price'] ) ? (float) $p['retail_price'] : ( isset( $p['variations'][0]['retail_price'] ) ? (float) $p['variations'][0]['retail_price'] : 0 );
-
-						$price            = $price_at_counter > 0 ? $price_at_counter : $retail_price;
-						$original_price   = ( $retail_price > $price ) ? $retail_price : 0;
-						$discount_percent = false;
-						if ( $original_price > 0 && $price < $original_price ) {
-							$discount_percent = '-' . (string) (int) round( ( ( $original_price - $price ) / $original_price ) * 100 ) . '%';
-						}
-
-						$brand = $bacera_pdp_related_brand( $p );
-						if ( $brand === '' ) {
-							$brand = __( 'Bacera', 'bacera' );
-						}
-
-						$product_detail_url = Bacera_Utils::get_product_permalink( $p );
-						if ( $product_detail_url === '' ) {
-							$product_detail_url = '#';
-						}
-
-						?>
-						<div class="w-full">
-							<a href="<?php echo esc_url( $product_detail_url ); ?>" class="group block w-full no-underline">
-								<div class="relative mx-auto mb-3 max-w-[93%] overflow-hidden rounded-lg bg-neutral-100">
-									<?php if ( $discount_percent ) : ?>
-										<span class="absolute left-2 top-2 z-10 rounded bg-white/90 px-2 py-1 text-[11px] font-semibold text-primary-900 shadow-sm"><?php echo esc_html( $discount_percent ); ?></span>
-									<?php endif; ?>
-									<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $name ); ?>" loading="lazy" class="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-								</div>
-								<p class="mb-1 text-[10px] font-medium uppercase tracking-[0.12em] text-primary-700/70"><?php echo esc_html( $brand ); ?></p>
-								<h3 class="mb-1 font-serif text-[22px] leading-tight text-primary-900"><?php echo esc_html( $name ); ?></h3>
-								<div class="flex flex-wrap items-baseline gap-2">
-									<span class="text-base font-medium text-primary-900"><?php echo esc_html( number_format( $price, 0, ',', '.' ) . ' ₫' ); ?></span>
-									<?php if ( $original_price > 0 ) : ?>
-										<span class="text-sm text-primary-700/35 line-through"><?php echo esc_html( number_format( $original_price, 0, ',', '.' ) . ' ₫' ); ?></span>
-									<?php endif; ?>
-								</div>
-							</a>
-						</div>
-						<?php
-					endforeach;
-					?>
-				</div>
-            </div>
-			<?php endif; ?>
-        </section>
-
-    </div>
-
-	<div id="bacera-cart-overlay" class="bacera-cart-overlay" aria-hidden="true"></div>
-	<aside id="bacera-cart-drawer" class="bacera-cart-drawer" aria-hidden="true" aria-label="<?php esc_attr_e( 'Shopping cart', 'bacera' ); ?>">
-		<div class="bacera-cart-drawer-head flex items-center justify-between">
-			<h2 class="m-0 font-serif font-bold text-[2rem] leading-none text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></h2>
-			<button type="button" id="bacera-cart-close" class="h-9 w-9 rounded-full border border-stone-200 text-xl leading-none text-stone-600 hover:bg-stone-50" aria-label="<?php esc_attr_e( 'Close cart', 'bacera' ); ?>">×</button>
+<?php /* ─── CART DRAWER ─── */ ?>
+<div id="bacera-cart-overlay" class="bacera-cart-overlay" aria-hidden="true"></div>
+<aside id="bacera-cart-drawer" class="bacera-cart-drawer" aria-hidden="true" aria-label="<?php esc_attr_e( 'Shopping cart', 'bacera' ); ?>">
+	<div class="bacera-cart-drawer-head" style="display:flex;align-items:center;justify-content:space-between;">
+		<h2 style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:500;color:#2A1F17;"><?php esc_html_e( 'Your Cart', 'bacera' ); ?></h2>
+		<button type="button" id="bacera-cart-close" style="width:34px;height:34px;border-radius:50%;border:1px solid #DDD5CB;background:transparent;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9A8478;" aria-label="<?php esc_attr_e( 'Close cart', 'bacera' ); ?>">×</button>
+	</div>
+	<div id="bacera-cart-items" class="bacera-cart-items"></div>
+	<div class="bacera-cart-footer">
+		<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1rem;">
+			<p style="margin:0;font-size:.8rem;color:#9A8478;"><?php esc_html_e( 'Total (VAT included)', 'bacera' ); ?></p>
+			<p id="bacera-cart-total" style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.75rem;color:#2A1F17;">0đ</p>
 		</div>
-		<div id="bacera-cart-items" class="bacera-cart-items"></div>
-		<div class="bacera-cart-footer">
-			<div class="flex items-end justify-between gap-4 mb-4">
-				<div>
-					<p class="m-0 text-[1.75rem] leading-none font-serif font-bold text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></p>
-					<p class="m-0 mt-1 text-base text-stone-600"><?php esc_html_e( 'Total (VAT included)', 'bacera' ); ?></p>
-				</div>
-				<p id="bacera-cart-total" class="m-0 text-[2rem] leading-none tabular-nums text-stone-800">0đ</p>
-			</div>
-			<div class="grid grid-cols-2 gap-2">
-				<a id="bacera-cart-go-checkout" href="<?php echo esc_url( $checkout_page_url ); ?>" class="rounded-xl bg-accent-500 px-4 py-3 text-center font-medium text-white no-underline hover:bg-accent-600"><?php esc_html_e( 'Đến thanh toán', 'bacera' ); ?></a>
-				<a id="bacera-cart-go-cart" href="<?php echo esc_url( $cart_page_url ); ?>" class="rounded-xl border border-stone-300 px-4 py-3 text-center font-medium text-stone-700 no-underline hover:bg-stone-50"><?php esc_html_e( 'Xem giỏ hàng', 'bacera' ); ?></a>
-			</div>
+		<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+			<a id="bacera-cart-go-checkout" href="<?php echo esc_url( $checkout_page_url ); ?>" style="border-radius:10px;background:#4d3d32;padding:.75rem 1rem;text-align:center;font-weight:500;color:#fff;text-decoration:none;font-size:.875rem;"><?php esc_html_e( 'Checkout', 'bacera' ); ?></a>
+			<a id="bacera-cart-go-cart"     href="<?php echo esc_url( $cart_page_url ); ?>"       style="border-radius:10px;border:1px solid #DDD5CB;padding:.75rem 1rem;text-align:center;font-weight:500;color:#6B5344;text-decoration:none;font-size:.875rem;"><?php esc_html_e( 'View cart', 'bacera' ); ?></a>
 		</div>
-	</aside>
+	</div>
+</aside>
+
 </main>
 
 <script>
-(function () {
-	var drawer = document.getElementById('bacera-cart-drawer');
-	var overlay = document.getElementById('bacera-cart-overlay');
-	var closeBtn = document.getElementById('bacera-cart-close');
-	var listEl = document.getElementById('bacera-cart-items');
-	var totalEl = document.getElementById('bacera-cart-total');
-	var addBtn = document.getElementById('bacera-pdp-add-cart-btn');
-	var jsonEl = document.getElementById('bacera-pdp-variants-json');
-	var metaEl = document.getElementById('bacera-pdp-cart-meta-json');
-	if (!drawer || !overlay || !closeBtn || !listEl || !totalEl) return;
-
-	var STORAGE_KEY = 'bacera_shop_cart_v1';
-	var CHECKOUT_ITEMS_KEY = 'bacera_checkout_items';
-	var drawerPreviewItemId = null;
-
-	function loadCart() {
-		try {
-			var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-			return Array.isArray(parsed) ? parsed : [];
-		} catch (e) {
-			return [];
-		}
-	}
-
-	function saveCart(cart) {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
-	}
-
-	function toCurrency(numberValue) {
-		return Number(numberValue || 0).toLocaleString('vi-VN') + 'đ';
-	}
-
-	function escapeHtml(value) {
-		return String(value || '')
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#039;');
-	}
-
-	function computeTotal(cart) {
-		return cart.reduce(function (sum, item) {
-			return sum + (Number(item.price || 0) * Number(item.qty || 0));
-		}, 0);
-	}
-
-	var trashIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
-
-	function parseVariantDetails(item) {
-		var color = String(item.color || '').trim();
-		var size = String(item.size || '').trim();
-		var label = String(item.variant_label || '').trim();
-		if ((!color || !size) && label) {
-			var parts = label.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
-			if (!color && parts[0]) color = parts[0];
-			if (!size && parts[1]) size = parts[1];
-		}
-		return { color: color, size: size };
-	}
-
-	function formatColorSizeSubtitle(meta, item) {
-		var c = meta.color;
-		var s = meta.size;
-		if (c && s) return c + ' | ' + s;
-		if (c) return c;
-		if (s) return s;
-		return String(item.variant_label || '').trim();
-	}
-
-	function getDrawerDisplayCart() {
-		var cart = loadCart();
-		if (!drawerPreviewItemId) {
-			return [];
-		}
-		return cart.filter(function (item) {
-			return String(item.id) === String(drawerPreviewItemId);
-		});
-	}
-
-	function renderCart() {
-		var cart = getDrawerDisplayCart();
-		if (!cart.length) {
-			listEl.innerHTML = '<p class="bacera-cart-empty"><?php echo esc_js( __( 'Giỏ hàng của bạn đang trống.', 'bacera' ) ); ?></p>';
-			totalEl.textContent = '0đ';
-			return;
-		}
-
-		listEl.innerHTML = cart.map(function (item) {
-			var title = escapeHtml(item.name || '<?php echo esc_js( __( 'Product', 'bacera' ) ); ?>');
-			var brand = escapeHtml(item.brand || '<?php echo esc_js( __( 'Bacera', 'bacera' ) ); ?>');
-			var variantMeta = parseVariantDetails(item);
-			var variantSubtitle = formatColorSizeSubtitle(variantMeta, item);
-			var variantLineHtml = variantSubtitle
-				? '<p class="bacera-cart-variant-line">' + escapeHtml(variantSubtitle) + '</p>'
-				: '';
-			var image = escapeHtml(item.image || 'https://placehold.co/120x120/f0ece3/8d6a54?text=Product');
-			var originalPrice = Number(item.original_price || 0);
-			var oldPriceHtml = originalPrice > Number(item.price || 0)
-				? '<span class="text-sm line-through text-stone-400 tabular-nums">' + toCurrency(originalPrice) + '</span>'
-				: '';
-			return ''
-				+ '<article class="bacera-cart-item" data-cart-id="' + escapeHtml(item.id) + '">'
-				+ '  <img src="' + image + '" alt="' + title + '" loading="lazy" />'
-				+ '  <div class="min-w-0">'
-				+ '    <div class="bacera-cart-item-main">'
-				+ '      <div class="bacera-cart-item-text">'
-				+ '        <p class="m-0 text-sm text-stone-500">' + brand + '</p>'
-				+ '        <p class="m-0 mt-1 text-xl leading-snug font-medium text-stone-800">' + title + '</p>'
-				+ variantLineHtml
-				+ '      </div>'
-				+ '      <button type="button" class="bacera-cart-remove" data-cart-action="remove" aria-label="<?php echo esc_js( __( 'Remove item', 'bacera' ) ); ?>">' + trashIconSvg + '</button>'
-				+ '    </div>'
-				+ '    <div class="mt-3 flex items-center justify-between gap-3">'
-				+ '      <div class="bacera-cart-qty" role="group" aria-label="<?php echo esc_attr( __( 'Quantity', 'bacera' ) ); ?>">'
-				+ '        <button type="button" data-cart-action="minus">−</button>'
-				+ '        <span>' + String(Number(item.qty || 1)).padStart(2, '0') + '</span>'
-				+ '        <button type="button" data-cart-action="plus">+</button>'
-				+ '      </div>'
-				+ '      <div class="text-right">'
-				+ oldPriceHtml
-				+ '        <p class="m-0 text-[1.75rem] leading-none tabular-nums text-stone-800">' + toCurrency(item.price) + '</p>'
-				+ '      </div>'
-				+ '    </div>'
-				+ '  </div>'
-				+ '</article>';
-		}).join('');
-
-		totalEl.textContent = toCurrency(computeTotal(cart));
-	}
-
-	function setDrawerOpen(opened) {
-		if (!opened) {
-			drawerPreviewItemId = null;
-		}
-		drawer.classList.toggle('is-open', opened);
-		overlay.classList.toggle('is-open', opened);
-		drawer.setAttribute('aria-hidden', opened ? 'false' : 'true');
-		overlay.setAttribute('aria-hidden', opened ? 'false' : 'true');
-		document.body.classList.toggle('overflow-hidden', opened);
-	}
-
-	function upsertItemWithQty(nextItem, addQty) {
-		var cart = loadCart();
-		var index = cart.findIndex(function (item) {
-			return String(item.id) === String(nextItem.id);
-		});
-		var q = Math.max(1, parseInt(addQty, 10) || 1);
-		if (index >= 0) {
-			cart[index].qty = Number(cart[index].qty || 1) + q;
-		} else {
-			nextItem.qty = q;
-			cart.push(nextItem);
-		}
-		saveCart(cart);
-	}
-
-	function getCurrentVariantIndex() {
-		var sw = document.querySelectorAll('.bacera-pdp-swatch');
-		for (var i = 0; i < sw.length; i++) {
-			if (sw[i].classList.contains('border-primary-800')) {
-				var ix = parseInt(sw[i].getAttribute('data-variant-index'), 10);
-				return isNaN(ix) ? 0 : ix;
-			}
-		}
-		return 0;
-	}
-
-	function pdpQtyFromInput() {
-		var q = document.getElementById('bacera-pdp-qty');
-		var n = parseInt(q && q.value ? q.value : '1', 10);
-		return isNaN(n) || n < 1 ? 1 : n;
-	}
-
-	function buildCartItemFromPdp(v, meta) {
-		var vid = v.variationId || '';
-		if (!vid) return null;
-		return {
-			id: 'var_' + vid,
-			variation_id: vid,
-			product_id: v.productId || '',
-			name: meta.productName,
-			brand: meta.brand,
-			variant_label: v.variantLabel || '',
-			color: v.colorLabel || '',
-			size: v.size || '',
-			image: v.mainImage || '',
-			price: Number(v.price || 0),
-			original_price: Number(v.originalPrice || 0),
-			url: meta.permalink
-		};
-	}
-
-	if (addBtn && jsonEl && metaEl) {
-		addBtn.addEventListener('click', function () {
-			var variants;
-			var meta;
-			try {
-				variants = JSON.parse(jsonEl.textContent);
-				meta = JSON.parse(metaEl.textContent);
-			} catch (e) {
-				return;
-			}
-			if (!variants || !variants.length || !meta) return;
-			var vi = getCurrentVariantIndex();
-			if (vi < 0 || vi >= variants.length) vi = 0;
-			var v = variants[vi];
-			var item = buildCartItemFromPdp(v, meta);
-			if (!item) return;
-			var qty = pdpQtyFromInput();
-			upsertItemWithQty(item, qty);
-			drawerPreviewItemId = String(item.id);
-			renderCart();
-			setDrawerOpen(true);
-		});
-	}
-
-	listEl.addEventListener('click', function (event) {
-		var actionBtn = event.target.closest('button[data-cart-action]');
-		if (!actionBtn) return;
-		var row = actionBtn.closest('.bacera-cart-item');
-		if (!row) return;
-		var itemId = row.getAttribute('data-cart-id');
-		if (!itemId) return;
-		var action = actionBtn.getAttribute('data-cart-action');
-		var cart = loadCart();
-		var idx = cart.findIndex(function (item) {
-			return String(item.id) === String(itemId);
-		});
-		if (idx < 0) return;
-		if (action === 'remove') {
-			cart.splice(idx, 1);
-		} else if (action === 'minus') {
-			cart[idx].qty = Number(cart[idx].qty || 1) - 1;
-			if (cart[idx].qty <= 0) {
-				cart.splice(idx, 1);
-			}
-		} else if (action === 'plus') {
-			cart[idx].qty = Number(cart[idx].qty || 1) + 1;
-		}
-		saveCart(cart);
-		renderCart();
+(function(){
+var drawer=document.getElementById('bacera-cart-drawer'),overlay=document.getElementById('bacera-cart-overlay'),closeBtn=document.getElementById('bacera-cart-close'),listEl=document.getElementById('bacera-cart-items'),totalEl=document.getElementById('bacera-cart-total');
+var addBtn=document.getElementById('bacera-pdp-add-cart-btn'),jsonEl=document.getElementById('bacera-pdp-variants-json'),metaEl=document.getElementById('bacera-pdp-cart-meta-json');
+if(!drawer||!overlay||!closeBtn||!listEl||!totalEl)return;
+var KEY='bacera_shop_cart_v1',CK='bacera_checkout_items',previewId=null;
+function loadCart(){try{var p=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(p)?p:[];}catch(e){return[];}}
+function saveCart(c){localStorage.setItem(KEY,JSON.stringify(c));}
+function toCurrency(n){return Number(n||0).toLocaleString('vi-VN')+'đ';}
+function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function total(c){return c.reduce(function(s,i){return s+Number(i.price||0)*Number(i.qty||0);},0);}
+var trash='<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+function pv(item){var c=String(item.color||'').trim(),s=String(item.size||'').trim(),l=String(item.variant_label||'').trim();if((!c||!s)&&l){var pts=l.split('|').map(function(x){return x.trim();}).filter(Boolean);if(!c&&pts[0])c=pts[0];if(!s&&pts[1])s=pts[1];}return c&&s?c+' · '+s:c||s||l;}
+function getDisp(){var c=loadCart();if(!previewId)return[];return c.filter(function(i){return String(i.id)===String(previewId);});}
+function render(){
+	var cart=getDisp();
+	if(!cart.length){listEl.innerHTML='<p class="bacera-cart-empty"><?php echo esc_js(__('Your cart is empty.','bacera'));?></p>';totalEl.textContent='0đ';return;}
+	listEl.innerHTML=cart.map(function(item){
+		var sub=pv(item),op=Number(item.original_price||0),oph=op>Number(item.price||0)?'<span style="font-size:.75rem;text-decoration:line-through;color:#9A8478;">'+toCurrency(op)+'</span>':'';
+		return '<article class="bacera-cart-item" data-cart-id="'+esc(item.id)+'">'
+			+'<img src="'+esc(item.image||'https://placehold.co/120x120/f0ece3/8d6a54?text=Bacera')+'" alt="'+esc(item.name||'')+'" loading="lazy"/>'
+			+'<div style="min-width:0;"><div class="bacera-cart-item-main"><div class="bacera-cart-item-text">'
+			+'<p style="margin:0;font-size:.75rem;color:#9A8478;">'+esc(item.brand||'Bacera')+'</p>'
+			+'<p style="margin:.15rem 0 0;font-size:.9rem;font-weight:600;color:#2A1F17;">'+esc(item.name||'')+'</p>'
+			+(sub?'<p class="bacera-cart-variant-line">'+esc(sub)+'</p>':'')
+			+'</div><button type="button" class="bacera-cart-remove" data-cart-action="remove">'+trash+'</button></div>'
+			+'<div style="margin-top:.6rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;">'
+			+'<div class="bacera-cart-qty" role="group"><button type="button" data-cart-action="minus">−</button><span>'+String(Number(item.qty||1)).padStart(2,'0')+'</span><button type="button" data-cart-action="plus">+</button></div>'
+			+'<div style="text-align:right;">'+oph+'<p style="margin:0;font-size:1rem;font-weight:600;color:#2A1F17;">'+toCurrency(item.price)+'</p></div>'
+			+'</div></div></article>';
+	}).join('');
+	totalEl.textContent=toCurrency(total(cart));
+}
+function setOpen(open){if(!open)previewId=null;drawer.classList.toggle('is-open',open);overlay.classList.toggle('is-open',open);drawer.setAttribute('aria-hidden',open?'false':'true');overlay.setAttribute('aria-hidden',open?'false':'true');document.body.classList.toggle('overflow-hidden',open);}
+function upsertQty(next,qty){var c=loadCart(),i=c.findIndex(function(x){return String(x.id)===String(next.id);});var q=Math.max(1,parseInt(qty,10)||1);if(i>=0){c[i].qty=Number(c[i].qty||1)+q;}else{next.qty=q;c.push(next);}saveCart(c);}
+function getVi(){var sw=document.querySelectorAll('.bacera-pdp-swatch');for(var i=0;i<sw.length;i++){if(sw[i].classList.contains('is-active')){var ix=parseInt(sw[i].getAttribute('data-variant-index'),10);return isNaN(ix)?0:ix;}}return 0;}
+function getQ(){var q=document.getElementById('bacera-pdp-qty');var n=parseInt(q&&q.value?q.value:'1',10);return isNaN(n)||n<1?1:n;}
+if(addBtn&&jsonEl&&metaEl){
+	addBtn.addEventListener('click',function(){
+		var variants,meta;
+		try{variants=JSON.parse(jsonEl.textContent);meta=JSON.parse(metaEl.textContent);}catch(e){return;}
+		if(!variants||!variants.length||!meta)return;
+		var vi=getVi();if(vi<0||vi>=variants.length)vi=0;
+		var v=variants[vi];
+		var vid=v.variationId||'';if(!vid)return;
+		var item={id:'var_'+vid,variation_id:vid,product_id:v.productId||'',name:meta.productName,brand:meta.brand,variant_label:v.variantLabel||'',color:v.colorLabel||'',size:v.size||'',image:v.mainImage||'',price:Number(v.price||0),original_price:Number(v.originalPrice||0),url:meta.permalink};
+		upsertQty(item,getQ());
+		previewId=String(item.id);render();setOpen(true);
 	});
-
-	var checkoutLink = document.getElementById('bacera-cart-go-checkout');
-	if (checkoutLink) {
-		checkoutLink.addEventListener('click', function (e) {
-			var full = loadCart();
-			var picked = drawerPreviewItemId
-				? full.filter(function (item) { return String(item.id) === String(drawerPreviewItemId); })
-				: [];
-			if (!picked.length) {
-				e.preventDefault();
-				return;
-			}
-			try {
-				sessionStorage.setItem(CHECKOUT_ITEMS_KEY, JSON.stringify(picked));
-			} catch (err) {}
-		});
-	}
-
-	closeBtn.addEventListener('click', function () { setDrawerOpen(false); });
-	overlay.addEventListener('click', function () { setDrawerOpen(false); });
-	document.addEventListener('keydown', function (event) {
-		if (event.key === 'Escape') setDrawerOpen(false);
-	});
-
-	renderCart();
+}
+listEl.addEventListener('click',function(e){var btn=e.target.closest('button[data-cart-action]');if(!btn)return;var row=btn.closest('.bacera-cart-item');if(!row)return;var id=row.getAttribute('data-cart-id'),action=btn.getAttribute('data-cart-action'),c=loadCart(),i=c.findIndex(function(x){return String(x.id)===String(id);});if(i<0)return;if(action==='remove')c.splice(i,1);else if(action==='minus'){c[i].qty=Number(c[i].qty||1)-1;if(c[i].qty<=0)c.splice(i,1);}else if(action==='plus')c[i].qty=Number(c[i].qty||1)+1;saveCart(c);render();});
+var co=document.getElementById('bacera-cart-go-checkout');if(co){co.addEventListener('click',function(e){var full=loadCart(),picked=previewId?full.filter(function(x){return String(x.id)===String(previewId);}):[];if(!picked.length){e.preventDefault();return;}try{sessionStorage.setItem(CK,JSON.stringify(picked));}catch(err){}});}
+closeBtn.addEventListener('click',function(){setOpen(false);});
+overlay.addEventListener('click',function(){setOpen(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
+render();
 })();
 </script>
 
-<?php 
-    endwhile; 
-endif; 
+<?php
+	endwhile;
+endif;
 
-get_footer(); 
+get_footer();
 ?>

@@ -73,7 +73,7 @@ $title      = get_the_title();
 $price_raw  = get_post_meta($workshop_id, '_price', true) ?: '';
 // Format price for display: raw is stored as plain integer
 $price_num  = (int) preg_replace('/[^0-9]/', '', $price_raw ?: '0');
-$price_fmt  = $price_num > 0 ? number_format($price_num, 0, ',', '.') . 'đ' : 'Liên hệ';
+$price_fmt  = $price_num > 0 ? number_format($price_num, 0, ',', '.') . 'đ' : 'Contact us';
 $duration_min = intval(get_post_meta($workshop_id, '_duration', true) ?: 0);
 // Convert minutes to human-readable
 if ($duration_min > 0) {
@@ -650,7 +650,7 @@ get_header();
 
     <!-- BREADCRUMB -->
     <nav class="ws-bc">
-        <a href="<?php echo esc_url(home_url('/')); ?>">Trang chủ</a>
+        <a href="<?php echo esc_url(home_url('/')); ?>">Home</a>
         <span class="ws-bc-sep">/</span>
         <a href="<?php echo esc_url(home_url('/workshop/')); ?>">Workshop</a>
         <span class="ws-bc-sep">/</span>
@@ -671,7 +671,7 @@ get_header();
                 }
                 ?>
             </div>
-            <span class="ws-rating-text"><?php echo esc_html($rating_str); ?>/5<?php if ($review_cnt > 0): ?> &mdash; <?php echo $review_cnt; ?> đánh giá<?php endif; ?></span>
+            <span class="ws-rating-text"><?php echo esc_html($rating_str); ?>/5<?php if ($review_cnt > 0): ?> &mdash; <?php echo $review_cnt; ?> reviews<?php endif; ?></span>
         </div>
         <?php endif; ?>
     </div>
@@ -721,14 +721,14 @@ get_header();
                     <?php echo $short_desc ? esc_html($short_desc) : wp_kses_post(wpautop($desc)); ?>
                 </div>
                 <?php else: ?>
-                <p class="ws-body-text">Trải nghiệm workshop thủ công cùng Bacera. Khóa học sẽ giúp bạn khám phá bản thân qua nghệ thuật sáng tạo.</p>
+                <p class="ws-body-text">Experience a handcraft workshop with Bacera. This class will help you discover yourself through creative art.</p>
                 <?php endif; ?>
 
                 <!-- Meta strip -->
                 <div class="ws-meta-strip" style="margin-top:28px">
                     <?php if ($duration_label && $duration_label !== '—'): ?>
                     <div class="ws-meta-item">
-                        <span class="ws-meta-label">Thời lượng</span>
+                        <span class="ws-meta-label">Duration</span>
                         <div class="ws-meta-val">
                             <svg class="ws-meta-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
                             <?php echo esc_html($duration_label); ?>
@@ -737,7 +737,7 @@ get_header();
                     <?php endif; ?>
                     <?php if ($trainer && $trainer !== '—'): ?>
                     <div class="ws-meta-item">
-                        <span class="ws-meta-label">Người hướng dẫn</span>
+                        <span class="ws-meta-label">Instructor</span>
                         <div class="ws-meta-val">
                             <svg class="ws-meta-icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                             <?php echo esc_html($trainer); ?>
@@ -811,10 +811,10 @@ get_header();
             <!-- Reviews -->
             <div style="border-top:1px solid #e7e5e4;padding-top:36px">
                 <div class="ws-reviews-header">
-                    <h2 class="ws-h2" style="margin-bottom:0">Đánh giá</h2>
+                    <h2 class="ws-h2" style="margin-bottom:0">Reviews</h2>
                     <?php if ($review_cnt > 0): ?>
                     <div class="ws-rating-block">
-                        <span class="ws-rating-text"><?php echo esc_html($rating_str); ?>/5 &mdash; <?php echo $review_cnt; ?> lượt</span>
+                        <span class="ws-rating-text"><?php echo esc_html($rating_str); ?>/5 &mdash; <?php echo $review_cnt; ?> reviews</span>
                         <div class="ws-stars">
                             <?php for ($i = 1; $i <= 5; $i++):
                                 $cls = $i <= round((float)$avg_rating) ? '' : ' empty';
@@ -841,17 +841,17 @@ get_header();
                 </div>
                 <?php endforeach; ?>
                 <?php if ($review_cnt >= 10): ?>
-                <button class="ws-btn-more">Xem thêm đánh giá</button>
+                <button class="ws-btn-more">See more reviews</button>
                 <?php endif; ?>
                 <?php else: ?>
-                <p style="color:#a8a29e;font-style:italic;font-size:15px">Chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải nghiệm!</p>
+                <p style="color:#a8a29e;font-style:italic;font-size:15px">No reviews yet. Be the first to share your experience!</p>
                 <?php endif; ?>
             </div>
 
             <!-- Write a review -->
             <div style="border-top:1px solid #e7e5e4;padding-top:40px;margin-bottom:48px">
                 <div class="ws-review-form-hd">
-                    <h2 class="ws-h2" style="margin-bottom:0">Viết đánh giá</h2>
+                    <h2 class="ws-h2" style="margin-bottom:0">Write a review</h2>
                     <div class="ws-rating-pick" id="ws-star-picker">
                         <?php for ($i = 1; $i <= 5; $i++): ?>
                         <svg class="ws-rating-pick-star" data-val="<?php echo $i; ?>" viewBox="0 0 24 24">
@@ -866,23 +866,23 @@ get_header();
                     <div class="ws-grid-2">
                         <div class="ws-fl-group">
                             <input type="text" id="ws-rev-name" class="ws-fl-input" placeholder=" " required>
-                            <label class="ws-fl-label" for="ws-rev-name">Họ và tên</label>
+                            <label class="ws-fl-label" for="ws-rev-name">Full name</label>
                         </div>
                         <div class="ws-fl-group">
                             <input type="email" id="ws-rev-email" class="ws-fl-input" placeholder=" ">
-                            <label class="ws-fl-label" for="ws-rev-email">Email (không bắt buộc)</label>
+                            <label class="ws-fl-label" for="ws-rev-email">Email (optional)</label>
                         </div>
                     </div>
                     <div class="ws-fl-group">
                         <input type="text" id="ws-rev-title" class="ws-fl-input" placeholder=" ">
-                        <label class="ws-fl-label" for="ws-rev-title">Tiêu đề đánh giá</label>
+                        <label class="ws-fl-label" for="ws-rev-title">Review title</label>
                     </div>
                     <div class="ws-fl-group ws-fl-ta-wrap">
                         <textarea id="ws-rev-body" class="ws-fl-ta" rows="5" placeholder=" " required></textarea>
-                        <label class="ws-fl-label" for="ws-rev-body">Chia sẻ trải nghiệm của bạn...</label>
+                        <label class="ws-fl-label" for="ws-rev-body">Share your experience...</label>
                     </div>
                     <div id="ws-review-msg" style="display:none;font-size:13px;padding:10px 14px;border-radius:10px"></div>
-                    <button type="submit" class="ws-btn-submit">Gửi đánh giá</button>
+                    <button type="submit" class="ws-btn-submit">Submit review</button>
                 </form>
             </div>
 
@@ -897,27 +897,27 @@ get_header();
                 <div class="ws-no-slot">
                     <div style="font-size:44px">📅</div>
                     <p style="font-weight:600;color:#44403c;font-size:15px;margin:0">Chưa có lịch học nào</p>
-                    <p style="color:#78716c;font-size:14px;margin:0">Vui lòng liên hệ để đăng ký mở lịch riêng.</p>
-                    <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="ws-btn-login" style="margin-top:4px">Liên hệ ngay</a>
+                    <p style="color:#78716c;font-size:14px;margin:0">Please contact us to schedule a private session.</p>
+                    <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="ws-btn-login" style="margin-top:4px">Contact us</a>
                 </div>
 
                 <?php elseif (!$is_logged_in): ?>
                 <!-- Login gate -->
-                <h3 class="ws-card-price"><?php echo esc_html($price_fmt); ?><span>/Người</span></h3>
+                <h3 class="ws-card-price"><?php echo esc_html($price_fmt); ?><span>/Person</span></h3>
                 <div class="ws-login-gate">
                         <div class="ws-login-avatar">
                             <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
                         </div>
                         <div>
-                            <p class="ws-login-title">Đăng nhập để đặt chỗ</p>
-                            <p class="ws-login-sub">Bạn cần tài khoản Bacera để xác nhận và quản lý lịch học.</p>
+                            <p class="ws-login-title">Sign in to book a seat</p>
+                            <p class="ws-login-sub">You need a Bacera account to confirm and manage your bookings.</p>
                         </div>
-                        <a href="<?php echo $redirect_url; ?>" class="ws-btn-login">Đăng nhập / Đăng ký</a>
-                        <p class="ws-login-hint">Miễn phí — Chỉ mất 30 giây</p>
+                        <a href="<?php echo $redirect_url; ?>" class="ws-btn-login">Sign in / Register</a>
+                        <p class="ws-login-hint">Free &mdash; Takes only 30 seconds</p>
                     </div>
                     <!-- Slot preview -->
                     <div style="border-top:1px solid #f0ede8;padding-top:16px">
-                        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a8a29e;margin:0 0 8px">Lịch học sắp tới</p>
+                        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a8a29e;margin:0 0 8px">Upcoming sessions</p>
                         <?php foreach (array_slice($upcoming_slots, 0, 3) as $sl):
                             $pvail = (int)$sl['total_seats'] - (int)$sl['booked_seats']; ?>
                         <div class="ws-preview-slot">
@@ -926,8 +926,8 @@ get_header();
                                 <div class="ws-preview-time"><?php echo esc_html($sl['time_start'].' – '.$sl['time_end']); ?></div>
                             </div>
                             <div class="ws-preview-avail">
-                                <?php echo $pvail; ?> chỗ trống<br>
-                                <span style="color:<?php echo $sl['status']==='full'?'#dc2626':'#16a34a'; ?>;font-weight:600"><?php echo $sl['status']==='full'?'Kín chỗ':'Đang mở'; ?></span>
+                                <?php echo $pvail; ?> seats available<br>
+                                <span style="color:<?php echo $sl['status']==='full'?'#dc2626':'#16a34a'; ?>;font-weight:600"><?php echo $sl['status']==='full'?'Full':'Open'; ?></span>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -938,7 +938,7 @@ get_header();
                 <!-- ══ FULL BOOKING WIDGET (logged in) ══ -->
 
                 <!-- Price -->
-                <h3 class="ws-card-price" id="bwks-header-price"><?php echo esc_html($price_fmt); ?><span>/Người</span></h3>
+                <h3 class="ws-card-price" id="bwks-header-price"><?php echo esc_html($price_fmt); ?><span>/Person</span></h3>
 
                 <!-- User bar -->
                 <div class="ws-user-bar">
@@ -954,7 +954,7 @@ get_header();
 
                     <!-- STEP 1: Chọn lịch -->
                     <div id="bwks-step1" class="ws-step-wrap active">
-                        <div class="ws-step-label">Chọn ngày học</div>
+                        <div class="ws-step-label">Select a date</div>
                         <?php foreach ($upcoming_slots as $sl):
                             $avail   = (int)$sl['total_seats'] - (int)$sl['booked_seats'];
                             $is_full = $sl['status']==='full' || $avail <= 0;
@@ -975,11 +975,11 @@ get_header();
                             </div>
                             <div style="text-align:right">
                                 <?php if ($is_full): ?>
-                                <span class="ws-slot-avail-full">Kín chỗ</span>
+                                <span class="ws-slot-avail-full">Full</span>
                                 <?php else: ?>
-                                <span class="ws-slot-avail-open"><?php echo $avail; ?> chỗ trống</span>
+                                <span class="ws-slot-avail-open"><?php echo $avail; ?> seats available</span>
                                 <?php if ($slot_price_num > 0): ?>
-                                <div style="font-size:11px;color:#78716c;margin-top:2px"><?php echo number_format($slot_price_num,0,',','.'); ?>đ/ghế</div>
+                                <div style="font-size:11px;color:#78716c;margin-top:2px"><?php echo number_format($slot_price_num,0,',','.'); ?>đ/seat</div>
                                 <?php endif; ?>
                                 <?php endif; ?>
                             </div>
@@ -987,7 +987,7 @@ get_header();
                         <?php endforeach; ?>
                         <button id="bwks-btn-step2" type="button" disabled onclick="bwksGoStep(2)"
                                 class="ws-btn-book" style="font-size:14px;padding:14px">
-                            Chọn vị trí ghế →
+                            Select seat position →
                         </button>
                     </div>
 
@@ -998,33 +998,33 @@ get_header();
                                 <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                                 Quay lại
                             </button>
-                            <span class="ws-step-label" id="bwks-step2-label">Chọn vị trí ghế</span>
+                            <span class="ws-step-label" id="bwks-step2-label">Select seat position</span>
                         </div>
 
-                        <div id="bwks-seats-loading" style="text-align:center;padding:16px;color:#a8a29e;font-size:13px;display:none">Đang tải sơ đồ...</div>
+                        <div id="bwks-seats-loading" style="text-align:center;padding:16px;color:#a8a29e;font-size:13px;display:none">Loading seat map...</div>
 
                         <div id="bwks-seats-area" class="ws-seatmap">
                             <div class="ws-seatmap-trainer">
                                 <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                Vị trí Trainer
+                                Trainer position
                             </div>
                             <div id="bwks-seat-grid" class="ws-seatmap-grid"></div>
                             <div class="ws-seat-legend">
-                                <div class="ws-leg"><div class="ws-leg-dot" style="background:#1c1917"></div> Đang chọn (<span id="bwks-sel-count">0</span>)</div>
-                                <div class="ws-leg"><div class="ws-leg-dot" style="background:#f5f5f4;border:1.5px solid #e7e5e4"></div> Trống</div>
-                                <div class="ws-leg"><div class="ws-leg-dot" style="background:#fef2f2;border:1.5px solid #fecaca"></div> Đã đặt</div>
+                                <div class="ws-leg"><div class="ws-leg-dot" style="background:#1c1917"></div> Selected (<span id="bwks-sel-count">0</span>)</div>
+                                <div class="ws-leg"><div class="ws-leg-dot" style="background:#f5f5f4;border:1.5px solid #e7e5e4"></div> Available</div>
+                                <div class="ws-leg"><div class="ws-leg-dot" style="background:#fef2f2;border:1.5px solid #fecaca"></div> Booked</div>
                             </div>
                         </div>
 
                         <!-- Live price bar -->
                         <div id="bwks-price-live" class="ws-price-live">
-                            <span style="font-size:13px;opacity:.8">Tạm tính</span>
+                            <span style="font-size:13px;opacity:.8">Estimated total</span>
                             <span style="font-size:20px;font-weight:700" id="bwks-price-live-val">0đ</span>
                         </div>
 
                         <button id="bwks-btn-step3" type="button" disabled onclick="bwksGoStep(3)"
                                 class="ws-btn-book" style="font-size:14px;padding:14px">
-                            Tiếp tục (<span id="bwks-seat-count">0</span> ghế) →
+                            Continue (<span id="bwks-seat-count">0</span> seat(s)) →
                         </button>
                     </div>
 
@@ -1033,25 +1033,25 @@ get_header();
                         <div style="display:flex;align-items:center;gap:8px">
                             <button type="button" class="ws-back-btn" onclick="bwksGoStep(2)">
                                 <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                                Quay lại
+                                Back
                             </button>
-                            <span class="ws-step-label">Xác nhận đặt chỗ</span>
+                            <span class="ws-step-label">Confirm booking</span>
                         </div>
 
                         <!-- Summary -->
                         <div class="ws-summary-box">
                             <div class="ws-sumrow"><span class="ws-sumlabel">Workshop</span><span class="ws-sumvalue"><?php echo esc_html($title); ?></span></div>
-                            <div class="ws-sumrow"><span class="ws-sumlabel">Ngày học</span><span class="ws-sumvalue" id="bwks-sum-date">—</span></div>
-                            <div class="ws-sumrow"><span class="ws-sumlabel">Vị trí ghế</span><span class="ws-sumvalue" id="bwks-sum-seats">—</span></div>
-                            <div class="ws-sumrow"><span class="ws-sumlabel">Số lượng</span><span class="ws-sumvalue" id="bwks-sum-qty">—</span></div>
-                            <div class="ws-sumrow"><span class="ws-sumlabel">Đơn giá/ghế</span><span class="ws-sumvalue" id="bwks-sum-unit">—</span></div>
+                            <div class="ws-sumrow"><span class="ws-sumlabel">Date</span><span class="ws-sumvalue" id="bwks-sum-date">—</span></div>
+                            <div class="ws-sumrow"><span class="ws-sumlabel">Seat position(s)</span><span class="ws-sumvalue" id="bwks-sum-seats">—</span></div>
+                            <div class="ws-sumrow"><span class="ws-sumlabel">Quantity</span><span class="ws-sumvalue" id="bwks-sum-qty">—</span></div>
+                            <div class="ws-sumrow"><span class="ws-sumlabel">Price/seat</span><span class="ws-sumvalue" id="bwks-sum-unit">—</span></div>
                             <div class="ws-sumrow" id="bwks-sum-discount" style="display:none"></div>
                             <hr class="ws-sumdivider">
-                            <div class="ws-sumrow"><span class="ws-sumlabel">Người đặt</span><span class="ws-sumvalue"><?php echo esc_html($current_customer['name']?:'Khách'); ?></span></div>
-                            <div class="ws-sumrow"><span class="ws-sumlabel">Liên hệ</span><span class="ws-sumvalue"><?php echo esc_html($current_customer['phone']?:$current_customer['email']?:'—'); ?></span></div>
+                            <div class="ws-sumrow"><span class="ws-sumlabel">Booked by</span><span class="ws-sumvalue"><?php echo esc_html($current_customer['name']?:'Guest'); ?></span></div>
+                            <div class="ws-sumrow"><span class="ws-sumlabel">Contact</span><span class="ws-sumvalue"><?php echo esc_html($current_customer['phone']?:$current_customer['email']?:'—'); ?></span></div>
                             <hr class="ws-sumdivider">
                             <div class="ws-sumrow" style="margin-top:2px">
-                                <span style="font-size:14px;font-weight:700;color:#1c1917">TỔNG TIỀN</span>
+                                <span style="font-size:14px;font-weight:700;color:#1c1917">TOTAL</span>
                                 <span style="font-size:22px;font-weight:800;color:#ef4444;letter-spacing:-.5px" id="bwks-sum-total">—</span>
                             </div>
                         </div>
@@ -1059,7 +1059,7 @@ get_header();
                         <!-- Payment methods -->
                         <?php if (!empty($payment_methods)): ?>
                         <div>
-                            <label class="ws-notes-label">Phương thức thanh toán</label>
+                            <label class="ws-notes-label">Payment method</label>
                             <?php foreach ($payment_methods as $idx => $pm): ?>
                             <label class="pay-method-card <?php echo $idx === 0 ? 'active' : ''; ?>">
                                 <div class="pm-radio"></div>
@@ -1076,25 +1076,25 @@ get_header();
 
                         <!-- Promo code -->
                         <div>
-                            <label class="ws-notes-label">Mã giảm giá</label>
+                            <label class="ws-notes-label">Promo code</label>
                             <div class="promo-wrap">
-                                <input type="text" id="bwks-promo-input" class="promo-input" placeholder="Nhập mã">
-                                <button type="button" class="promo-btn" onclick="bwksApplyPromo()">Áp dụng</button>
+                                <input type="text" id="bwks-promo-input" class="promo-input" placeholder="Enter code">
+                                <button type="button" class="promo-btn" onclick="bwksApplyPromo()">Apply</button>
                             </div>
                             <div id="bwks-promo-msg" class="promo-result" style="display:none"></div>
                         </div>
 
                         <!-- Notes -->
                         <div>
-                            <label class="ws-notes-label">Ghi chú (tùy chọn)</label>
-                            <textarea id="bwks-notes" class="ws-notes-ta" rows="2" placeholder="Yêu cầu đặc biệt, câu hỏi..."></textarea>
+                            <label class="ws-notes-label">Notes (optional)</label>
+                            <textarea id="bwks-notes" class="ws-notes-ta" rows="2" placeholder="Special requests, questions..."></textarea>
                         </div>
 
                         <div id="bwks-err" class="ws-err-box" style="display:none"></div>
                         <button id="bwks-confirm-btn" class="ws-btn-book active" type="button" onclick="bwksSubmit()">
-                            Xác nhận đặt chỗ
+                            Confirm booking
                         </button>
-                        <p class="ws-hint">Sau khi đặt, chúng tôi sẽ liên hệ xác nhận và hướng dẫn thanh toán.</p>
+                        <p class="ws-hint">After booking, we will contact you to confirm and guide you through payment.</p>
                     </div>
 
                     <!-- SUCCESS -->
@@ -1103,12 +1103,12 @@ get_header();
                             <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                         </div>
                         <div>
-                            <p class="ws-success-title">Đặt chỗ thành công! 🎉</p>
-                            <p class="ws-success-msg" id="bwks-success-msg">Chúng tôi sẽ liên hệ xác nhận sớm nhất.</p>
+                            <p class="ws-success-title">Booking confirmed! 🎉</p>
+                            <p class="ws-success-msg" id="bwks-success-msg">We will contact you to confirm soon.</p>
                         </div>
                         <div class="ws-success-btns">
-                            <a href="<?php echo esc_url(home_url('/')); ?>" class="ws-btn-login">Xem Workshop khác</a>
-                            <button type="button" onclick="bwksReset()" class="ws-btn-secondary">Đặt thêm lịch khác</button>
+                            <a href="<?php echo esc_url(home_url('/')); ?>" class="ws-btn-login">View other workshops</a>
+                            <button type="button" onclick="bwksReset()" class="ws-btn-secondary">Book another session</button>
                         </div>
                     </div>
 
@@ -1127,22 +1127,22 @@ get_header();
         <div class="ws-mbar-title"><?php echo esc_html($title); ?></div>
         <div class="ws-mbar-bottom">
             <div class="ws-mbar-price" id="ws-mbar-price-lbl">
-                <?php echo esc_html($price_fmt); ?><span>/Người</span>
+                <?php echo esc_html($price_fmt); ?><span>/Person</span>
             </div>
             <div class="ws-mbar-meta" id="ws-mbar-meta-lbl">
                 <?php
                 if (!empty($upcoming_slots)) {
                     $first_avail = (int)$upcoming_slots[0]['total_seats'] - (int)$upcoming_slots[0]['booked_seats'];
-                    echo count($upcoming_slots) . ' lịch · ' . $first_avail . ' chỗ trống';
+                    echo count($upcoming_slots) . ' sessions · ' . $first_avail . ' seats available';
                 } else {
-                    echo 'Chưa có lịch học';
+                    echo 'No upcoming sessions';
                 }
                 ?>
             </div>
         </div>
     </div>
     <button class="ws-mbar-cta" id="ws-mbar-cta" onclick="wsOpenSheet()">
-        <?php echo $is_logged_in ? 'Đặt chỗ' : 'Đặt chỗ'; ?>
+        <?php echo $is_logged_in ? 'Book a seat' : 'Book a seat'; ?>
     </button>
 </div>
 
@@ -1154,7 +1154,7 @@ get_header();
     <div class="ws-sheet-bar">
         <div style="width:32px"></div><!-- spacer -->
         <div class="ws-sheet-handle"></div>
-        <button class="ws-sheet-close" onclick="wsCloseSheet()" aria-label="Đóng">
+        <button class="ws-sheet-close" onclick="wsCloseSheet()" aria-label="Close">
             <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
     </div>
@@ -1304,13 +1304,13 @@ get_header();
         if (!name || !body) {
             msg.style.display = 'block';
             msg.style.background = '#fef2f2'; msg.style.border = '1px solid #fecaca'; msg.style.color = '#dc2626';
-            msg.textContent = 'Vui lòng điền tên và nội dung đánh giá.';
+            msg.textContent = 'Please fill in your name and review content.';
             return false;
         }
         if (rating < 1) {
             msg.style.display = 'block';
             msg.style.background = '#fef2f2'; msg.style.border = '1px solid #fecaca'; msg.style.color = '#dc2626';
-            msg.textContent = 'Vui lòng chọn số sao đánh giá.';
+            msg.textContent = 'Please select a star rating.';
             return false;
         }
 
@@ -1324,7 +1324,7 @@ get_header();
         fd.append('_ajax_nonce', '<?php echo wp_create_nonce('bacera_review_nonce'); ?>');
 
         var btn = document.querySelector('#ws-review-form .ws-btn-submit');
-        btn.disabled = true; btn.textContent = 'Đang gửi...';
+        btn.disabled = true; btn.textContent = 'Sending...';
 
         fetch('<?php echo esc_js(admin_url('admin-ajax.php')); ?>', { method: 'POST', body: fd })
             .then(function(r) { return r.json(); })
@@ -1343,9 +1343,9 @@ get_header();
             .catch(function() {
                 msg.style.display = 'block';
                 msg.style.background='#fef2f2';msg.style.border='1px solid #fecaca';msg.style.color='#dc2626';
-                msg.textContent = 'Không thể kết nối. Vui lòng thử lại.';
+                msg.textContent = 'Unable to connect. Please try again.';
             })
-            .finally(function() { btn.disabled = false; btn.textContent = 'Gửi đánh giá'; });
+            .finally(function() { btn.disabled = false; btn.textContent = 'Submit review'; });
         return false;
     };
 
@@ -1366,7 +1366,7 @@ get_header();
     };
 
     function fmt(n) {
-        if (!n) return 'Liên hệ';
+        if (!n) return 'Contact us';
         return n.toLocaleString('vi-VN') + 'đ';
     }
 
@@ -1383,7 +1383,7 @@ get_header();
             if (disEl) { disEl.innerHTML = ''; disEl.style.display = 'none'; }
         }
         var totalEl = document.getElementById('bwks-sum-total');
-        if (totalEl) totalEl.textContent = total > 0 ? fmt(total) : (total === 0 && state.selectedSeats.length > 0 ? '0đ' : 'Liên hệ');
+        if (totalEl) totalEl.textContent = total > 0 ? fmt(total) : (total === 0 && state.selectedSeats.length > 0 ? '0đ' : 'Contact us');
     }
 
     window.bwksApplyPromo = function() {
@@ -1394,7 +1394,7 @@ get_header();
         if (!code) { msgEl.style.display='none'; state.promoCode=''; state.discountAmt=0; bwksUpdateTotal(); return; }
         msgEl.style.display = 'block';
         msgEl.className = 'promo-result';
-        msgEl.textContent = 'Đang kiểm tra...';
+        msgEl.textContent = 'Checking...';
         var fd = new FormData();
         fd.append('action','bacera_check_promo_code');
         fd.append('_ajax_nonce',NONCE);
@@ -1435,8 +1435,8 @@ get_header();
         if (step === 3) {
             document.getElementById('bwks-sum-date').textContent  = state.slotLabel;
             document.getElementById('bwks-sum-seats').textContent = state.selectedSeats.join(', ');
-            document.getElementById('bwks-sum-qty').textContent   = state.selectedSeats.length + ' ghế';
-            document.getElementById('bwks-sum-unit').textContent  = state.slotPrice ? fmt(state.slotPrice) : 'Liên hệ';
+            document.getElementById('bwks-sum-qty').textContent   = state.selectedSeats.length + ' seat(s)';
+            document.getElementById('bwks-sum-unit').textContent  = state.slotPrice ? fmt(state.slotPrice) : 'Contact us';
             bwksUpdateTotal();
         }
     };
@@ -1450,7 +1450,7 @@ get_header();
         state.totalSeats= parseInt(btn.dataset.total, 10);
         state.selectedSeats = [];
         var hdr = document.getElementById('bwks-header-price');
-        if (hdr && state.slotPrice > 0) hdr.innerHTML = fmt(state.slotPrice) + '<span>/Người</span>';
+        if (hdr && state.slotPrice > 0) hdr.innerHTML = fmt(state.slotPrice) + '<span>/Person</span>';
         var step2btn = document.getElementById('bwks-btn-step2');
         if (step2btn) { step2btn.disabled = false; step2btn.classList.add('active'); }
         bwksLoadSeats();
@@ -1552,7 +1552,7 @@ get_header();
             .then(function(r){return r.json();})
             .then(function(data){
                 state.submitting=false;
-                if(btn){btn.disabled=false;btn.textContent='Xác nhận đặt chỗ';}
+                if(btn){btn.disabled=false;btn.textContent='Confirm booking';}
                 if(data.success){
                     ['bwks-step1','bwks-step2','bwks-step3'].forEach(function(id){
                         var el=document.getElementById(id);if(el)el.classList.remove('active');
@@ -1560,7 +1560,7 @@ get_header();
                     var successEl=document.getElementById('bwks-success');
                     if(successEl) successEl.style.display='flex';
                     var msgEl=document.getElementById('bwks-success-msg');
-                    if(msgEl) msgEl.textContent=(data.data&&data.data.message)||'Đặt chỗ thành công!';
+                    if(msgEl) msgEl.textContent=(data.data&&data.data.message)||'Booking confirmed!';
                     if(data.data&&data.data.payment&&data.data.payment.instructions){
                         var pay=data.data.payment;
                         var ex=document.getElementById('bwks-pay-inst');if(ex)ex.remove();
@@ -1578,8 +1578,8 @@ get_header();
             })
             .catch(function(){
                 state.submitting=false;
-                if(btn){btn.disabled=false;btn.textContent='Xác nhận đặt chỗ';}
-                if(errEl){errEl.textContent='Không thể kết nối. Vui lòng thử lại.';errEl.style.display='block';}
+                if(btn){btn.disabled=false;btn.textContent='Confirm booking';}
+                if(errEl){errEl.textContent='Unable to connect. Please try again.';errEl.style.display='block';}
             });
     };
 

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bacera – Product Detail Redesign (PDP)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F8F4EE;
+    --cream-mid: #F2EDE5;
+    --sand: #E8DFD3;
+    --clay-100: #E5D8CC;
+    --clay-300: #C0A28E;
+    --clay-500: #A9846B;
+    --clay-600: #8D6A54;
+    --clay-700: #6B5344;
+    --clay-800: #4d3d32;
+    --clay-900: #3d2f26;
+    --accent: #C06B3A;
+    --accent-dark: #A55630;
+    --text-primary: #2A1F17;
+    --text-secondary: #6B5344;
+    --text-muted: #9A8478;
+    --border: #DDD5CB;
+    --border-light: #EDE6DD;
+    --white: #FFFFFF;
+    --shadow-sm: 0 1px 3px rgba(42,31,23,0.06), 0 1px 2px rgba(42,31,23,0.04);
+    --shadow-md: 0 4px 16px rgba(42,31,23,0.08), 0 2px 6px rgba(42,31,23,0.04);
+    --shadow-lg: 0 12px 32px rgba(42,31,23,0.10), 0 4px 12px rgba(42,31,23,0.06);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --easing: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--cream);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── ANNOTATION BAR ─── */
+  .annotation-bar {
+    background: var(--clay-800); color: white;
+    padding: 0.6rem 1.5rem; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center; gap: 2rem;
+    letter-spacing: 0.02em;
+  }
+  .annotation-bar strong { color: var(--clay-100); }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(248,244,238,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 max(1.5rem, 5vw);
+  }
+  .site-header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; max-width: 1440px; margin: 0 auto;
+  }
+  .site-logo { font-family: var(--font-serif); font-size: 1.55rem; font-weight: 600; letter-spacing: 0.04em; color: var(--text-primary); text-decoration: none; }
+  .site-nav { display: flex; gap: 2rem; list-style: none; }
+  .site-nav a { font-size: 0.875rem; color: var(--text-secondary); text-decoration: none; transition: color .2s; }
+  .site-nav a:hover { color: var(--text-primary); }
+  .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+  .header-icon-btn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); transition: all .2s; }
+  .header-icon-btn:hover { background: var(--sand); color: var(--text-primary); }
+
+  /* ─── BREADCRUMB ─── */
+  .breadcrumb-bar {
+    max-width: 1440px; margin: 0 auto;
+    padding: 1.25rem max(1.5rem, 5vw) 0;
+  }
+  .breadcrumb { display: flex; gap: 0.5rem; align-items: center; list-style: none; flex-wrap: wrap; }
+  .breadcrumb li { font-size: 0.78rem; color: var(--text-muted); }
+  .breadcrumb li a { color: var(--text-muted); text-decoration: none; transition: color .15s; }
+  .breadcrumb li a:hover { color: var(--text-primary); }
+  .breadcrumb-sep { color: var(--border); font-size: 0.7rem; }
+
+  /* ─── PDP MAIN LAYOUT ─── */
+  .pdp-container {
+    max-width: 1440px; margin: 0 auto;
+    padding: 1.5rem max(1.5rem, 5vw) 0;
+  }
+  .pdp-hero {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 3.5rem;
+    align-items: start;
+  }
+
+  /* ─── GALLERY ─── */
+  .pdp-gallery { display: flex; flex-direction: column; gap: 0.75rem; position: sticky; top: 88px; }
+  .gallery-main-wrap {
+    width: 100%; aspect-ratio: 4/5; border-radius: var(--radius-xl);
+    overflow: hidden; background: var(--cream-mid); position: relative;
+    cursor: zoom-in;
+  }
+  .gallery-main-img {
+    width: 100%; height: 100%; object-fit: cover;
+    background: linear-gradient(145deg, #EDE5DC, #DDD0C4, #C8B9A8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8rem; transition: transform .5s var(--easing);
+  }
+  .gallery-main-wrap:hover .gallery-main-img { transform: scale(1.05); }
+
+  /* Floating badges on main image */
+  .gallery-badge-sale {
+    position: absolute; left: 1rem; top: 1rem; z-index: 5;
+    background: var(--accent); color: white;
+    font-size: 0.7rem; font-weight: 700; padding: 5px 10px; border-radius: var(--radius-sm);
+    letter-spacing: 0.04em;
+  }
+  .gallery-wishlist {
+    position: absolute; right: 1rem; top: 1rem; z-index: 5;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.9); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; color: var(--clay-500); backdrop-filter: blur(4px);
+    border: 1px solid var(--border-light); transition: all .2s;
+  }
+  .gallery-wishlist:hover { color: var(--accent); transform: scale(1.08); }
+
+  /* Image nav arrows */
+  .gallery-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.88); border: 1px solid var(--border);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary); z-index: 5; transition: all .2s;
+    backdrop-filter: blur(4px);
+  }
+  .gallery-nav:hover { background: white; box-shadow: var(--shadow-md); }
+  .gallery-nav.prev { left: 0.75rem; }
+  .gallery-nav.next { right: 0.75rem; }
+
+  /* Thumbnails */
+  .gallery-thumbs {
+    display: flex; gap: 0.5rem; overflow-x: auto;
+    padding-bottom: 2px; scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .gallery-thumbs::-webkit-scrollbar { display: none; }
+  .thumb-btn {
+    flex-shrink: 0; width: 68px; height: 72px;
+    border-radius: var(--radius-sm); overflow: hidden;
+    border: 2px solid transparent; background: var(--cream-mid);
+    cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; scroll-snap-align: start;
+  }
+  .thumb-btn.active { border-color: var(--clay-700); }
+  .thumb-btn:hover:not(.active) { border-color: var(--clay-300); }
+
+  /* ─── PRODUCT INFO ─── */
+  .pdp-info { display: flex; flex-direction: column; gap: 1.25rem; }
+  .pdp-collection-tag {
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--clay-500);
+  }
+  .pdp-title {
+    font-family: var(--font-serif); font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 400; line-height: 1.15; color: var(--text-primary);
+  }
+  .pdp-title em { font-style: italic; }
+
+  /* Rating row */
+  .pdp-rating {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-light);
+  }
+  .rating-stars { color: var(--accent); font-size: 0.9rem; letter-spacing: -0.03em; }
+  .rating-score { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+  .rating-count { font-size: 0.8rem; color: var(--text-muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+  /* Price block */
+  .pdp-price-block { display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .pdp-price { font-family: var(--font-serif); font-size: 2rem; font-weight: 500; color: var(--text-primary); }
+  .pdp-price-old { font-size: 1.1rem; color: var(--text-muted); text-decoration: line-through; }
+  .pdp-discount-badge {
+    background: var(--accent); color: white;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+    padding: 4px 9px; border-radius: var(--radius-sm);
+  }
+  .pdp-savings-note { font-size: 0.78rem; color: var(--accent); font-weight: 500; margin-top: 0.15rem; }
+
+  /* Short description */
+  .pdp-excerpt { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.75; }
+
+  /* Key attributes strip */
+  .pdp-attributes {
+    display: flex; gap: 0.6rem; flex-wrap: wrap;
+  }
+  .attr-chip {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.3rem 0.75rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--white);
+    font-size: 0.75rem; color: var(--text-secondary);
+  }
+  .attr-chip svg { opacity: 0.6; }
+
+  /* ─── VARIANT PICKER ─── */
+  .variant-section { display: flex; flex-direction: column; gap: 0.5rem; }
+  .variant-label-row { display: flex; align-items: center; justify-content: space-between; }
+  .variant-label { font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.02em; }
+  .variant-selected { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
+  .variant-guide { font-size: 0.75rem; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+  /* Color swatches */
+  .swatches-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .swatch-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent;
+    cursor: pointer; position: relative; transition: all .2s;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
+  }
+  .swatch-btn.active { box-shadow: 0 0 0 3px var(--white), 0 0 0 5px var(--clay-700); }
+  .swatch-btn:hover:not(.active) { transform: scale(1.1); }
+
+  /* Size pills */
+  .sizes-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .size-pill {
+    padding: 0.4rem 1rem; border-radius: 999px;
+    border: 1.5px solid var(--border); background: var(--white);
+    font-size: 0.8rem; color: var(--text-secondary);
+    cursor: pointer; transition: all .15s;
+  }
+  .size-pill.active { border-color: var(--clay-800); background: var(--clay-800); color: white; }
+  .size-pill:hover:not(.active) { border-color: var(--clay-500); color: var(--text-primary); }
+  .size-pill.unavailable { opacity: 0.35; cursor: not-allowed; }
+
+  /* ─── QTY & ADD TO CART ─── */
+  .atc-row {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 0.75rem;
+    align-items: center; margin-top: 0.5rem;
+  }
+  .qty-ctrl {
+    display: flex; align-items: center; border: 1.5px solid var(--border);
+    border-radius: var(--radius-md); overflow: hidden; background: var(--white);
+    height: 52px;
+  }
+  .qty-btn {
+    width: 44px; height: 100%; border: none; background: transparent;
+    font-size: 1.2rem; color: var(--text-secondary); cursor: pointer;
+    transition: background .15s; display: flex; align-items: center; justify-content: center;
+  }
+  .qty-btn:hover { background: var(--cream-mid); }
+  .qty-value { min-width: 40px; text-align: center; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+
+  .btn-atc {
+    height: 52px; border-radius: var(--radius-md);
+    background: var(--clay-800); color: white;
+    font-family: var(--font-sans); font-size: 0.9rem; font-weight: 500;
+    border: none; cursor: pointer; letter-spacing: 0.03em;
+    transition: background .2s, transform .1s;
+    padding: 0 1.75rem;
+  }
+  .btn-atc:hover { background: var(--clay-700); }
+  .btn-atc:active { transform: scale(0.98); }
+
+  .btn-wishlist {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    border: 1.5px solid var(--border); background: var(--white);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: var(--clay-500); transition: all .2s;
+  }
+  .btn-wishlist:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Stock status */
+  .stock-status { display: flex; align-items: center; gap: 0.4rem; }
+  .stock-dot { width: 7px; height: 7px; border-radius: 50%; background: #52b754; }
+  .stock-dot.low { background: var(--accent); }
+  .stock-text { font-size: 0.78rem; color: var(--text-secondary); }
+  .stock-text strong { color: var(--text-primary); }
+
+  /* ─── TRUST BADGES ─── */
+  .trust-bar {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    padding: 1rem 0; border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+  }
+  .trust-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.72rem; color: var(--text-secondary); flex: 1; min-width: 120px;
+  }
+  .trust-icon { color: var(--clay-500); flex-shrink: 0; }
+
+  /* ─── ACCORDIONS ─── */
+  .accordions { display: flex; flex-direction: column; }
+  .accordion-item { border-bottom: 1px solid var(--border-light); }
+  .accordion-trigger {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem 0; background: none; border: none; cursor: pointer;
+    font-family: var(--font-sans); font-size: 0.875rem; font-weight: 500;
+    color: var(--text-primary); text-align: left;
+    transition: color .15s;
+  }
+  .accordion-trigger:hover { color: var(--clay-600); }
+  .accordion-chevron {
+    font-size: 0.7rem; color: var(--text-muted);
+    transition: transform .25s var(--easing);
+  }
+  .accordion-item.open .accordion-chevron { transform: rotate(180deg); }
+  .accordion-body {
+    font-size: 0.85rem; color: var(--text-secondary); line-height: 1.75;
+    overflow: hidden; max-height: 0; transition: max-height .3s var(--easing);
+    padding-bottom: 0;
+  }
+  .accordion-item.open .accordion-body { max-height: 300px; padding-bottom: 1rem; }
+  .spec-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .spec-table tr { border-bottom: 1px solid var(--border-light); }
+  .spec-table tr:last-child { border-bottom: none; }
+  .spec-table td { padding: 0.45rem 0; vertical-align: top; }
+  .spec-table td:first-child { color: var(--text-muted); width: 45%; padding-right: 1rem; }
+  .spec-table td:last-child { color: var(--text-primary); font-weight: 500; }
+
+  /* ─── TABS SECTION BELOW HERO ─── */
+  .pdp-lower { max-width: 1440px; margin: 0 auto; padding: 4rem max(1.5rem, 5vw) 0; }
+
+  .tabs-nav {
+    display: flex; border-bottom: 1px solid var(--border-light); gap: 0; margin-bottom: 2.5rem;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--font-sans); font-size: 0.875rem; font-weight: 400;
+    color: var(--text-muted); padding: 0.85rem 1.5rem;
+    border-bottom: 2px solid transparent; transition: all .2s;
+    white-space: nowrap; margin-bottom: -1px;
+  }
+  .tab-btn.active { color: var(--text-primary); font-weight: 600; border-color: var(--clay-700); }
+  .tab-btn:hover:not(.active) { color: var(--text-secondary); }
+
+  /* Tab content */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Details tab */
+  .tab-detail-grid {
+    display: grid; grid-template-columns: 1.4fr 0.6fr; gap: 3rem; align-items: start;
+  }
+  .rich-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.85; }
+  .rich-text h2 { font-family: var(--font-serif); font-size: 1.55rem; color: var(--text-primary); margin-bottom: 0.75rem; margin-top: 1.75rem; }
+  .rich-text h2:first-child { margin-top: 0; }
+  .rich-text p { margin-bottom: 0.85rem; }
+  .rich-text ul { padding-left: 1.25rem; margin-bottom: 0.85rem; }
+  .rich-text li { margin-bottom: 0.3rem; }
+
+  /* Craft story sidebar */
+  .craft-story {
+    background: var(--cream-mid); border-radius: var(--radius-lg);
+    padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;
+    border: 1px solid var(--border-light);
+  }
+  .craft-story-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--clay-500);
+  }
+  .craft-story-title { font-family: var(--font-serif); font-size: 1.35rem; color: var(--text-primary); }
+  .craft-story-body { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.75; }
+  .craft-icon { font-size: 2.5rem; }
+
+  /* ─── REVIEWS TAB ─── */
+  .reviews-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2.5rem; align-items: start; }
+  .rating-summary {
+    background: var(--white); border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light); padding: 1.75rem;
+    box-shadow: var(--shadow-sm); text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    position: sticky; top: 88px;
+  }
+  .rating-big { font-family: var(--font-serif); font-size: 4rem; line-height: 1; color: var(--text-primary); }
+  .rating-bar-row { width: 100%; display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.75rem; }
+  .rating-bar-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--text-muted); }
+  .rating-bar-track { flex: 1; height: 5px; background: var(--sand); border-radius: 999px; overflow: hidden; }
+  .rating-bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+
+  .reviews-list { display: flex; flex-direction: column; gap: 1.25rem; }
+  .review-card {
+    background: var(--white); border: 1px solid var(--border-light);
+    border-radius: var(--radius-md); padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .review-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+  .review-author-row { display: flex; align-items: center; gap: 0.6rem; }
+  .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--sand); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 600; color: var(--clay-600); flex-shrink: 0; }
+  .review-name { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+  .review-date { font-size: 0.72rem; color: var(--text-muted); }
+  .review-stars { color: var(--accent); font-size: 0.8rem; letter-spacing: -0.02em; text-align: right; }
+  .review-title { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem; }
+  .review-body { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.7; }
+  .review-verified { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.68rem; color: #52b754; margin-top: 0.5rem; }
+
+  /* Write review form */
+  .write-review-btn {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 1.25rem; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--clay-700); background: transparent;
+    color: var(--clay-700); font-family: var(--font-sans); font-size: 0.8rem;
+    font-weight: 500; cursor: pointer; transition: all .15s; margin-top: 0.75rem;
+  }
+  .write-review-btn:hover { background: var(--clay-700); color: white; }
+
+  /* ─── RELATED PRODUCTS ─── */
+  .related-section { max-width: 1440px; margin: 0 auto; padding: 4rem max(1.5rem, 5vw) 5rem; }
+  .related-header { text-align: center; margin-bottom: 2.5rem; }
+  .related-title { font-family: var(--font-serif); font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 400; color: var(--text-primary); }
+  .related-sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; }
+  .related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+
+  /* Mini product card */
+  .mini-card { cursor: pointer; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 0.5rem; }
+  .mini-card-img {
+    width: 100%; aspect-ratio: 4/5; border-radius: var(--radius-md); overflow: hidden;
+    background: var(--cream-mid); display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem; transition: transform .4s var(--easing);
+  }
+  .mini-card:hover .mini-card-img { transform: scale(1.03); }
+  .mini-card-collection { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--clay-500); }
+  .mini-card-name { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 400; color: var(--text-primary); line-height: 1.25; }
+  .mini-card-price { font-size: 0.875rem; font-weight: 500; color: var(--text-primary); }
+
+  /* ─── MINI CART DRAWER ─── */
+  .cart-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.28);opacity:0;pointer-events:none;z-index:60;transition:opacity .25s; }
+  .cart-overlay.open { opacity:1;pointer-events:auto; }
+  .cart-drawer {
+    position:fixed;top:0;right:0;height:100vh;width:min(480px,92vw);
+    background:var(--white);box-shadow:var(--shadow-lg);
+    transform:translateX(100%);transition:transform .3s var(--easing);
+    display:flex;flex-direction:column;z-index:70;
+  }
+  .cart-drawer.open { transform:translateX(0); }
+  .cart-head { padding:1.75rem 1.5rem 1.25rem; border-bottom:1px solid var(--border-light); display:flex;align-items:center;justify-content:space-between; }
+  .cart-head-title { font-family:var(--font-serif);font-size:1.6rem;font-weight:500;color:var(--text-primary); }
+  .cart-close { width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:1.1rem;color:var(--text-muted);transition:all .15s;display:flex;align-items:center;justify-content:center; }
+  .cart-close:hover { background:var(--cream-mid); }
+  .cart-body { flex:1;overflow-y:auto;padding:1.5rem; }
+  .cart-empty-state { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.75rem;height:200px;color:var(--text-muted);font-size:0.9rem;text-align:center; }
+  .cart-item-row { display:flex;gap:0.9rem;padding:0.9rem 0;border-bottom:1px solid var(--border-light); }
+  .cart-item-img { width:80px;height:80px;border-radius:var(--radius-sm);background:var(--cream-mid);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2rem; }
+  .cart-item-info { flex:1;min-width:0;display:flex;flex-direction:column;gap:0.25rem; }
+  .cart-item-name { font-size:0.875rem;font-weight:500;color:var(--text-primary); }
+  .cart-item-var { font-size:0.75rem;color:var(--text-muted); }
+  .cart-item-price { font-size:0.875rem;font-weight:600;color:var(--text-primary); }
+  .cart-foot { padding:1.25rem 1.5rem 1.75rem;border-top:1px solid var(--border-light); }
+  .cart-total-row { display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1rem; }
+  .cart-total-label { font-size:0.85rem;color:var(--text-muted); }
+  .cart-total-amount { font-family:var(--font-serif);font-size:1.75rem;color:var(--text-primary); }
+  .btn-checkout { width:100%;height:50px;border-radius:var(--radius-md);background:var(--clay-800);color:white;border:none;font-family:var(--font-sans);font-size:0.9rem;font-weight:500;cursor:pointer;transition:background .2s; margin-bottom:0.5rem; }
+  .btn-checkout:hover { background:var(--clay-700); }
+  .btn-view-cart { width:100%;height:44px;border-radius:var(--radius-md);border:1.5px solid var(--border);background:transparent;color:var(--text-secondary);font-family:var(--font-sans);font-size:0.85rem;cursor:pointer;transition:all .15s; }
+  .btn-view-cart:hover { border-color:var(--clay-500);color:var(--text-primary); }
+
+  @media (max-width: 900px) {
+    .pdp-hero { grid-template-columns:1fr; }
+    .pdp-gallery { position:static; }
+    .tab-detail-grid { grid-template-columns:1fr; }
+    .reviews-grid { grid-template-columns:1fr; }
+    .related-grid { grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Annotation bar -->
+<div class="annotation-bar">
+  <span>🎨 <strong>UX/UI Redesign Preview</strong> – Product Detail Page (PDP)</span>
+  <span>|</span>
+  <span><a href="shop-redesign.html" style="color:var(--clay-100);text-underline-offset:3px;">← Back to Shop (PLP)</a></span>
+</div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="#" class="site-logo">Bacera</a>
+    <nav><ul class="site-nav">
+      <li><a href="#">Our Story</a></li>
+      <li><a href="shop-redesign.html">Shop</a></li>
+      <li><a href="#">Workshop</a></li>
+      <li><a href="#">Our Team</a></li>
+      <li><a href="#">Blog</a></li>
+    </ul></nav>
+    <div class="header-actions">
+      <button class="header-icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="header-icon-btn" id="cartToggleBtn" style="position:relative;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:1.5px solid var(--cream);"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <ol class="breadcrumb">
+    <li><a href="#">Homepage</a></li>
+    <li class="breadcrumb-sep">/</li>
+    <li><a href="shop-redesign.html">Shop</a></li>
+    <li class="breadcrumb-sep">/</li>
+    <li><a href="shop-redesign.html?cat=drinkware">Drinkware</a></li>
+    <li class="breadcrumb-sep">/</li>
+    <li>Whisper Tea Cup</li>
+  </ol>
+</div>
+
+<!-- PDP Hero -->
+<div class="pdp-container">
+  <div class="pdp-hero">
+
+    <!-- Gallery column -->
+    <div class="pdp-gallery">
+      <div class="gallery-main-wrap">
+        <div class="gallery-main-img" id="mainGallery">🍵</div>
+        <span class="gallery-badge-sale">-18%</span>
+        <button class="gallery-wishlist" id="wishBtn">♡</button>
+        <button class="gallery-nav prev" aria-label="Previous image">‹</button>
+        <button class="gallery-nav next" aria-label="Next image">›</button>
+      </div>
+      <!-- Thumbs -->
+      <div class="gallery-thumbs">
+        <button class="thumb-btn active" data-emoji="🍵">🍵</button>
+        <button class="thumb-btn" data-emoji="🫂" style="background:linear-gradient(145deg,#E5DDD0,#D8CEBC);">🫂</button>
+        <button class="thumb-btn" data-emoji="☕" style="background:linear-gradient(145deg,#EAE2D6,#DDD4C4);">☕</button>
+        <button class="thumb-btn" data-emoji="🌿" style="background:linear-gradient(145deg,#E2DCD2,#D5CCBF);">🌿</button>
+        <button class="thumb-btn" data-emoji="✨" style="background:linear-gradient(145deg,#EDE8E0,#E2DAD0);">✨</button>
+        <button class="thumb-btn" data-emoji="🫙">🫙</button>
+      </div>
+    </div>
+
+    <!-- Info column -->
+    <div class="pdp-info">
+      <div class="pdp-collection-tag">Drinkware · Handcrafted in Hanoi</div>
+      <h1 class="pdp-title">Whisper<br/><em>Tea Cup</em></h1>
+
+      <!-- Rating -->
+      <div class="pdp-rating">
+        <span class="rating-stars">★★★★★</span>
+        <span class="rating-score">4.9</span>
+        <span class="rating-count">24 reviews</span>
+      </div>
+
+      <!-- Price -->
+      <div>
+        <div class="pdp-price-block">
+          <span class="pdp-price">820,000 ₫</span>
+          <span class="pdp-price-old">1,000,000 ₫</span>
+          <span class="pdp-discount-badge">-18%</span>
+        </div>
+        <div class="pdp-savings-note">You save 180,000 ₫</div>
+      </div>
+
+      <!-- Description -->
+      <p class="pdp-excerpt">
+        A slender, hand-thrown cup shaped for slow mornings. The reactive glaze creates subtle, unrepeatable patterns — each piece is truly one of a kind.
+      </p>
+
+      <!-- Attributes chips -->
+      <div class="pdp-attributes">
+        <span class="attr-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Food-safe glaze
+        </span>
+        <span class="attr-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Handmade · 2–3 days
+        </span>
+        <span class="attr-chip">🍃 Reactive glaze</span>
+      </div>
+
+      <!-- Color variant -->
+      <div class="variant-section">
+        <div class="variant-label-row">
+          <span class="variant-label">Color:</span>
+          <span class="variant-selected" id="colorSelected">Brown Earth</span>
+        </div>
+        <div class="swatches-row">
+          <button class="swatch-btn active" style="background:#3d2f26;" aria-label="Brown Earth" data-label="Brown Earth"></button>
+          <button class="swatch-btn" style="background:#6b5344;" aria-label="Walnut" data-label="Walnut"></button>
+          <button class="swatch-btn" style="background:#8d6a54;" aria-label="Taupe" data-label="Taupe"></button>
+          <button class="swatch-btn" style="background:#c0a28e;" aria-label="Linen" data-label="Linen"></button>
+          <button class="swatch-btn" style="background:#E8DFCB;" aria-label="Cream" data-label="Cream"></button>
+        </div>
+      </div>
+
+      <!-- Size -->
+      <div class="variant-section">
+        <div class="variant-label-row">
+          <span class="variant-label">Size (Capacity):</span>
+          <span class="variant-guide">Size guide</span>
+        </div>
+        <div class="sizes-row">
+          <button class="size-pill active">70ml</button>
+          <button class="size-pill">100ml</button>
+          <button class="size-pill">150ml</button>
+          <button class="size-pill unavailable">200ml</button>
+        </div>
+      </div>
+
+      <!-- Stock -->
+      <div class="stock-status">
+        <span class="stock-dot low"></span>
+        <span class="stock-text">Only <strong>4 left</strong> in stock</span>
+      </div>
+
+      <!-- Add to cart -->
+      <div class="atc-row">
+        <button class="btn-wishlist" id="wishBtnInline">♡</button>
+        <div class="qty-ctrl">
+          <button class="qty-btn" id="qtyMinus">−</button>
+          <span class="qty-value" id="qtyValue">1</span>
+          <button class="qty-btn" id="qtyPlus">+</button>
+        </div>
+        <button class="btn-atc" id="addCartBtn">Add to cart</button>
+      </div>
+
+      <!-- Trust -->
+      <div class="trust-bar">
+        <div class="trust-item">
+          <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Free ship over 2,000,000₫
+        </div>
+        <div class="trust-item">
+          <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"/><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/></svg>
+          Handcrafted · unique
+        </div>
+        <div class="trust-item">
+          <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          30-day returns
+        </div>
+      </div>
+
+      <!-- Accordions -->
+      <div class="accordions">
+        <div class="accordion-item open" id="acc-dims">
+          <button class="accordion-trigger" onclick="toggleAccordion('acc-dims')">
+            Dimensions &amp; Specifications
+            <span class="accordion-chevron">▾</span>
+          </button>
+          <div class="accordion-body">
+            <table class="spec-table">
+              <tr><td>Capacity</td><td>70 ml</td></tr>
+              <tr><td>Diameter</td><td>6.5 cm</td></tr>
+              <tr><td>Height</td><td>5.0 cm</td></tr>
+              <tr><td>Weight</td><td>~95g</td></tr>
+              <tr><td>Material</td><td>Stoneware clay</td></tr>
+              <tr><td>Finish</td><td>Reactive glaze</td></tr>
+              <tr><td>Dishwasher</td><td>Hand wash recommended</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="accordion-item" id="acc-ship">
+          <button class="accordion-trigger" onclick="toggleAccordion('acc-ship')">
+            Shipping &amp; Returns
+            <span class="accordion-chevron">▾</span>
+          </button>
+          <div class="accordion-body">
+            Orders are carefully packed with recycled materials. Standard delivery 3–5 days within Vietnam. Free returns within 30 days if item arrives damaged.
+          </div>
+        </div>
+        <div class="accordion-item" id="acc-care">
+          <button class="accordion-trigger" onclick="toggleAccordion('acc-care')">
+            Care Instructions
+            <span class="accordion-chevron">▾</span>
+          </button>
+          <div class="accordion-body">
+            Hand wash with warm water and mild soap. Avoid abrasive cleaners. Not suitable for microwave use. Dry with a soft cloth to preserve the glaze finish.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab section below hero -->
+<div class="pdp-lower">
+  <div class="tabs-nav" role="tablist">
+    <button class="tab-btn active" data-tab="details" onclick="switchTab('details')">Product Details</button>
+    <button class="tab-btn" data-tab="reviews" onclick="switchTab('reviews')">Reviews (24)</button>
+    <button class="tab-btn" data-tab="story">The Craft Story</button>
+  </div>
+
+  <!-- Details tab -->
+  <div class="tab-panel active" id="tab-details">
+    <div class="tab-detail-grid">
+      <div class="rich-text">
+        <h2>About This Cup</h2>
+        <p>The Whisper Tea Cup is wheel-thrown by hand at Bacera's Hanoi studio. Each piece begins as raw stoneware clay, shaped slowly on the wheel, then trimmed, bisque-fired, and glazed by hand before its final firing at 1220°C.</p>
+        <p>The reactive glaze – our signature Brown Earth formula – responds to heat in unpredictable ways during firing, creating the gentle gradients and surface variations that make each cup distinct. No two cups are identical.</p>
+        <h2>Designed For Slow Moments</h2>
+        <p>With a capacity of 70ml, this cup is sized for small-format teas: single-origin whites, aged oolongs, and delicate greens. The thick walls retain heat beautifully, while the slightly flared rim invites full sensory appreciation of the steam and aroma.</p>
+        <ul>
+          <li>Kiln-fired at 1220°C for durability</li>
+          <li>Food-safe, lead-free glaze</li>
+          <li>Natural surface variation – imperfections are intentional</li>
+          <li>Made in Hanoi, Vietnam</li>
+        </ul>
+      </div>
+      <div class="craft-story">
+        <div class="craft-icon">🏺</div>
+        <div class="craft-story-label">Behind the piece</div>
+        <div class="craft-story-title">Crafted with intention, fired with patience</div>
+        <div class="craft-story-body">Each cup takes 4–6 days from clay to kiln. Our artisans at Bacera's Hanoi studio hand-throw every piece using local stoneware clay sourced from the Red River delta — a tradition that connects modern craft with centuries of Vietnamese ceramics.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews tab -->
+  <div class="tab-panel" id="tab-reviews">
+    <div class="reviews-grid">
+      <div class="rating-summary">
+        <div style="color:var(--accent);font-size:1.75rem;letter-spacing:-0.02em;">★★★★★</div>
+        <div class="rating-big">4.9</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);">out of 5 · 24 reviews</div>
+        <div class="rating-bar-row">
+          <div class="rating-bar-item">5★ <div class="rating-bar-track"><div class="rating-bar-fill" style="width:88%;"></div></div> 88%</div>
+          <div class="rating-bar-item">4★ <div class="rating-bar-track"><div class="rating-bar-fill" style="width:8%;"></div></div> 8%</div>
+          <div class="rating-bar-item">3★ <div class="rating-bar-track"><div class="rating-bar-fill" style="width:4%;"></div></div> 4%</div>
+          <div class="rating-bar-item">2★ <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%;"></div></div> 0%</div>
+          <div class="rating-bar-item">1★ <div class="rating-bar-track"><div class="rating-bar-fill" style="width:0%;"></div></div> 0%</div>
+        </div>
+        <button class="write-review-btn">✍ Write a review</button>
+      </div>
+      <div class="reviews-list">
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-author-row">
+              <div class="review-avatar">L</div>
+              <div>
+                <div class="review-name">Linh Nguyễn</div>
+                <div class="review-date">April 15, 2026</div>
+              </div>
+            </div>
+            <div class="review-stars">★★★★★</div>
+          </div>
+          <div class="review-title">Absolutely beautiful — worth every dong</div>
+          <div class="review-body">The glaze is nothing like in the photos — it's even more stunning in person. The brown-to-amber gradient shifts depending on the light. I use it every morning for my oolong and it genuinely transforms the ritual.</div>
+          <div class="review-verified">✓ Verified purchase</div>
+        </div>
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-author-row">
+              <div class="review-avatar" style="background:var(--clay-100);color:var(--clay-700);">M</div>
+              <div>
+                <div class="review-name">Minh Trần</div>
+                <div class="review-date">March 28, 2026</div>
+              </div>
+            </div>
+            <div class="review-stars">★★★★★</div>
+          </div>
+          <div class="review-title">Perfect thickness, perfect weight</div>
+          <div class="review-body">I've tried many ceramic cups but this one hits different. The wall thickness keeps my tea warm for longer without making the cup feel heavy. Packaging was beautiful too.</div>
+          <div class="review-verified">✓ Verified purchase</div>
+        </div>
+        <div class="review-card">
+          <div class="review-header">
+            <div class="review-author-row">
+              <div class="review-avatar" style="background:var(--sand);color:var(--clay-800);">A</div>
+              <div>
+                <div class="review-name">Anna K.</div>
+                <div class="review-date">March 12, 2026</div>
+              </div>
+            </div>
+            <div class="review-stars">★★★★☆</div>
+          </div>
+          <div class="review-title">Lovely but smaller than expected</div>
+          <div class="review-body">Beautiful piece, the craftsmanship is obvious. Just wish I'd read the specs more carefully — 70ml is very small. Perfect for gongfu sessions but not for a regular cup of tea.</div>
+          <div class="review-verified">✓ Verified purchase</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Craft story tab (placeholder) -->
+  <div class="tab-panel" id="tab-story">
+    <div style="max-width:600px;margin:0 auto;text-align:center;padding:3rem 0;">
+      <div style="font-size:4rem;margin-bottom:1.5rem;">🏺</div>
+      <h2 style="font-family:var(--font-serif);font-size:2rem;color:var(--text-primary);margin-bottom:0.75rem;">From clay to kiln</h2>
+      <p style="font-size:0.9rem;color:var(--text-secondary);line-height:1.8;">This section would feature an immersive behind-the-scenes story of the artisan who crafted this specific piece — video, photos, and narrative — connecting buyer with maker.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Related products -->
+<div class="related-section">
+  <div class="related-header">
+    <h2 class="related-title">You might also like</h2>
+    <p class="related-sub">Freshly crafted. New stories waiting to be part of your everyday rituals.</p>
+  </div>
+  <div class="related-grid">
+    <a href="#" class="mini-card">
+      <div class="mini-card-img" style="background:linear-gradient(145deg,#EBE3D8,#D5C9BC);">⚱️</div>
+      <div class="mini-card-collection">Teapots</div>
+      <div class="mini-card-name">Clay Earth Teapot</div>
+      <div class="mini-card-price">1,450,000 ₫</div>
+    </a>
+    <a href="#" class="mini-card">
+      <div class="mini-card-img" style="background:linear-gradient(145deg,#E0D5C8,#D4C8B8);">🥣</div>
+      <div class="mini-card-collection">Bowls</div>
+      <div class="mini-card-name">Stillwater Ramen Bowl</div>
+      <div class="mini-card-price">680,000 ₫</div>
+    </a>
+    <a href="#" class="mini-card">
+      <div class="mini-card-img" style="background:linear-gradient(145deg,#F0E8DC,#E4D9CD);">🫙</div>
+      <div class="mini-card-collection">Storage</div>
+      <div class="mini-card-name">Harvest Jar – Medium</div>
+      <div class="mini-card-price">590,000 ₫</div>
+    </a>
+    <a href="#" class="mini-card">
+      <div class="mini-card-img" style="background:linear-gradient(145deg,#E5DDCF,#DAD0C2);">🌸</div>
+      <div class="mini-card-collection">Vases &amp; Decor</div>
+      <div class="mini-card-name">Blossom Bud Vase</div>
+      <div class="mini-card-price">920,000 ₫</div>
+    </a>
+  </div>
+</div>
+
+<!-- Mini cart drawer -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-head">
+    <span class="cart-head-title">Your Cart</span>
+    <button class="cart-close" id="cartClose">×</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-item-row">
+      <div class="cart-item-img">🍵</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">Whisper Tea Cup</div>
+        <div class="cart-item-var">Brown Earth · 70ml · Qty: 1</div>
+        <div class="cart-item-price">820,000 ₫</div>
+      </div>
+    </div>
+  </div>
+  <div class="cart-foot">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total (TAX incl.)</span>
+      <span class="cart-total-amount">820,000 ₫</span>
+    </div>
+    <button class="btn-checkout">Proceed to checkout</button>
+    <button class="btn-view-cart">View cart</button>
+  </div>
+</aside>
+
+<script>
+// Gallery thumbs
+document.querySelectorAll('.thumb-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const mainGallery = document.getElementById('mainGallery');
+    if(mainGallery) mainGallery.textContent = this.getAttribute('data-emoji') || this.textContent;
+  });
+});
+
+// Wishlist
+document.getElementById('wishBtn').addEventListener('click', function() {
+  this.textContent = this.textContent.trim() === '♡' ? '♥' : '♡';
+  this.style.color = this.textContent.trim() === '♥' ? 'var(--accent)' : '';
+});
+document.getElementById('wishBtnInline').addEventListener('click', function() {
+  this.textContent = this.textContent.trim() === '♡' ? '♥' : '♡';
+  this.style.borderColor = this.textContent.trim() === '♥' ? 'var(--accent)' : '';
+  this.style.color = this.textContent.trim() === '♥' ? 'var(--accent)' : '';
+});
+
+// Swatches
+document.querySelectorAll('.swatch-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.swatch-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const label = document.getElementById('colorSelected');
+    if(label) label.textContent = this.getAttribute('data-label') || '';
+  });
+});
+
+// Sizes
+document.querySelectorAll('.size-pill:not(.unavailable)').forEach(pill => {
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.size-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// Qty
+let qty = 1;
+document.getElementById('qtyMinus').addEventListener('click', () => { if(qty > 1) { qty--; document.getElementById('qtyValue').textContent = qty; } });
+document.getElementById('qtyPlus').addEventListener('click', () => { qty++; document.getElementById('qtyValue').textContent = qty; });
+
+// Cart drawer
+function openCart() {
+  document.getElementById('cartOverlay').classList.add('open');
+  document.getElementById('cartDrawer').classList.add('open');
+}
+function closeCart() {
+  document.getElementById('cartOverlay').classList.remove('open');
+  document.getElementById('cartDrawer').classList.remove('open');
+}
+document.getElementById('cartToggleBtn').addEventListener('click', () => { openCart(); });
+document.getElementById('cartClose').addEventListener('click', closeCart);
+document.getElementById('cartOverlay').addEventListener('click', closeCart);
+document.getElementById('addCartBtn').addEventListener('click', openCart);
+
+// Tabs
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-tab') === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.toggle('active', panel.id === 'tab-' + name);
+  });
+}
+
+// Accordions
+function toggleAccordion(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+</script>
+</body>
+</html>

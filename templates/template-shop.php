@@ -444,970 +444,523 @@ foreach ( $bacera_shop_by_defs as $def ) {
 	$bacera_shop_by_tiles[] = array_merge( $def, [ 'id' => $tid ] );
 }
 
+
 get_header();
 ?>
 
-<main class="bacera-shop-page min-h-screen bg-gray-50/50 font-sans selection:bg-primary-500/10 selection:text-primary-800">
-	<?php /* Layout 20/80: inline để không bị ghi đè / cache cũ của main.css; md+ = 2 cột (tránh chỉ &lt;1024px vẫn 1 cột). */ ?>
-	<style id="bacera-shop-plp-layout">
-		/* Lề trang Shop: CSS thuần (Tailwind px-* có thể không có trong main.css đã build). */
-		main.bacera-shop-page {
-			box-sizing: border-box;
-			width: 100%;
-			max-width: 100%;
-			padding-top: 3.5rem;
-			padding-bottom: 3.5rem;
-			padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
-			padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
-		}
-		@media (min-width: 640px) {
-			main.bacera-shop-page {
-				padding-left: max(1.75rem, env(safe-area-inset-left, 0px)) !important;
-				padding-right: max(1.75rem, env(safe-area-inset-right, 0px)) !important;
-			}
-		}
-		@media (min-width: 1024px) {
-			main.bacera-shop-page {
-				padding-top: 5rem !important;
-				padding-bottom: 5rem !important;
-				padding-left: max(3rem, min(10vw, 11rem)) !important;
-				padding-right: max(3rem, min(10vw, 11rem)) !important;
-			}
-		}
-		@media (min-width: 1280px) {
-			main.bacera-shop-page {
-				padding-left: max(4rem, min(11vw, 14rem)) !important;
-				padding-right: max(4rem, min(11vw, 14rem)) !important;
-			}
-		}
-		@media (min-width: 1536px) {
-			main.bacera-shop-page {
-				padding-left: max(5rem, min(12vw, 18rem)) !important;
-				padding-right: max(5rem, min(12vw, 18rem)) !important;
-			}
-		}
-		@media (min-width: 768px) {
-			main .bacera-shop-split {
-				display: grid !important;
-				grid-template-columns: minmax(0, 1fr) minmax(0, 4fr) !important;
-				align-items: start;
-				gap: 2rem;
-			}
-			main .bacera-shop-split > aside,
-			main .bacera-shop-split > .bacera-shop-main {
-				min-width: 0;
-			}
-		}
-		@media (min-width: 1024px) {
-			main .bacera-shop-split { gap: 2.5rem; }
-		}
-		@media (min-width: 1280px) {
-			main .bacera-shop-split { gap: 3rem; }
-		}
-		.bacera-shop-by-grid {
-			justify-items: center;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-		.bacera-shop-by-tile {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			gap: 0.35rem;
-			width: 100%;
-			max-width: 5rem;
-			min-height: 5rem;
-			padding: 0.45rem 0.25rem 0.5rem;
-			box-sizing: border-box;
-			border-radius: 0.5rem;
-			border: 1px solid rgb(231 229 228 / 0.9);
-			background: rgb(255 255 255 / 0.65);
-			color: rgb(41 37 36);
-			font-size: 0.8125rem;
-			font-weight: 500;
-			line-height: 1.2;
-			text-align: center;
-			text-decoration: none;
-			transition: background-color 0.15s ease, border-color 0.15s ease;
-		}
-		.bacera-shop-by-tile:hover:not(.bacera-shop-by-tile--disabled) {
-			background: rgb(245 245 244);
-		}
-		.bacera-shop-by-tile.is-active {
-			background: rgb(245 240 232);
-			border-color: rgb(214 211 209);
-			box-shadow: inset 0 0 0 1px rgb(231 229 228);
-		}
-		.bacera-shop-by-tile--disabled {
-			opacity: 0.45;
-			cursor: not-allowed;
-		}
-		@media (min-width: 640px) {
-			.bacera-shop-by-grid {
-				grid-template-columns: repeat(4, minmax(0, 1fr));
-			}
-		}
-		@media (min-width: 1024px) {
-			.bacera-shop-by-grid {
-				grid-template-columns: repeat(8, minmax(0, 1fr));
-			}
-		}
-		.bacera-cart-overlay {
-			position: fixed;
-			inset: 0;
-			background: rgb(0 0 0 / 0.28);
-			opacity: 0;
-			pointer-events: none;
-			transition: opacity 0.25s ease;
-			z-index: 60;
-		}
-		.bacera-cart-overlay.is-open {
-			opacity: 1;
-			pointer-events: auto;
-		}
-		.bacera-cart-drawer {
-			position: fixed;
-			top: 0;
-			right: 0;
-			height: 100vh;
-			width: min(560px, 92vw);
-			background: #fff;
-			box-shadow: -10px 0 28px rgb(41 37 36 / 0.18);
-			transform: translateX(100%);
-			transition: transform 0.28s ease;
-			display: flex;
-			flex-direction: column;
-			z-index: 70;
-		}
-		.bacera-cart-drawer.is-open {
-			transform: translateX(0);
-		}
-		.bacera-cart-drawer-head {
-			padding: 2.5rem 1.25rem 1.25rem;
-			border-bottom: 1px solid rgb(231 229 228);
-		}
-		.bacera-cart-items {
-			flex: 1;
-			overflow-y: auto;
-			padding: 1.75rem 1.25rem 2.5rem;
-		}
-		.bacera-cart-item {
-			display: grid;
-			grid-template-columns: 96px minmax(0, 1fr);
-			gap: 0.9rem;
-			padding: 1.25rem 0;
-			border-bottom: 1px solid rgb(231 229 228);
-		}
-		.bacera-cart-item img {
-			width: 96px;
-			height: 96px;
-			border-radius: 0.65rem;
-			object-fit: cover;
-			background: rgb(245 245 244);
-		}
-		.bacera-cart-item-main {
-			display: flex;
-			align-items: flex-start;
-			justify-content: space-between;
-			gap: 0.5rem;
-			min-width: 0;
-		}
-		.bacera-cart-item-text {
-			min-width: 0;
-			flex: 1;
-		}
-		.bacera-cart-variant-line {
-			margin: 0.375rem 0 0;
-			font-size: 0.9375rem;
-			line-height: 1.45;
-			color: rgb(87 83 78);
-		}
-		.bacera-cart-qty {
-			display: inline-flex;
-			align-items: center;
-			border: 1px solid rgb(214 211 209);
-			border-radius: 0.5rem;
-			overflow: hidden;
-		}
-		.bacera-cart-qty button {
-			width: 2rem;
-			height: 2rem;
-			border: 0;
-			background: #fff;
-			color: rgb(87 83 78);
-			cursor: pointer;
-		}
-		.bacera-cart-qty span {
-			min-width: 2rem;
-			text-align: center;
-			font-variant-numeric: tabular-nums;
-			color: rgb(41 37 36);
-		}
-		.bacera-cart-remove {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			flex-shrink: 0;
-			width: 2.25rem;
-			height: 2.25rem;
-			padding: 0;
-			border: 0;
-			border-radius: 0.5rem;
-			background: transparent;
-			color: rgb(168 162 158);
-			cursor: pointer;
-			transition: color 0.15s ease, background-color 0.15s ease;
-		}
-		.bacera-cart-remove:hover {
-			color: rgb(87 83 78);
-			background: rgb(245 245 244);
-		}
-		.bacera-cart-remove svg {
-			display: block;
-		}
-		.bacera-cart-footer {
-			border-top: 1px solid rgb(231 229 228);
-			padding: 1.75rem 1.25rem 2.5rem;
-			background: #fff;
-		}
-		.bacera-cart-empty {
-			padding: 2.5rem 1.25rem;
-			color: rgb(120 113 108);
-			font-size: 0.95rem;
-		}
-	</style>
-	<div class="max-w-[90rem] mx-auto px-0">
+<main class="bacera-shop-page min-h-screen font-sans" style="background:#F8F4EE;">
+<style id="bacera-shop-redesign-css">
+:root {
+	--bsh-cream:       #F8F4EE;
+	--bsh-cream-mid:   #F2EDE5;
+	--bsh-sand:        #E8DFD3;
+	--bsh-clay-100:    #E5D8CC;
+	--bsh-clay-300:    #C0A28E;
+	--bsh-clay-500:    #A9846B;
+	--bsh-clay-600:    #8D6A54;
+	--bsh-clay-700:    #6B5344;
+	--bsh-clay-800:    #4d3d32;
+	--bsh-clay-900:    #3d2f26;
+	--bsh-accent:      #C06B3A;
+	--bsh-text:        #2A1F17;
+	--bsh-text-sec:    #6B5344;
+	--bsh-text-muted:  #9A8478;
+	--bsh-border:      #DDD5CB;
+	--bsh-border-lt:   #EDE6DD;
+	--bsh-white:       #FFFFFF;
+}
+.bsh-wrap {
+	max-width: 1440px; margin: 0 auto;
+	padding: clamp(2rem,5vw,4rem) clamp(1.25rem,4vw,3rem) 5rem;
+}
+/* Hero */
+.bsh-hero {
+	background: linear-gradient(135deg,#F2EBE0 0%,#EAE0D5 40%,#DDD0C4 100%);
+	border-radius: 28px;
+	padding: clamp(2rem,4vw,3.5rem) clamp(1.5rem,4vw,3rem) clamp(1.75rem,3.5vw,3rem);
+	margin-bottom: 2.5rem; position: relative; overflow: hidden;
+	display: flex; flex-direction: column; gap: 1.75rem;
+}
+.bsh-hero::after {
+	content:''; position:absolute; right:-80px; top:-80px;
+	width:340px; height:340px; border-radius:50%;
+	background:radial-gradient(circle,rgba(192,107,58,.10) 0%,transparent 70%);
+	pointer-events:none;
+}
+.bsh-hero-label { font-size:.68rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#8D6A54; }
+.bsh-hero-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(1.9rem,3.5vw,3rem); font-weight:400; line-height:1.15; color:#2A1F17; max-width:500px; margin-top:.5rem; }
+.bsh-hero-title em { font-style:italic; color:#C06B3A; }
+/* Cat pills */
+.bsh-cats { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; }
+.bsh-cat-label { font-size:.7rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#9A8478; margin-right:.25rem; }
+.bsh-cat-pill {
+	display:inline-flex; align-items:center; gap:.35rem;
+	padding:.4rem 1rem; border-radius:999px;
+	font-family:inherit; font-size:.78rem; font-weight:500;
+	border:1px solid #DDD5CB; background:#fff; color:#6B5344;
+	cursor:pointer; text-decoration:none;
+	transition:all .2s;
+}
+.bsh-cat-pill:hover { border-color:#A9846B; color:#4d3d32; }
+.bsh-cat-pill.is-active { background:#4d3d32; color:#fff; border-color:#4d3d32; }
+/* Layout split */
+.bsh-split { display:grid; grid-template-columns:220px 1fr; gap:2rem; align-items:start; }
+@media(max-width:900px){ .bsh-split{grid-template-columns:1fr;} .bsh-sidebar{display:none;} .bsh-filter-fab{display:flex!important;} }
+/* Sidebar */
+.bsh-sidebar { position:sticky; top:88px; background:#fff; border:1px solid #EDE6DD; border-radius:20px; padding:1.5rem 1.25rem; box-shadow:0 1px 3px rgba(42,31,23,.06); }
+.bsh-sidebar-heading { font-size:.62rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#9A8478; padding-bottom:.6rem; border-bottom:1px solid #EDE6DD; margin-bottom:.85rem; }
+.bsh-sidebar-section { margin-bottom:1.5rem; }
+.bsh-sidebar-section:last-child { margin-bottom:0; }
+.bsh-filter-list { list-style:none; display:flex; flex-direction:column; gap:.2rem; }
+.bsh-filter-item { display:flex; align-items:center; gap:.55rem; }
+.bsh-filter-item label { font-size:.83rem; color:#6B5344; cursor:pointer; flex:1; transition:color .15s; }
+.bsh-filter-item label:hover { color:#2A1F17; }
+.bsh-filter-item input[type="checkbox"], .bsh-filter-item input[type="radio"] {
+	width:14px; height:14px; flex-shrink:0; border:1.5px solid #C0A28E; border-radius:3px;
+	appearance:none; cursor:pointer; position:relative; transition:background .15s,border-color .15s;
+	margin-top:0;
+}
+.bsh-filter-item input[type="radio"] { border-radius:50%; }
+.bsh-filter-item input[type="checkbox"]:checked, .bsh-filter-item input[type="radio"]:checked { background:#4d3d32; border-color:#4d3d32; }
+.bsh-filter-item input[type="checkbox"]:checked::after { content:'✓'; position:absolute; font-size:9px; color:#fff; font-weight:700; top:50%; left:50%; transform:translate(-50%,-50%); }
+.bsh-filter-item input[type="radio"]:checked::after { content:''; position:absolute; width:5px; height:5px; border-radius:50%; background:#fff; top:50%; left:50%; transform:translate(-50%,-50%); }
+.bsh-all-link { display:block; border-radius:14px; padding:.45rem .6rem; font-size:.83rem; font-weight:500; text-decoration:none; transition:background .15s,color .15s; }
+.bsh-all-link.is-active { background:#E5D8CC; color:#4d3d32; }
+.bsh-all-link:not(.is-active) { color:#6B5344; }
+.bsh-all-link:not(.is-active):hover { background:#F2EDE5; }
+/* Toolbar */
+.bsh-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; flex-wrap:wrap; gap:.6rem; }
+.bsh-product-count { font-size:.83rem; color:#9A8478; }
+.bsh-product-count strong { color:#2A1F17; font-weight:600; }
+.bsh-sort-select {
+	font-family:inherit; font-size:.78rem; color:#2A1F17; background:#fff;
+	border:1px solid #DDD5CB; border-radius:8px; padding:.4rem 2rem .4rem .7rem;
+	appearance:none; cursor:pointer; outline:none;
+	background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B5344' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+	background-repeat:no-repeat; background-position:right .6rem center; transition:border-color .2s;
+}
+.bsh-sort-select:focus { border-color:#A9846B; }
+/* Product grid */
+.bsh-product-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.1rem; }
+@media(max-width:1100px){ .bsh-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media(max-width:600px){ .bsh-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;} }
+/* Empty */
+.bsh-empty { border-radius:28px; border:1px solid #EDE6DD; background:#fff; padding:4rem 2rem; text-align:center; }
+.bsh-empty-icon { font-size:2.5rem; margin-bottom:.75rem; }
+.bsh-empty-title { font-family:'Cormorant Garamond',Georgia,serif; font-size:1.5rem; color:#2A1F17; margin-bottom:.35rem; }
+.bsh-empty-sub { font-size:.85rem; color:#9A8478; }
+/* Pagination */
+.bsh-pagination { display:flex; justify-content:center; align-items:center; gap:.35rem; margin-top:2.5rem; flex-wrap:wrap; }
+.bsh-page-btn { width:36px; height:36px; border-radius:8px; border:1px solid #DDD5CB; background:#fff; font-size:.83rem; color:#6B5344; cursor:pointer; display:flex; align-items:center; justify-content:center; text-decoration:none; font-family:inherit; font-weight:500; transition:all .15s; }
+.bsh-page-btn:hover { border-color:#A9846B; color:#2A1F17; }
+.bsh-page-btn.is-current { background:#4d3d32; color:#fff; border-color:#4d3d32; }
+.bsh-page-ellipsis { font-size:.85rem; color:#9A8478; padding:0 .2rem; line-height:36px; }
+/* Mobile FAB */
+.bsh-filter-fab { display:none; position:fixed; bottom:1.5rem; right:1.5rem; z-index:100; background:#4d3d32; color:#fff; padding:.75rem 1.25rem; border-radius:999px; font-size:.83rem; font-weight:500; font-family:inherit; box-shadow:0 8px 24px rgba(42,31,23,.18); border:none; cursor:pointer; align-items:center; gap:.4rem; }
+/* Cart overlay/drawer */
+.bacera-cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,.28); opacity:0; pointer-events:none; transition:opacity .25s; z-index:60; }
+.bacera-cart-overlay.is-open { opacity:1; pointer-events:auto; }
+.bacera-cart-drawer { position:fixed; top:0; right:0; height:100vh; width:min(520px,93vw); background:#fff; box-shadow:-8px 0 28px rgba(42,31,23,.14); transform:translateX(100%); transition:transform .28s; display:flex; flex-direction:column; z-index:70; }
+.bacera-cart-drawer.is-open { transform:translateX(0); }
+.bacera-cart-drawer-head { padding:2rem 1.5rem 1.25rem; border-bottom:1px solid #EDE6DD; }
+.bacera-cart-items { flex:1; overflow-y:auto; padding:1.5rem; }
+.bacera-cart-item { display:grid; grid-template-columns:88px minmax(0,1fr); gap:.85rem; padding:1rem 0; border-bottom:1px solid #EDE6DD; }
+.bacera-cart-item img { width:88px; height:88px; border-radius:10px; object-fit:cover; background:#F2EDE5; }
+.bacera-cart-item-main { display:flex; align-items:flex-start; justify-content:space-between; gap:.5rem; min-width:0; }
+.bacera-cart-item-text { min-width:0; flex:1; }
+.bacera-cart-variant-line { margin:.3rem 0 0; font-size:.82rem; line-height:1.45; color:#6B5344; }
+.bacera-cart-qty { display:inline-flex; align-items:center; border:1px solid #DDD5CB; border-radius:8px; overflow:hidden; }
+.bacera-cart-qty button { width:2rem; height:2rem; border:0; background:#fff; color:#6B5344; cursor:pointer; font-size:1rem; }
+.bacera-cart-qty span { min-width:2rem; text-align:center; font-variant-numeric:tabular-nums; color:#2A1F17; font-size:.875rem; font-weight:600; }
+.bacera-cart-remove { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:2rem; height:2rem; padding:0; border:0; border-radius:8px; background:transparent; color:#9A8478; cursor:pointer; transition:color .15s,background .15s; }
+.bacera-cart-remove:hover { color:#6B5344; background:#F2EDE5; }
+.bacera-cart-footer { border-top:1px solid #EDE6DD; padding:1.5rem; background:#fff; }
+.bacera-cart-empty { padding:2.5rem 1rem; color:#9A8478; font-size:.9rem; text-align:center; }
+</style>
 
-		<header class="mb-10 md:mb-12 rounded-2xl border border-stone-200/80 bg-stone-50 px-5 py-8 md:px-8 md:py-10">
-			<nav class="text-xs md:text-sm text-stone-500 mb-4 font-sans" aria-label="<?php esc_attr_e( 'Breadcrumb', 'bacera' ); ?>">
-				<ol class="flex flex-wrap items-center gap-x-2 gap-y-1 list-none m-0 p-0">
-					<li><a class="hover:text-primary-700 transition-colors" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Homepage', 'bacera' ); ?></a></li>
-					<li class="text-stone-300 select-none" aria-hidden="true">/</li>
-					<li><a class="hover:text-primary-700 transition-colors" href="<?php echo esc_url( $url_shop_clear_cats ); ?>"><?php esc_html_e( 'Shop all', 'bacera' ); ?></a></li>
-				</ol>
-			</nav>
-			<h1 class="font-serif text-3xl md:text-4xl font-semibold text-stone-800 tracking-tight mb-6 md:mb-8"><?php esc_html_e( 'Shop by', 'bacera' ); ?></h1>
-			<div class="bacera-shop-by-grid grid gap-3 md:gap-4">
-				<?php foreach ( $bacera_shop_by_tiles as $tile ) : ?>
-					<?php
-					$key = $tile['key'];
-					$tid = (string) $tile['id'];
-					$is_all = ( $key === 'all' );
-					$href   = bacera_shop_by_tile_url( $shop_base_url, $sort, $is_all ? '' : $tid );
-					$active = $is_all
-						? empty( $selected_category_ids )
-						: ( $tid !== '' && count( $selected_category_ids ) === 1 && (string) $selected_category_ids[0] === $tid );
-					$tile_classes = 'bacera-shop-by-tile font-sans' . ( $active ? ' is-active' : '' );
-					if ( ! $is_all && $tid === '' ) {
-						$tile_classes .= ' bacera-shop-by-tile--disabled';
-					}
-					?>
-					<?php if ( $is_all || $tid !== '' ) : ?>
-						<a class="<?php echo esc_attr( $tile_classes ); ?>" href="<?php echo esc_url( $href ); ?>" <?php echo $active ? 'aria-current="page"' : ''; ?>>
-							<span class="text-stone-800 [&_svg]:stroke-stone-800"><?php echo bacera_shop_by_tile_icon( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-							<span><?php echo esc_html( $tile['label'] ); ?></span>
-						</a>
-					<?php else : ?>
-						<span class="<?php echo esc_attr( $tile_classes ); ?>" role="presentation" title="<?php esc_attr_e( 'Category not available in store', 'bacera' ); ?>">
-							<span class="text-stone-800 [&_svg]:stroke-stone-800"><?php echo bacera_shop_by_tile_icon( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-							<span><?php echo esc_html( $tile['label'] ); ?></span>
-						</span>
-					<?php endif; ?>
-				<?php endforeach; ?>
-			</div>
-		</header>
+<div class="bsh-wrap">
 
-		<?php if ( ! class_exists( 'Pancake_API_Client' ) || ! class_exists( 'Bacera_Utils' ) ) : ?>
-			<div class="rounded-[2rem] border border-gray-100 bg-white p-8 text-center text-gray-700 shadow-sm">
-				<?php esc_html_e( 'Pancake integration is not active. Please enable the Bacera Pancake plugin.', 'bacera' ); ?>
-			</div>
-		<?php elseif ( $products_response === false ) : ?>
-			<div class="rounded-[2rem] border border-gray-100 bg-white p-8 text-center text-gray-700 shadow-sm">
-				<?php esc_html_e( 'Could not reach the shop API. Check API key and Shop ID in settings.', 'bacera' ); ?>
-			</div>
-		<?php elseif ( $products_api_error ) : ?>
-			<div class="rounded-[2rem] border border-gray-100 bg-white p-8 text-center text-gray-700 shadow-sm">
-				<?php esc_html_e( 'The shop API returned an error. Try again later.', 'bacera' ); ?>
-			</div>
-		<?php else : ?>
+	<?php /* ── Load Cormorant Garamond if not in header ── */ ?>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
 
-		<?php
-		// Vertical split: 20% sidebar / 80% main — CSS chính trong <style id="bacera-shop-plp-layout"> (+ .bacera-shop-split trong theme CSS).
-		?>
-		<div class="bacera-shop-split grid grid-cols-1">
-			<aside class="min-w-0 w-full md:max-w-none border border-gray-100 rounded-2xl bg-white p-5 md:p-6 shadow-sm md:sticky md:top-24 space-y-8" aria-label="<?php esc_attr_e( 'Filters and categories', 'bacera' ); ?>">
-				<form method="get" action="<?php echo esc_url( $shop_base_url ); ?>" id="bacera-shop-sidebar-form" class="space-y-8">
-					<input type="hidden" name="shop_page" value="1" />
-					<?php bacera_shop_sidebar_hidden_inputs(); ?>
+	<?php /* ─── HERO ─── */ ?>
+	<div class="bsh-hero">
+		<div>
+			<div class="bsh-hero-label"><?php esc_html_e( 'Handcrafted · Vietnamese Ceramics', 'bacera' ); ?></div>
+			<h1 class="bsh-hero-title">
+				<?php esc_html_e( 'Every piece holds', 'bacera' ); ?><br/>
+				<em><?php esc_html_e( 'a quiet story.', 'bacera' ); ?></em>
+			</h1>
+		</div>
+		<div class="bsh-cats">
+			<span class="bsh-cat-label"><?php esc_html_e( 'Browse', 'bacera' ); ?></span>
+			<?php
+			$all_active   = empty( $selected_category_ids );
+			$all_pill_url = remove_query_arg( [ 'cat', 'filter_collection', 'shop_page' ], $shop_base_url );
+			if ( $sort !== 'price_low' ) { $all_pill_url = add_query_arg( 'sort', $sort, $all_pill_url ); }
+			?>
+			<a href="<?php echo esc_url( $all_pill_url ); ?>" class="bsh-cat-pill <?php echo $all_active ? 'is-active' : ''; ?>" <?php echo $all_active ? 'aria-current="page"' : ''; ?>>
+				<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+				<?php esc_html_e( 'All', 'bacera' ); ?>
+			</a>
+			<?php foreach ( $bacera_shop_by_tiles as $tile ) :
+				$tkey = $tile['key']; $tid = (string) $tile['id'];
+				if ( $tkey === 'all' || $tid === '' ) { continue; }
+				$t_url = bacera_shop_by_tile_url( $shop_base_url, $sort, $tid );
+				$t_active = count( $selected_category_ids ) === 1 && $selected_category_ids[0] === $tid;
+			?>
+			<a href="<?php echo esc_url( $t_url ); ?>" class="bsh-cat-pill <?php echo $t_active ? 'is-active' : ''; ?>" <?php echo $t_active ? 'aria-current="page"' : ''; ?>>
+				<?php echo bacera_shop_by_tile_icon( $tkey ); // phpcs:ignore ?>
+				<?php echo esc_html( $tile['label'] ); ?>
+			</a>
+			<?php endforeach; ?>
+		</div>
+	</div>
 
-					<?php
-					$chk = static function ( $name, $value ) {
-						$cur = isset( $_GET[ $name ] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET[ $name ] ) ) : [];
-						return in_array( (string) $value, array_map( 'strval', $cur ), true );
-					};
-					$chk_cat = static function ( $cid ) use ( $selected_category_ids ) {
-						return in_array( (string) $cid, array_map( 'strval', $selected_category_ids ), true );
-					};
-					?>
-					<div>
-						<h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-2 mb-3"><?php esc_html_e( 'Collection', 'bacera' ); ?></h2>
-						<ul class="space-y-2 list-none m-0 p-0">
-							<li>
-								<a href="<?php echo esc_url( $url_shop_clear_cats ); ?>" class="block rounded-lg px-2 py-2 text-sm font-medium transition-colors <?php echo empty( $selected_category_ids ) ? 'bg-primary-100 text-primary-900' : 'text-gray-700 hover:bg-gray-50'; ?>">
-									<?php esc_html_e( 'All products', 'bacera' ); ?>
-								</a>
-							</li>
-							<?php foreach ( $categories_data as $cat ) : ?>
-								<?php
-								if ( ! is_array( $cat ) ) {
-									continue;
-								}
-								$cid   = isset( $cat['id'] ) ? (string) $cat['id'] : ( isset( $cat['category_id'] ) ? (string) $cat['category_id'] : '' );
-								$label = $cat['text'] ?? $cat['name'] ?? '';
-								if ( $cid === '' ) {
-									continue;
-								}
-								$fid = 'filter-cat-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $cid );
-								?>
-								<li class="flex items-start gap-2">
-									<input class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" type="checkbox" name="filter_collection[]" value="<?php echo esc_attr( $cid ); ?>" id="<?php echo esc_attr( $fid ); ?>" <?php checked( $chk_cat( $cid ) ); ?> onchange="this.form.submit()" />
-									<label class="text-sm text-gray-700 cursor-pointer leading-snug" for="<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $label !== '' ? $label : $cid ); ?></label>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
+	<?php /* ─── API Error states ─── */ ?>
+	<?php if ( ! class_exists( 'Pancake_API_Client' ) || ! class_exists( 'Bacera_Utils' ) ) : ?>
+		<div class="bsh-empty"><div class="bsh-empty-icon">⚙️</div><p class="bsh-empty-title"><?php esc_html_e( 'Plugin not active', 'bacera' ); ?></p><p class="bsh-empty-sub"><?php esc_html_e( 'Please enable the Bacera Pancake plugin.', 'bacera' ); ?></p></div>
+	<?php elseif ( $products_response === false ) : ?>
+		<div class="bsh-empty"><div class="bsh-empty-icon">🔌</div><p class="bsh-empty-title"><?php esc_html_e( 'Connection error', 'bacera' ); ?></p><p class="bsh-empty-sub"><?php esc_html_e( 'Could not reach the shop API.', 'bacera' ); ?></p></div>
+	<?php elseif ( $products_api_error ) : ?>
+		<div class="bsh-empty"><div class="bsh-empty-icon">⚠️</div><p class="bsh-empty-title"><?php esc_html_e( 'API error', 'bacera' ); ?></p><p class="bsh-empty-sub"><?php esc_html_e( 'Try again later.', 'bacera' ); ?></p></div>
+	<?php else : ?>
 
-					<?php
-					$bacera_filter_groups = [
-						[
-							'heading' => __( 'Capacity', 'bacera' ),
-							'name'    => 'filter_capacity',
-							'options' => [
-								'lt100'   => '<100ml',
-								'100_150' => '100–150ml',
-								'150_250' => '150–250ml',
-								'gt250'   => '>250ml',
-							],
-						],
-						[
-							'heading' => __( 'Handle Type', 'bacera' ),
-							'name'    => 'filter_handle',
-							'options' => [
-								'with_handle'    => __( 'With handle', 'bacera' ),
-								'without_handle' => __( 'Without handle', 'bacera' ),
-								'round_loop'     => __( 'Round loop', 'bacera' ),
-								'hollow_handle'  => __( 'Hollow handle', 'bacera' ),
-							],
-						],
-						[
-							'heading' => __( 'Glaze Finish', 'bacera' ),
-							'name'    => 'filter_glaze',
-							'options' => [
-								'smooth'   => __( 'Smooth', 'bacera' ),
-								'reactive' => __( 'Reactive', 'bacera' ),
-								'matte'    => __( 'Matte', 'bacera' ),
-								'glossy'   => __( 'Glossy', 'bacera' ),
-							],
-						],
-						[
-							'heading' => __( 'Shape', 'bacera' ),
-							'name'    => 'filter_shape',
-							'options' => [
-								'round'      => __( 'Round', 'bacera' ),
-								'slim'       => __( 'Slim', 'bacera' ),
-								'tall'       => __( 'Tall', 'bacera' ),
-								'flared_rim' => __( 'Flared rim', 'bacera' ),
-							],
-						],
-						[
-							'heading' => __( 'Best For', 'bacera' ),
-							'name'    => 'filter_best_for',
-							'options' => [
-								'tea'      => __( 'Tea', 'bacera' ),
-								'coffee'   => __( 'Coffee', 'bacera' ),
-								'espresso' => __( 'Espresso', 'bacera' ),
-								'alcohol'  => __( 'Alcohol', 'bacera' ),
-								'juice'    => __( 'Juice', 'bacera' ),
-							],
-						],
-					];
-					foreach ( $bacera_filter_groups as $grp ) :
-						$gname = $grp['name'];
+	<div class="bsh-split">
+
+		<?php /* ─── SIDEBAR ─── */ ?>
+		<aside class="bsh-sidebar" aria-label="<?php esc_attr_e( 'Filters', 'bacera' ); ?>">
+			<form method="get" action="<?php echo esc_url( $shop_base_url ); ?>" id="bacera-shop-sidebar-form">
+				<input type="hidden" name="shop_page" value="1" />
+				<?php bacera_shop_sidebar_hidden_inputs(); ?>
+				<?php
+				$chk = static function ( $name, $value ) {
+					$cur = isset( $_GET[ $name ] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET[ $name ] ) ) : [];
+					return in_array( (string) $value, array_map( 'strval', $cur ), true );
+				};
+				$chk_cat = static function ( $cid ) use ( $selected_category_ids ) {
+					return in_array( (string) $cid, array_map( 'strval', $selected_category_ids ), true );
+				};
+				?>
+
+				<div class="bsh-sidebar-section">
+					<div class="bsh-sidebar-heading"><?php esc_html_e( 'Collection', 'bacera' ); ?></div>
+					<a href="<?php echo esc_url( $url_shop_clear_cats ); ?>" class="bsh-all-link <?php echo empty( $selected_category_ids ) ? 'is-active' : ''; ?>">
+						<?php esc_html_e( 'All products', 'bacera' ); ?>
+					</a>
+					<ul class="bsh-filter-list" style="margin-top:.5rem;">
+						<?php foreach ( $categories_data as $cat ) :
+							if ( ! is_array( $cat ) ) { continue; }
+							$cid   = isset( $cat['id'] ) ? (string) $cat['id'] : ( isset( $cat['category_id'] ) ? (string) $cat['category_id'] : '' );
+							$label = $cat['text'] ?? $cat['name'] ?? '';
+							if ( $cid === '' ) { continue; }
+							$fid = 'bsh-cat-' . preg_replace( '/[^a-zA-Z0-9_-]/', '', $cid );
 						?>
-					<div>
-						<h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-2 mb-3"><?php echo esc_html( $grp['heading'] ); ?></h2>
-						<ul class="space-y-2 list-none m-0 p-0">
-							<?php foreach ( $grp['options'] as $val => $lab ) : ?>
-								<?php
-								$fid = 'bacera-' . sanitize_key( $gname . '-' . $val );
-								?>
-								<li class="flex items-start gap-2">
-									<input class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" type="checkbox" name="<?php echo esc_attr( $gname ); ?>[]" value="<?php echo esc_attr( $val ); ?>" id="<?php echo esc_attr( $fid ); ?>" <?php checked( $chk( $gname, $val ) ); ?> onchange="this.form.submit()" />
-									<label class="text-sm text-gray-700 cursor-pointer leading-snug" for="<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( is_string( $lab ) ? $lab : (string) $lab ); ?></label>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
-					<?php endforeach; ?>
+						<li class="bsh-filter-item">
+							<input type="checkbox" name="filter_collection[]" value="<?php echo esc_attr( $cid ); ?>" id="<?php echo esc_attr( $fid ); ?>" <?php checked( $chk_cat( $cid ) ); ?> onchange="this.form.submit()" />
+							<label for="<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $label !== '' ? $label : $cid ); ?></label>
+						</li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
 
-					<div>
-						<h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-2 mb-3"><?php esc_html_e( 'Price', 'bacera' ); ?></h2>
-						<ul class="space-y-2 list-none m-0 p-0">
-							<?php
-							$price_opts = [
-								''   => __( 'Any', 'bacera' ),
-								'p1' => __( 'Under $30', 'bacera' ),
-								'p2' => __( '$30–$60', 'bacera' ),
-								'p3' => __( '$60–$100', 'bacera' ),
-								'p4' => __( 'Above $100', 'bacera' ),
-							];
-							foreach ( $price_opts as $val => $lab ) :
-								$fid = $val === '' ? 'filter-price-any' : 'filter-price-' . $val;
-								?>
-								<li class="flex items-center gap-2">
-									<input class="border-gray-300 text-primary-600 focus:ring-primary-500" type="radio" name="filter_price" value="<?php echo esc_attr( $val ); ?>" id="<?php echo esc_attr( $fid ); ?>" <?php checked( isset( $_GET['filter_price'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_price'] ) ) : '', $val ); ?> onchange="this.form.submit()" />
-									<label class="text-sm text-gray-700 cursor-pointer" for="<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $lab ); ?></label>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
-
-					<div>
-						<h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest border-b border-gray-100 pb-2 mb-3"><?php esc_html_e( 'Size', 'bacera' ); ?></h2>
-						<ul class="space-y-2 list-none m-0 p-0">
-							<?php foreach ( [ 'small' => __( 'Small', 'bacera' ), 'medium' => __( 'Medium', 'bacera' ), 'large' => __( 'Large', 'bacera' ) ] as $val => $lab ) : ?>
-								<li class="flex items-start gap-2">
-									<input class="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500" type="checkbox" name="filter_size[]" value="<?php echo esc_attr( $val ); ?>" id="filter-size-<?php echo esc_attr( $val ); ?>" <?php checked( $chk( 'filter_size', $val ) ); ?> onchange="this.form.submit()" />
-									<label class="text-sm text-gray-700 cursor-pointer" for="filter-size-<?php echo esc_attr( $val ); ?>"><?php echo esc_html( $lab ); ?></label>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					</div>
-				</form>
-			</aside>
-
-			<div class="bacera-shop-main min-w-0 w-full flex flex-col gap-8">
-				<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-					<p class="text-body-small text-gray-600 m-0">
+				<div class="bsh-sidebar-section">
+					<div class="bsh-sidebar-heading"><?php esc_html_e( 'Price', 'bacera' ); ?></div>
+					<ul class="bsh-filter-list">
 						<?php
-						if ( ! empty( $items ) ) {
-							printf(
-								/* translators: %d: product count */
-								esc_html( _n( '%d product', '%d products', count( $items ), 'bacera' ) ),
-								(int) count( $items )
-							);
-						} else {
-							esc_html_e( 'No products in this view.', 'bacera' );
-						}
+						$price_opts = [ '' => __( 'Any price', 'bacera' ), 'p1' => __( 'Under $30', 'bacera' ), 'p2' => '$30–$60', 'p3' => '$60–$100', 'p4' => __( 'Above $100', 'bacera' ) ];
+						$cur_price  = isset( $_GET['filter_price'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_price'] ) ) : '';
+						foreach ( $price_opts as $val => $lab ) :
+							$fid = $val === '' ? 'bsh-price-any' : 'bsh-price-' . $val;
 						?>
-					</p>
-					<form method="get" class="flex items-center gap-2 shrink-0" action="<?php echo esc_url( $shop_base_url ); ?>">
-						<input type="hidden" name="shop_page" value="1" />
-						<?php
-						foreach ( $selected_category_ids as $sid ) {
-							echo '<input type="hidden" name="filter_collection[]" value="' . esc_attr( $sid ) . '" />';
-						}
-						if ( isset( $_GET['filter_price'] ) && $_GET['filter_price'] !== '' ) {
-							echo '<input type="hidden" name="filter_price" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET['filter_price'] ) ) ) . '" />';
-						}
-						$bacera_sort_array_keys = [ 'filter_size', 'filter_capacity', 'filter_handle', 'filter_glaze', 'filter_shape', 'filter_best_for' ];
-						foreach ( $bacera_sort_array_keys as $pk ) {
-							if ( empty( $_GET[ $pk ] ) ) {
-								continue;
-							}
-							foreach ( (array) wp_unslash( $_GET[ $pk ] ) as $pv ) {
-								echo '<input type="hidden" name="' . esc_attr( $pk ) . '[]" value="' . esc_attr( sanitize_text_field( $pv ) ) . '" />';
-							}
-						}
-						?>
-						<label for="bacera-shop-sort" class="text-body-small text-gray-700 whitespace-nowrap"><?php esc_html_e( 'Sort by:', 'bacera' ); ?></label>
-						<select name="sort" id="bacera-shop-sort" onchange="this.form.submit()" class="text-body-small rounded-lg border border-gray-200 bg-white text-gray-900 py-2 pl-3 pr-8 focus:ring-2 focus:ring-primary-400 focus:border-primary-400">
-							<option value="price_low" <?php selected( $sort, 'price_low' ); ?>><?php esc_html_e( 'Price low – high', 'bacera' ); ?></option>
-							<option value="price_high" <?php selected( $sort, 'price_high' ); ?>><?php esc_html_e( 'Price high – low', 'bacera' ); ?></option>
-							<option value="newest" <?php selected( $sort, 'newest' ); ?>><?php esc_html_e( 'Newest', 'bacera' ); ?></option>
-						</select>
-					</form>
+						<li class="bsh-filter-item">
+							<input type="radio" name="filter_price" value="<?php echo esc_attr( $val ); ?>" id="<?php echo esc_attr( $fid ); ?>" <?php checked( $cur_price, $val ); ?> onchange="this.form.submit()" />
+							<label for="<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $lab ); ?></label>
+						</li>
+						<?php endforeach; ?>
+					</ul>
 				</div>
 
 				<?php
-				// Lọc cục bộ: giá (VND), danh mục (multi), size + bộ filter thuộc tính (từ khóa trong tên/mô tả).
-				if ( ! empty( $items ) ) {
-					$fp = isset( $_GET['filter_price'] ) ? sanitize_text_field( wp_unslash( $_GET['filter_price'] ) ) : '';
-					$fs = isset( $_GET['filter_size'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_size'] ) ) : [];
-					$f_cap  = isset( $_GET['filter_capacity'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_capacity'] ) ) : [];
-					$f_hand = isset( $_GET['filter_handle'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_handle'] ) ) : [];
-					$f_glz  = isset( $_GET['filter_glaze'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_glaze'] ) ) : [];
-					$f_shp  = isset( $_GET['filter_shape'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_shape'] ) ) : [];
-					$f_best = isset( $_GET['filter_best_for'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_best_for'] ) ) : [];
-					$fcats  = count( $selected_category_ids ) > 1 ? $selected_category_ids : [];
-					$needle_maps = bacera_shop_attribute_filter_needle_maps();
-
-					$items = array_values(
-						array_filter(
-							$items,
-							static function ( $p ) use ( $fp, $fcats, $fs, $f_cap, $f_hand, $f_glz, $f_shp, $f_best, $needle_maps ) {
-								$pa = isset( $p['price_at_counter'] ) ? (float) $p['price_at_counter'] : ( isset( $p['variations'][0]['price_at_counter'] ) ? (float) $p['variations'][0]['price_at_counter'] : 0 );
-								$ra = isset( $p['retail_price'] ) ? (float) $p['retail_price'] : ( isset( $p['variations'][0]['retail_price'] ) ? (float) $p['variations'][0]['retail_price'] : 0 );
-								$pr = $pa > 0 ? $pa : $ra;
-								if ( ! bacera_shop_price_band_matches( $pr, $fp ) ) {
-									return false;
-								}
-
-								$haystack = bacera_shop_filter_haystack( $p );
-
-								if ( ! empty( $fcats ) ) {
-									$p_cat_ids = bacera_shop_product_category_ids( $p );
-									$want       = array_map( 'strval', $fcats );
-									$have       = array_map( 'strval', $p_cat_ids );
-									if ( count( array_intersect( $want, $have ) ) === 0 ) {
-										return false;
-									}
-								}
-
-								if ( ! bacera_shop_keyword_group_match( $haystack, $f_cap, $needle_maps['capacity'] ) ) {
-									return false;
-								}
-								if ( ! bacera_shop_keyword_group_match( $haystack, $f_hand, $needle_maps['handle'] ) ) {
-									return false;
-								}
-								if ( ! bacera_shop_keyword_group_match( $haystack, $f_glz, $needle_maps['glaze'] ) ) {
-									return false;
-								}
-								if ( ! bacera_shop_keyword_group_match( $haystack, $f_shp, $needle_maps['shape'] ) ) {
-									return false;
-								}
-								if ( ! bacera_shop_keyword_group_match( $haystack, $f_best, $needle_maps['best_for'] ) ) {
-									return false;
-								}
-
-								if ( ! empty( $fs ) ) {
-									$ok = false;
-									foreach ( $fs as $sz ) {
-										if ( strpos( $haystack, strtolower( (string) $sz ) ) !== false ) {
-											$ok = true;
-											break;
-										}
-									}
-									if ( ! $ok ) {
-										return false;
-									}
-								}
-
-								return true;
-							}
-						)
-					);
-				}
-
-				if ( $sort === 'price_high' || $sort === 'price_low' ) {
-					usort(
-						$items,
-						function ( $a, $b ) use ( $sort ) {
-							$pa = isset( $a['price_at_counter'] ) ? (float) $a['price_at_counter'] : ( isset( $a['variations'][0]['price_at_counter'] ) ? (float) $a['variations'][0]['price_at_counter'] : 0 );
-							$pb = isset( $b['price_at_counter'] ) ? (float) $b['price_at_counter'] : ( isset( $b['variations'][0]['price_at_counter'] ) ? (float) $b['variations'][0]['price_at_counter'] : 0 );
-							$ra = isset( $a['retail_price'] ) ? (float) $a['retail_price'] : ( isset( $a['variations'][0]['retail_price'] ) ? (float) $a['variations'][0]['retail_price'] : 0 );
-							$rb = isset( $b['retail_price'] ) ? (float) $b['retail_price'] : ( isset( $b['variations'][0]['retail_price'] ) ? (float) $b['variations'][0]['retail_price'] : 0 );
-							$a_price = $pa > 0 ? $pa : $ra;
-							$b_price = $pb > 0 ? $pb : $rb;
-							return $sort === 'price_high' ? $b_price <=> $a_price : $a_price <=> $b_price;
-						}
-					);
-				} elseif ( $sort === 'newest' ) {
-					usort(
-						$items,
-						function ( $a, $b ) {
-							$ia = isset( $a['id'] ) ? (int) $a['id'] : 0;
-							$ib = isset( $b['id'] ) ? (int) $b['id'] : 0;
-							return $ib <=> $ia;
-						}
-					);
-				}
+				$bacera_filter_groups = [
+					[ 'heading' => __( 'Glaze Finish', 'bacera' ), 'name' => 'filter_glaze',    'options' => [ 'smooth' => __( 'Smooth', 'bacera' ), 'reactive' => __( 'Reactive', 'bacera' ), 'matte' => __( 'Matte', 'bacera' ), 'glossy' => __( 'Glossy', 'bacera' ) ] ],
+					[ 'heading' => __( 'Best For',    'bacera' ), 'name' => 'filter_best_for', 'options' => [ 'tea' => __( 'Tea', 'bacera' ), 'coffee' => __( 'Coffee', 'bacera' ), 'espresso' => __( 'Espresso', 'bacera' ), 'alcohol' => __( 'Alcohol', 'bacera' ), 'juice' => __( 'Juice', 'bacera' ) ] ],
+					[ 'heading' => __( 'Capacity',    'bacera' ), 'name' => 'filter_capacity', 'options' => [ 'lt100' => '<100ml', '100_150' => '100–150ml', '150_250' => '150–250ml', 'gt250' => '>250ml' ] ],
+					[ 'heading' => __( 'Shape',       'bacera' ), 'name' => 'filter_shape',    'options' => [ 'round' => __( 'Round', 'bacera' ), 'slim' => __( 'Slim', 'bacera' ), 'tall' => __( 'Tall', 'bacera' ), 'flared_rim' => __( 'Flared rim', 'bacera' ) ] ],
+				];
+				foreach ( $bacera_filter_groups as $grp ) :
+					$gname = $grp['name'];
 				?>
-
-				<?php if ( empty( $items ) ) : ?>
-					<div class="rounded-[2rem] border border-gray-100 bg-white p-12 text-center shadow-sm">
-						<p class="text-h2 font-bold text-gray-900 m-0 mb-2"><?php esc_html_e( 'No products', 'bacera' ); ?></p>
-						<p class="text-body-small text-gray-500 m-0"><?php esc_html_e( 'Try adjusting filters or category.', 'bacera' ); ?></p>
-					</div>
-				<?php else : ?>
-					<section class="bg-white rounded-[2rem] p-6 md:p-10 shadow-sm border border-gray-100">
-						<?php /* Đúng 3 cột trên desktop: grid-cols-3 từ breakpoint lg. */ ?>
-						<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 lg:gap-x-8 lg:gap-y-10 w-full">
-							<?php
-							foreach ( $items as $p ) :
-								$name = $p['product']['name'] ?? $p['name'] ?? __( 'Product', 'bacera' );
-
-								$image_url = Bacera_Utils::get_proxy_url( $p );
-
-								$price_at_counter = isset( $p['price_at_counter'] ) ? (float) $p['price_at_counter'] : ( isset( $p['variations'][0]['price_at_counter'] ) ? (float) $p['variations'][0]['price_at_counter'] : 0 );
-								$retail_price     = isset( $p['retail_price'] ) ? (float) $p['retail_price'] : ( isset( $p['variations'][0]['retail_price'] ) ? (float) $p['variations'][0]['retail_price'] : 0 );
-
-								$price          = $price_at_counter > 0 ? $price_at_counter : $retail_price;
-								$original_price = ( $retail_price > $price ) ? $retail_price : 0;
-
-								$discount_percent = false;
-								if ( $original_price > 0 && $price < $original_price ) {
-									$discount_percent = '-' . (string) (int) round( ( ( $original_price - $price ) / $original_price ) * 100 ) . '%';
-								}
-
-								$brand_fallback_ids = count( $selected_category_ids ) === 1 ? $selected_category_ids : [];
-								$brand              = bacera_shop_product_category_display_name( $p, $categories_data, $brand_fallback_ids );
-								if ( $brand === '' ) {
-									$brand = __( 'Bacera', 'bacera' );
-								}
-
-								$product_detail_url = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_product_permalink( $p ) : '';
-								$variation_id       = isset( $p['id'] ) ? (string) $p['id'] : '';
-								$product_id         = isset( $p['product']['id'] ) ? (string) $p['product']['id'] : ( isset( $p['product_id'] ) ? (string) $p['product_id'] : '' );
-								$cart_item_uid      = $variation_id !== '' ? 'var_' . $variation_id : 'prd_' . $product_id . '_' . md5( $name . '|' . $price );
-								$cart_variant_label = $p['name'] ?? '';
-								$cart_color         = $p['color_name'] ?? $p['color'] ?? '';
-								$cart_size          = $p['size_name'] ?? $p['size'] ?? $p['capacity'] ?? '';
-
-								get_template_part(
-									'app/Views/components/product-card',
-									null,
-									[
-										'title'       => $name,
-										'brand'       => $brand,
-										'price'       => number_format( $price, 0, ',', '.' ) . ' ₫',
-										'old_price'   => $original_price > 0 ? number_format( $original_price, 0, ',', '.' ) . ' ₫' : '',
-										'image'       => $image_url,
-										'discount'    => $discount_percent,
-										'url'         => $product_detail_url,
-										'add_to_cart' => true,
-										'cart_item'   => [
-											'id'             => $cart_item_uid,
-											'variation_id'   => $variation_id,
-											'product_id'     => $product_id,
-											'name'           => $name,
-											'brand'          => $brand,
-											'variant_label'  => is_string( $cart_variant_label ) ? $cart_variant_label : '',
-											'color'          => is_string( $cart_color ) ? $cart_color : '',
-											'size'           => is_string( $cart_size ) ? $cart_size : '',
-											'image'          => $image_url,
-											'price'          => (float) $price,
-											'original_price' => (float) $original_price,
-											'url'            => $product_detail_url,
-										],
-									]
-								);
-							endforeach;
-							?>
-						</div>
-					</section>
-
-					<?php if ( $total_pages > 1 ) : ?>
-						<nav class="flex flex-wrap items-center gap-2 md:gap-3" aria-label="<?php esc_attr_e( 'Pagination', 'bacera' ); ?>">
-							<?php
-							$tp        = (int) $total_pages;
-							$nav_pages = [];
-							if ( $tp <= 9 ) {
-								for ( $i = 1; $i <= $tp; $i++ ) {
-									$nav_pages[] = $i;
-								}
-							} else {
-								for ( $i = 1; $i <= 5; $i++ ) {
-									$nav_pages[] = $i;
-								}
-								$nav_pages[] = 'ellipsis';
-								$nav_pages[] = $tp;
-							}
-							foreach ( $nav_pages as $entry ) :
-								if ( $entry === 'ellipsis' ) :
-									?>
-									<span class="text-gray-400 px-1 select-none">…</span>
-									<?php
-									continue;
-								endif;
-								$n = (int) $entry;
-								$pargs = [];
-								foreach ( $_GET as $gk => $gv ) {
-									$gk = sanitize_key( $gk );
-									if ( is_array( $gv ) ) {
-										$pargs[ $gk ] = array_map(
-											static function ( $one ) {
-												return sanitize_text_field( wp_unslash( $one ) );
-											},
-											$gv
-										);
-									} else {
-										$pargs[ $gk ] = sanitize_text_field( wp_unslash( $gv ) );
-									}
-								}
-								$pargs['shop_page'] = $n;
-								$purl               = add_query_arg( $pargs, $shop_base_url );
-								$is_current = ( $n === $current_page );
-								?>
-								<a href="<?php echo esc_url( $purl ); ?>" class="text-[14px] font-medium tabular-nums px-1.5 py-1 rounded min-w-[2rem] text-center <?php echo $is_current ? 'text-primary-800 underline decoration-primary-400 underline-offset-4' : 'text-primary-600 hover:text-primary-900'; ?>">
-									<?php echo esc_html( str_pad( (string) $n, 2, '0', STR_PAD_LEFT ) ); ?>
-								</a>
-							<?php endforeach; ?>
-						</nav>
-					<?php endif; ?>
-				<?php endif; ?>
-			</div>
-		</div>
-
-		<?php endif; ?>
-
-		<!-- ═══════════════════════════════════════════════════════
-			 SEO CONTENT BLOCK
-		═══════════════════════════════════════════════════════ -->
-		<?php get_template_part('app/Views/components/seo-content', null, ['title' => 'Cửa hàng']); ?>
-
-	</div>
-	<div id="bacera-cart-overlay" class="bacera-cart-overlay" aria-hidden="true"></div>
-	<aside id="bacera-cart-drawer" class="bacera-cart-drawer" aria-hidden="true" aria-label="<?php esc_attr_e( 'Shopping cart', 'bacera' ); ?>">
-		<div class="bacera-cart-drawer-head flex items-center justify-between">
-			<h2 class="m-0 font-serif font-bold text-[2rem] leading-none text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></h2>
-			<button type="button" id="bacera-cart-close" class="h-9 w-9 rounded-full border border-stone-200 text-xl leading-none text-stone-600 hover:bg-stone-50" aria-label="<?php esc_attr_e( 'Close cart', 'bacera' ); ?>">×</button>
-		</div>
-		<div id="bacera-cart-items" class="bacera-cart-items"></div>
-		<div class="bacera-cart-footer">
-			<div class="flex items-end justify-between gap-4 mb-4">
-				<div>
-					<p class="m-0 text-[1.75rem] leading-none font-serif font-bold text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></p>
-					<p class="m-0 mt-1 text-base text-stone-600"><?php esc_html_e( 'Total (VAT included)', 'bacera' ); ?></p>
+				<div class="bsh-sidebar-section">
+					<div class="bsh-sidebar-heading"><?php echo esc_html( $grp['heading'] ); ?></div>
+					<ul class="bsh-filter-list">
+						<?php foreach ( $grp['options'] as $val => $lab ) :
+							$fid = 'bsh-' . sanitize_key( $gname . '-' . $val );
+						?>
+						<li class="bsh-filter-item">
+							<input type="checkbox" name="<?php echo esc_attr( $gname ); ?>[]" value="<?php echo esc_attr( $val ); ?>" id="<?php echo esc_attr( $fid ); ?>" <?php checked( $chk( $gname, $val ) ); ?> onchange="this.form.submit()" />
+							<label for="<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( is_string( $lab ) ? $lab : (string) $lab ); ?></label>
+						</li>
+						<?php endforeach; ?>
+					</ul>
 				</div>
-				<p id="bacera-cart-total" class="m-0 text-[2rem] leading-none tabular-nums text-stone-800">0đ</p>
+				<?php endforeach; ?>
+
+			</form>
+		</aside>
+
+		<?php /* ─── MAIN CONTENT ─── */ ?>
+		<div class="bsh-main-col">
+
+			<div class="bsh-toolbar">
+				<p class="bsh-product-count">
+					<?php
+					if ( ! empty( $items ) ) {
+						printf( esc_html( _n( '<strong>%d</strong> product', '<strong>%d</strong> products', count( $items ), 'bacera' ) ), count( $items ) );
+					} else {
+						esc_html_e( 'No products found.', 'bacera' );
+					}
+					?>
+				</p>
+				<form method="get" action="<?php echo esc_url( $shop_base_url ); ?>" style="display:flex;align-items:center;gap:.6rem;">
+					<input type="hidden" name="shop_page" value="1" />
+					<?php
+					foreach ( $selected_category_ids as $sid ) {
+						echo '<input type="hidden" name="filter_collection[]" value="' . esc_attr( $sid ) . '" />';
+					}
+					if ( isset( $_GET['filter_price'] ) && $_GET['filter_price'] !== '' ) {
+						echo '<input type="hidden" name="filter_price" value="' . esc_attr( sanitize_text_field( wp_unslash( $_GET['filter_price'] ) ) ) . '" />';
+					}
+					foreach ( [ 'filter_capacity', 'filter_glaze', 'filter_shape', 'filter_best_for', 'filter_size', 'filter_handle' ] as $pk ) {
+						if ( empty( $_GET[ $pk ] ) ) { continue; }
+						foreach ( (array) wp_unslash( $_GET[ $pk ] ) as $pv ) {
+							echo '<input type="hidden" name="' . esc_attr( $pk ) . '[]" value="' . esc_attr( sanitize_text_field( $pv ) ) . '" />';
+						}
+					}
+					?>
+					<label for="bsh-sort" style="font-size:.78rem;color:#9A8478;"><?php esc_html_e( 'Sort:', 'bacera' ); ?></label>
+					<select name="sort" id="bsh-sort" class="bsh-sort-select" onchange="this.form.submit()">
+						<option value="price_low"  <?php selected( $sort, 'price_low' ); ?>><?php esc_html_e( 'Price: Low → High', 'bacera' ); ?></option>
+						<option value="price_high" <?php selected( $sort, 'price_high' ); ?>><?php esc_html_e( 'Price: High → Low', 'bacera' ); ?></option>
+						<option value="newest"     <?php selected( $sort, 'newest' ); ?>><?php esc_html_e( 'Newest', 'bacera' ); ?></option>
+					</select>
+				</form>
 			</div>
-			<div class="grid grid-cols-2 gap-2">
-				<a id="bacera-cart-go-checkout" href="<?php echo esc_url( $checkout_shipping_url ); ?>" class="rounded-xl bg-accent-500 px-4 py-3 text-center font-medium text-white no-underline hover:bg-accent-600"><?php esc_html_e( 'Đến thanh toán', 'bacera' ); ?></a>
-				<a id="bacera-cart-go-cart" href="<?php echo esc_url( $cart_page_url ); ?>" class="rounded-xl border border-stone-300 px-4 py-3 text-center font-medium text-stone-700 no-underline hover:bg-stone-50"><?php esc_html_e( 'Xem giỏ hàng', 'bacera' ); ?></a>
+
+			<?php
+			// ── Client-side filter + sort (original logic preserved) ──
+			if ( ! empty( $items ) ) {
+				$fp     = isset( $_GET['filter_price'] )    ? sanitize_text_field( wp_unslash( $_GET['filter_price'] ) ) : '';
+				$fs     = isset( $_GET['filter_size'] )     ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_size'] ) )     : [];
+				$f_cap  = isset( $_GET['filter_capacity'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_capacity'] ) )  : [];
+				$f_hand = isset( $_GET['filter_handle'] )   ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_handle'] ) )    : [];
+				$f_glz  = isset( $_GET['filter_glaze'] )    ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_glaze'] ) )     : [];
+				$f_shp  = isset( $_GET['filter_shape'] )    ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_shape'] ) )     : [];
+				$f_best = isset( $_GET['filter_best_for'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['filter_best_for'] ) )  : [];
+				$fcats  = count( $selected_category_ids ) > 1 ? $selected_category_ids : [];
+				$needle_maps = bacera_shop_attribute_filter_needle_maps();
+				$items = array_values( array_filter( $items, static function ( $p ) use ( $fp, $fcats, $fs, $f_cap, $f_hand, $f_glz, $f_shp, $f_best, $needle_maps ) {
+					$pa = isset( $p['price_at_counter'] ) ? (float) $p['price_at_counter'] : 0;
+					$ra = isset( $p['retail_price'] ) ? (float) $p['retail_price'] : 0;
+					$pr = $pa > 0 ? $pa : $ra;
+					if ( ! bacera_shop_price_band_matches( $pr, $fp ) ) { return false; }
+					$hs = bacera_shop_filter_haystack( $p );
+					if ( ! empty( $fcats ) ) {
+						$ids = array_map( 'strval', bacera_shop_product_category_ids( $p ) );
+						if ( count( array_intersect( array_map( 'strval', $fcats ), $ids ) ) === 0 ) { return false; }
+					}
+					if ( ! bacera_shop_keyword_group_match( $hs, $f_cap,  $needle_maps['capacity'] ) ) { return false; }
+					if ( ! bacera_shop_keyword_group_match( $hs, $f_hand, $needle_maps['handle'] ) )   { return false; }
+					if ( ! bacera_shop_keyword_group_match( $hs, $f_glz,  $needle_maps['glaze'] ) )    { return false; }
+					if ( ! bacera_shop_keyword_group_match( $hs, $f_shp,  $needle_maps['shape'] ) )    { return false; }
+					if ( ! bacera_shop_keyword_group_match( $hs, $f_best, $needle_maps['best_for'] ) ) { return false; }
+					if ( ! empty( $fs ) ) { $ok=false; foreach($fs as $sz){if(strpos($hs,strtolower((string)$sz))!==false){$ok=true;break;}} if(!$ok)return false; }
+					return true;
+				} ) );
+			}
+			if ( $sort === 'price_high' || $sort === 'price_low' ) {
+				usort( $items, function ( $a, $b ) use ( $sort ) {
+					$ap = ( (float)( $a['price_at_counter'] ?? 0 ) ) ?: ( (float)( $a['retail_price'] ?? 0 ) );
+					$bp = ( (float)( $b['price_at_counter'] ?? 0 ) ) ?: ( (float)( $b['retail_price'] ?? 0 ) );
+					return $sort === 'price_high' ? $bp <=> $ap : $ap <=> $bp;
+				} );
+			} elseif ( $sort === 'newest' ) {
+				usort( $items, function ( $a, $b ) { return ( (int)( $b['id'] ?? 0 ) ) <=> ( (int)( $a['id'] ?? 0 ) ); } );
+			}
+			?>
+
+			<?php if ( empty( $items ) ) : ?>
+			<div class="bsh-empty">
+				<div class="bsh-empty-icon">🔍</div>
+				<p class="bsh-empty-title"><?php esc_html_e( 'No products found', 'bacera' ); ?></p>
+				<p class="bsh-empty-sub"><?php esc_html_e( 'Try adjusting your filters or browse all products.', 'bacera' ); ?></p>
 			</div>
+			<?php else : ?>
+
+			<div class="bsh-product-grid">
+				<?php foreach ( $items as $p ) :
+					$name             = $p['product']['name'] ?? $p['name'] ?? __( 'Product', 'bacera' );
+					$price_at_counter = isset( $p['price_at_counter'] ) ? (float) $p['price_at_counter'] : 0;
+					$retail_price     = isset( $p['retail_price'] ) ? (float) $p['retail_price'] : 0;
+					$price            = $price_at_counter > 0 ? $price_at_counter : $retail_price;
+					$original_price   = ( $retail_price > $price ) ? $retail_price : 0;
+					$discount_percent = false;
+					if ( $original_price > 0 && $price < $original_price ) {
+						$discount_percent = '-' . (int) round( ( ( $original_price - $price ) / $original_price ) * 100 ) . '%';
+					}
+					$image_url = Bacera_Utils::get_proxy_url( $p );
+					$brand_fallback_ids = count( $selected_category_ids ) === 1 ? $selected_category_ids : [];
+					$brand = bacera_shop_product_category_display_name( $p, $categories_data, $brand_fallback_ids );
+					if ( $brand === '' ) { $brand = __( 'Bacera', 'bacera' ); }
+					$product_detail_url = Bacera_Utils::get_product_permalink( $p );
+					$variation_id       = isset( $p['id'] ) ? (string) $p['id'] : '';
+					$product_id         = isset( $p['product']['id'] ) ? (string) $p['product']['id'] : ( isset( $p['product_id'] ) ? (string) $p['product_id'] : '' );
+					$cart_item_uid      = $variation_id !== '' ? 'var_' . $variation_id : 'prd_' . $product_id . '_' . md5( $name . '|' . $price );
+					$cart_variant_label = $p['name'] ?? '';
+					$cart_color         = $p['color_name'] ?? $p['color'] ?? '';
+					$cart_size          = $p['size_name'] ?? $p['size'] ?? $p['capacity'] ?? '';
+
+					get_template_part( 'app/Views/components/product-card', null, [
+						'title'       => $name,
+						'brand'       => $brand,
+						'price'       => number_format( $price, 0, ',', '.' ) . ' ₫',
+						'old_price'   => $original_price > 0 ? number_format( $original_price, 0, ',', '.' ) . ' ₫' : '',
+						'image'       => $image_url,
+						'discount'    => $discount_percent,
+						'url'         => $product_detail_url,
+						'add_to_cart' => true,
+						'cart_item'   => [
+							'id'             => $cart_item_uid,
+							'variation_id'   => $variation_id,
+							'product_id'     => $product_id,
+							'name'           => $name,
+							'brand'          => $brand,
+							'variant_label'  => is_string( $cart_variant_label ) ? $cart_variant_label : '',
+							'color'          => is_string( $cart_color ) ? $cart_color : '',
+							'size'           => is_string( $cart_size ) ? $cart_size : '',
+							'image'          => $image_url,
+							'price'          => (float) $price,
+							'original_price' => (float) $original_price,
+							'url'            => $product_detail_url,
+						],
+					] );
+				endforeach; ?>
+			</div>
+
+			<?php /* ── Pagination ── */ ?>
+			<?php if ( $total_pages > 1 ) :
+				$tp = (int) $total_pages;
+				$prange = [];
+				if ( $tp <= 9 ) { for ($i=1;$i<=$tp;$i++){ $prange[]=$i; } }
+				else {
+					for($i=1;$i<=min(3,$tp);$i++){ $prange[]=$i; }
+					if($current_page>4){ $prange[]='dot'; }
+					if($current_page>3&&$current_page<$tp-2){ $prange[]=$current_page; }
+					if($current_page<$tp-3){ $prange[]='dot'; }
+					for($i=max($tp-2,4);$i<=$tp;$i++){ $prange[]=$i; }
+					$prange=array_unique($prange);
+				}
+				$mkurl = static function($n) use($shop_base_url){
+					$pa=[];
+					foreach($_GET as $gk=>$gv){
+						$gk=sanitize_key($gk);
+						$pa[$gk]=is_array($gv)?array_map('sanitize_text_field',array_map('wp_unslash',(array)$gv)):sanitize_text_field(wp_unslash($gv));
+					}
+					$pa['shop_page']=$n;
+					return add_query_arg($pa,$shop_base_url);
+				};
+			?>
+			<nav class="bsh-pagination" aria-label="<?php esc_attr_e( 'Pagination', 'bacera' ); ?>">
+				<?php if($current_page>1):?><a href="<?php echo esc_url($mkurl($current_page-1));?>" class="bsh-page-btn" aria-label="<?php esc_attr_e('Previous','bacera');?>">‹</a><?php endif;?>
+				<?php foreach($prange as $entry):
+					if($entry==='dot'){ echo '<span class="bsh-page-ellipsis">…</span>'; continue; }
+					$n=(int)$entry; $ic=($n===$current_page);
+				?>
+				<a href="<?php echo esc_url($mkurl($n));?>" class="bsh-page-btn <?php echo $ic?'is-current':'';?>" <?php echo $ic?'aria-current="page"':'';?>><?php echo esc_html($n);?></a>
+				<?php endforeach;?>
+				<?php if($current_page<$total_pages):?><a href="<?php echo esc_url($mkurl($current_page+1));?>" class="bsh-page-btn" aria-label="<?php esc_attr_e('Next','bacera');?>">›</a><?php endif;?>
+			</nav>
+			<?php endif;?>
+
+			<?php endif; // empty check ?>
+		</div><?php // .bsh-main-col ?>
+	</div><?php // .bsh-split ?>
+
+	<?php endif; // API check ?>
+
+	<?php get_template_part( 'app/Views/components/seo-content', null, [ 'title' => __( 'Shop', 'bacera' ) ] ); ?>
+
+</div><?php // .bsh-wrap ?>
+
+<button class="bsh-filter-fab" onclick="document.querySelector('.bsh-sidebar').style.display='block';" aria-label="<?php esc_attr_e('Open filters','bacera');?>">
+	<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+	<?php esc_html_e('Filters','bacera');?>
+</button>
+
+<div id="bacera-cart-overlay" class="bacera-cart-overlay" aria-hidden="true"></div>
+<aside id="bacera-cart-drawer" class="bacera-cart-drawer" aria-hidden="true" aria-label="<?php esc_attr_e('Shopping cart','bacera');?>">
+	<div class="bacera-cart-drawer-head" style="display:flex;align-items:center;justify-content:space-between;">
+		<h2 style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-weight:500;color:#2A1F17;"><?php esc_html_e('Your Cart','bacera');?></h2>
+		<button type="button" id="bacera-cart-close" style="width:34px;height:34px;border-radius:50%;border:1px solid #DDD5CB;background:transparent;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#9A8478;" aria-label="<?php esc_attr_e('Close cart','bacera');?>">×</button>
+	</div>
+	<div id="bacera-cart-items" class="bacera-cart-items"></div>
+	<div class="bacera-cart-footer">
+		<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1rem;">
+			<p style="margin:0;font-size:.8rem;color:#9A8478;"><?php esc_html_e('Total (VAT included)','bacera');?></p>
+			<p id="bacera-cart-total" style="margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.75rem;color:#2A1F17;">0đ</p>
 		</div>
-	</aside>
+		<div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+			<a id="bacera-cart-go-checkout" href="<?php echo esc_url($checkout_shipping_url);?>" style="border-radius:10px;background:#4d3d32;padding:.75rem 1rem;text-align:center;font-weight:500;color:#fff;text-decoration:none;font-size:.875rem;"><?php esc_html_e('Checkout','bacera');?></a>
+			<a id="bacera-cart-go-cart"     href="<?php echo esc_url($cart_page_url);?>"       style="border-radius:10px;border:1px solid #DDD5CB;padding:.75rem 1rem;text-align:center;font-weight:500;color:#6B5344;text-decoration:none;font-size:.875rem;"><?php esc_html_e('View cart','bacera');?></a>
+		</div>
+	</div>
+</aside>
+
 </main>
 
 <script>
-(function () {
-	var drawer = document.getElementById('bacera-cart-drawer');
-	var overlay = document.getElementById('bacera-cart-overlay');
-	var closeBtn = document.getElementById('bacera-cart-close');
-	var listEl = document.getElementById('bacera-cart-items');
-	var totalEl = document.getElementById('bacera-cart-total');
-	if (!drawer || !overlay || !closeBtn || !listEl || !totalEl) return;
-
-	var STORAGE_KEY = 'bacera_shop_cart_v1';
-	var CHECKOUT_ITEMS_KEY = 'bacera_checkout_items';
-	/** Chỉ hiển thị trong panel dòng sản phẩm vừa thêm (theo id trong giỏ). */
-	var drawerPreviewItemId = null;
-
-	function loadCart() {
-		try {
-			var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-			return Array.isArray(parsed) ? parsed : [];
-		} catch (e) {
-			return [];
-		}
-	}
-
-	function saveCart(cart) {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
-	}
-
-	function toCurrency(numberValue) {
-		var amount = Number(numberValue || 0);
-		return amount.toLocaleString('vi-VN') + 'đ';
-	}
-
-	function escapeHtml(value) {
-		return String(value || '')
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#039;');
-	}
-
-	function computeTotal(cart) {
-		return cart.reduce(function (sum, item) {
-			return sum + (Number(item.price || 0) * Number(item.qty || 0));
-		}, 0);
-	}
-
-	var trashIconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
-
-	function parseVariantDetails(item) {
-		var color = String(item.color || '').trim();
-		var size = String(item.size || '').trim();
-		var label = String(item.variant_label || '').trim();
-		if ((!color || !size) && label) {
-			var parts = label.split('|').map(function (part) { return part.trim(); }).filter(Boolean);
-			if (!color && parts[0]) color = parts[0];
-			if (!size && parts[1]) size = parts[1];
-		}
-		return { color: color, size: size };
-	}
-
-	/** Một dòng dưới tên: "màu | kích thước" giống mockup. */
-	function formatColorSizeSubtitle(meta, item) {
-		var c = meta.color;
-		var s = meta.size;
-		if (c && s) return c + ' | ' + s;
-		if (c) return c;
-		if (s) return s;
-		var label = String(item.variant_label || '').trim();
-		return label;
-	}
-
-	function getDrawerDisplayCart() {
-		var cart = loadCart();
-		if (!drawerPreviewItemId) {
-			return [];
-		}
-		return cart.filter(function (item) {
-			return String(item.id) === String(drawerPreviewItemId);
-		});
-	}
-
-	function renderCart() {
-		var cart = getDrawerDisplayCart();
-		if (!cart.length) {
-			listEl.innerHTML = '<p class="bacera-cart-empty"><?php echo esc_js( __( 'Giỏ hàng của bạn đang trống.', 'bacera' ) ); ?></p>';
-			totalEl.textContent = '0đ';
-			return;
-		}
-
-		listEl.innerHTML = cart.map(function (item) {
-			var title = escapeHtml(item.name || '<?php echo esc_js( __( 'Product', 'bacera' ) ); ?>');
-			var brand = escapeHtml(item.brand || '<?php echo esc_js( __( 'Bacera', 'bacera' ) ); ?>');
-			var variantMeta = parseVariantDetails(item);
-			var variantSubtitle = formatColorSizeSubtitle(variantMeta, item);
-			var variantLineHtml = variantSubtitle
-				? '<p class="bacera-cart-variant-line">' + escapeHtml(variantSubtitle) + '</p>'
-				: '';
-			var image = escapeHtml(item.image || 'https://placehold.co/120x120/f0ece3/8d6a54?text=Product');
-			var originalPrice = Number(item.original_price || 0);
-			var oldPriceHtml = originalPrice > Number(item.price || 0)
-				? '<span class="text-sm line-through text-stone-400 tabular-nums">' + toCurrency(originalPrice) + '</span>'
-				: '';
-			return ''
-				+ '<article class="bacera-cart-item" data-cart-id="' + escapeHtml(item.id) + '">'
-				+ '  <img src="' + image + '" alt="' + title + '" loading="lazy" />'
-				+ '  <div class="min-w-0">'
-				+ '    <div class="bacera-cart-item-main">'
-				+ '      <div class="bacera-cart-item-text">'
-				+ '        <p class="m-0 text-sm text-stone-500">' + brand + '</p>'
-				+ '        <p class="m-0 mt-1 text-xl leading-snug font-medium text-stone-800">' + title + '</p>'
-				+ variantLineHtml
-				+ '      </div>'
-				+ '      <button type="button" class="bacera-cart-remove" data-cart-action="remove" aria-label="<?php echo esc_js( __( 'Remove item', 'bacera' ) ); ?>">' + trashIconSvg + '</button>'
-				+ '    </div>'
-				+ '    <div class="mt-3 flex items-center justify-between gap-3">'
-				+ '      <div class="bacera-cart-qty" role="group" aria-label="<?php echo esc_attr( __( 'Quantity', 'bacera' ) ); ?>">'
-				+ '        <button type="button" data-cart-action="minus">−</button>'
-				+ '        <span>' + String(Number(item.qty || 1)).padStart(2, '0') + '</span>'
-				+ '        <button type="button" data-cart-action="plus">+</button>'
-				+ '      </div>'
-				+ '      <div class="text-right">'
-				+ oldPriceHtml
-				+ '        <p class="m-0 text-[1.75rem] leading-none tabular-nums text-stone-800">' + toCurrency(item.price) + '</p>'
-				+ '      </div>'
-				+ '    </div>'
-				+ '  </div>'
-				+ '</article>';
-		}).join('');
-
-		totalEl.textContent = toCurrency(computeTotal(cart));
-	}
-
-	function setDrawerOpen(opened) {
-		if (!opened) {
-			drawerPreviewItemId = null;
-		}
-		drawer.classList.toggle('is-open', opened);
-		overlay.classList.toggle('is-open', opened);
-		drawer.setAttribute('aria-hidden', opened ? 'false' : 'true');
-		overlay.setAttribute('aria-hidden', opened ? 'false' : 'true');
-		document.body.classList.toggle('overflow-hidden', opened);
-	}
-
-	function upsertItem(nextItem) {
-		var cart = loadCart();
-		var index = cart.findIndex(function (item) {
-			return String(item.id) === String(nextItem.id);
-		});
-		if (index >= 0) {
-			cart[index].qty = Number(cart[index].qty || 1) + 1;
-		} else {
-			nextItem.qty = 1;
-			cart.push(nextItem);
-		}
-		saveCart(cart);
-	}
-
-	document.addEventListener('click', function (event) {
-		var addBtn = event.target.closest('.bacera-shop-add-cart-btn');
-		if (!addBtn) return;
-		event.preventDefault();
-		event.stopPropagation();
-		var payloadRaw = addBtn.getAttribute('data-cart-item') || '';
-		if (!payloadRaw) return;
-		try {
-			var payload = JSON.parse(payloadRaw);
-			if (!payload || !payload.id) return;
-			upsertItem(payload);
-			drawerPreviewItemId = String(payload.id);
-			renderCart();
-			setDrawerOpen(true);
-		} catch (e) {
-			return;
-		}
-	});
-
-	listEl.addEventListener('click', function (event) {
-		var actionBtn = event.target.closest('button[data-cart-action]');
-		if (!actionBtn) return;
-		var row = actionBtn.closest('.bacera-cart-item');
-		if (!row) return;
-		var itemId = row.getAttribute('data-cart-id');
-		if (!itemId) return;
-		var action = actionBtn.getAttribute('data-cart-action');
-		var cart = loadCart();
-		var idx = cart.findIndex(function (item) {
-			return String(item.id) === String(itemId);
-		});
-		if (idx < 0) return;
-		if (action === 'remove') {
-			cart.splice(idx, 1);
-		} else if (action === 'minus') {
-			cart[idx].qty = Number(cart[idx].qty || 1) - 1;
-			if (cart[idx].qty <= 0) {
-				cart.splice(idx, 1);
-			}
-		} else if (action === 'plus') {
-			cart[idx].qty = Number(cart[idx].qty || 1) + 1;
-		}
-		saveCart(cart);
-		renderCart();
-	});
-
-	var checkoutLink = document.getElementById('bacera-cart-go-checkout');
-	if (checkoutLink) {
-		checkoutLink.addEventListener('click', function (e) {
-			var full = loadCart();
-			var picked = drawerPreviewItemId
-				? full.filter(function (item) { return String(item.id) === String(drawerPreviewItemId); })
-				: [];
-			if (!picked.length) {
-				e.preventDefault();
-				return;
-			}
-			try {
-				sessionStorage.setItem(CHECKOUT_ITEMS_KEY, JSON.stringify(picked));
-			} catch (err) {}
-		});
-	}
-
-	closeBtn.addEventListener('click', function () { setDrawerOpen(false); });
-	overlay.addEventListener('click', function () { setDrawerOpen(false); });
-	document.addEventListener('keydown', function (event) {
-		if (event.key === 'Escape') setDrawerOpen(false);
-	});
-
-	renderCart();
+(function(){
+var drawer=document.getElementById('bacera-cart-drawer'),overlay=document.getElementById('bacera-cart-overlay'),closeBtn=document.getElementById('bacera-cart-close'),listEl=document.getElementById('bacera-cart-items'),totalEl=document.getElementById('bacera-cart-total');
+if(!drawer||!overlay||!closeBtn||!listEl||!totalEl)return;
+var KEY='bacera_shop_cart_v1',CK='bacera_checkout_items',previewId=null;
+function loadCart(){try{var p=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(p)?p:[];}catch(e){return[];}}
+function saveCart(c){localStorage.setItem(KEY,JSON.stringify(c));}
+function toCurrency(n){return Number(n||0).toLocaleString('vi-VN')+'đ';}
+function esc(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function total(c){return c.reduce(function(s,i){return s+Number(i.price||0)*Number(i.qty||0);},0);}
+var trash='<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+function pv(item){var c=String(item.color||'').trim(),s=String(item.size||'').trim(),l=String(item.variant_label||'').trim();if((!c||!s)&&l){var pts=l.split('|').map(function(x){return x.trim();}).filter(Boolean);if(!c&&pts[0])c=pts[0];if(!s&&pts[1])s=pts[1];}return c&&s?c+' · '+s:c||s||l;}
+function getDisp(){var c=loadCart();if(!previewId)return[];return c.filter(function(i){return String(i.id)===String(previewId);});}
+function render(){
+	var cart=getDisp();
+	if(!cart.length){listEl.innerHTML='<p class="bacera-cart-empty"><?php echo esc_js(__('Your cart is empty.','bacera'));?></p>';totalEl.textContent='0đ';return;}
+	listEl.innerHTML=cart.map(function(item){
+		var sub=pv(item),op=Number(item.original_price||0),oph=op>Number(item.price||0)?'<span style="font-size:.75rem;text-decoration:line-through;color:#9A8478;">'+toCurrency(op)+'</span>':'';
+		return '<article class="bacera-cart-item" data-cart-id="'+esc(item.id)+'">'
+			+'<img src="'+esc(item.image||'https://placehold.co/120x120/f0ece3/8d6a54?text=Bacera')+'" alt="'+esc(item.name||'')+'" loading="lazy"/>'
+			+'<div style="min-width:0;">'
+			+'<div class="bacera-cart-item-main"><div class="bacera-cart-item-text">'
+			+'<p style="margin:0;font-size:.75rem;color:#9A8478;">'+esc(item.brand||'Bacera')+'</p>'
+			+'<p style="margin:.15rem 0 0;font-size:.9rem;font-weight:600;color:#2A1F17;line-height:1.3;">'+esc(item.name||'')+'</p>'
+			+(sub?'<p class="bacera-cart-variant-line">'+esc(sub)+'</p>':'')
+			+'</div><button type="button" class="bacera-cart-remove" data-cart-action="remove" aria-label="<?php echo esc_js(__('Remove','bacera'));?>">'+trash+'</button></div>'
+			+'<div style="margin-top:.6rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;">'
+			+'<div class="bacera-cart-qty" role="group"><button type="button" data-cart-action="minus">−</button><span>'+String(Number(item.qty||1)).padStart(2,'0')+'</span><button type="button" data-cart-action="plus">+</button></div>'
+			+'<div style="text-align:right;">'+oph+'<p style="margin:0;font-size:1rem;font-weight:600;color:#2A1F17;">'+toCurrency(item.price)+'</p></div>'
+			+'</div></div></article>';
+	}).join('');
+	totalEl.textContent=toCurrency(total(cart));
+}
+function setOpen(open){if(!open)previewId=null;drawer.classList.toggle('is-open',open);overlay.classList.toggle('is-open',open);drawer.setAttribute('aria-hidden',open?'false':'true');overlay.setAttribute('aria-hidden',open?'false':'true');document.body.classList.toggle('overflow-hidden',open);}
+function upsert(next){var c=loadCart(),i=c.findIndex(function(x){return String(x.id)===String(next.id);});if(i>=0){c[i].qty=Number(c[i].qty||1)+1;}else{next.qty=1;c.push(next);}saveCart(c);}
+document.addEventListener('click',function(e){var btn=e.target.closest('.bacera-shop-add-cart-btn');if(!btn)return;e.preventDefault();e.stopPropagation();var raw=btn.getAttribute('data-cart-item')||'';if(!raw)return;try{var p=JSON.parse(raw);if(!p||!p.id)return;upsert(p);previewId=String(p.id);render();setOpen(true);}catch(err){}});
+listEl.addEventListener('click',function(e){var btn=e.target.closest('button[data-cart-action]');if(!btn)return;var row=btn.closest('.bacera-cart-item');if(!row)return;var id=row.getAttribute('data-cart-id'),action=btn.getAttribute('data-cart-action'),c=loadCart(),i=c.findIndex(function(x){return String(x.id)===String(id);});if(i<0)return;if(action==='remove')c.splice(i,1);else if(action==='minus'){c[i].qty=Number(c[i].qty||1)-1;if(c[i].qty<=0)c.splice(i,1);}else if(action==='plus')c[i].qty=Number(c[i].qty||1)+1;saveCart(c);render();});
+var co=document.getElementById('bacera-cart-go-checkout');if(co){co.addEventListener('click',function(e){var full=loadCart(),picked=previewId?full.filter(function(x){return String(x.id)===String(previewId);}):[];if(!picked.length){e.preventDefault();return;}try{sessionStorage.setItem(CK,JSON.stringify(picked));}catch(err){}});}
+closeBtn.addEventListener('click',function(){setOpen(false);});
+overlay.addEventListener('click',function(){setOpen(false);});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});
+render();
 })();
 </script>
 

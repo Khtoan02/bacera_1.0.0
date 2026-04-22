@@ -30,9 +30,9 @@
                 <div class="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col gap-2.5">
                     <h3 class="text-xs font-medium leading-4 tracking-tight text-white/50 mb-1 uppercase">Sitemap</h3>
                     <a href="<?php echo esc_url(home_url('/shop/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Shop</a>
-                    <a href="<?php echo esc_url(home_url('/our-team/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Our maker</a>
+                    <a href="<?php echo esc_url(home_url('/our-team/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Our makers</a>
                     <a href="<?php echo esc_url(home_url('/blog/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Journal</a>
-                    <a href="<?php echo esc_url(home_url('/sustainability/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Our sustainability</a>
+                    <a href="<?php echo esc_url(home_url('/sustainability/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Sustainability</a>
                     <a href="<?php echo esc_url(home_url('/contact/')); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline">Contact us</a>
                 </div>
 
@@ -43,7 +43,7 @@
                     if ($footer_workshops): foreach($footer_workshops as $fw): ?>
                     <a href="<?php echo esc_url(get_permalink($fw)); ?>" class="text-[15px] font-normal leading-5 text-white/75 hover:text-white hover:translate-x-1 transition-all no-underline"><?php echo esc_html($fw->post_title); ?></a>
                     <?php endforeach; else: ?>
-                    <a href="<?php echo esc_url(get_post_type_archive_link('workshop') ?: home_url('/workshop/')); ?>" class="text-[15px] font-normal text-white/75 hover:text-white transition-all no-underline">Xem tất cả workshop</a>
+                    <a href="<?php echo esc_url(get_post_type_archive_link('workshop') ?: home_url('/workshop/')); ?>" class="text-[15px] font-normal text-white/75 hover:text-white transition-all no-underline">View all workshops</a>
                     <?php endif; ?>
                 </div>
 
@@ -126,6 +126,16 @@
 get_template_part('app/Views/components/mobile-dock'); 
 ?>
 
+<?php
+// ── GTranslate Engine (hidden) ──────────────────────────────────────────────
+// Render shortcode với wrapper ẩn — chỉ load JS engine, không hiện UI của plugin.
+// Header của Bacera đã có custom language selector kết nối qua mstTranslatePage().
+if ( function_exists('do_shortcode') && shortcode_exists('gtranslate') ) {
+    echo '<div id="gtranslate-hidden-engine" aria-hidden="true" style="display:none!important;position:absolute;pointer-events:none;">';
+    echo do_shortcode('[gtranslate]');
+    echo '</div>';
+}
+?>
 <?php wp_footer(); ?>
 </body>
 </html>

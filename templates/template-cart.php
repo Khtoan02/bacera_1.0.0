@@ -193,36 +193,36 @@ get_header();
 			</ol>
 		</nav>
 
-		<h1 class="font-serif text-3xl md:text-4xl font-semibold text-stone-800 tracking-tight mb-10 md:mb-12"><?php esc_html_e( 'Xem giỏ hàng', 'bacera' ); ?></h1>
+		<h1 class="font-serif text-3xl md:text-4xl font-semibold text-stone-800 tracking-tight mb-10 md:mb-12"><?php esc_html_e( 'Your cart', 'bacera' ); ?></h1>
 
 		<div id="bacera-cart-empty" class="rounded-2xl border border-stone-200/80 bg-white p-10 md:p-14 text-center shadow-sm">
-			<p class="m-0 text-lg text-stone-600 mb-6"><?php esc_html_e( 'Giỏ hàng của bạn đang trống.', 'bacera' ); ?></p>
-			<a href="<?php echo esc_url( $shop_url ); ?>" class="inline-flex items-center justify-center rounded-xl bg-accent-500 px-8 py-3.5 font-medium text-white no-underline hover:bg-accent-600 transition-colors"><?php esc_html_e( 'Tiếp tục mua hàng', 'bacera' ); ?></a>
+			<p class="m-0 text-lg text-stone-600 mb-6"><?php esc_html_e( 'Your cart is empty.', 'bacera' ); ?></p>
+			<a href="<?php echo esc_url( $shop_url ); ?>" class="inline-flex items-center justify-center rounded-xl bg-accent-500 px-8 py-3.5 font-medium text-white no-underline hover:bg-accent-600 transition-colors"><?php esc_html_e( 'Continue shopping', 'bacera' ); ?></a>
 		</div>
 
 		<div id="bacera-cart-main" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-12 lg:items-start">
 			<div class="lg:col-span-2 min-w-0">
 				<div class="hidden md:grid md:grid-cols-[1fr_9rem_10rem_2.75rem] gap-4 pb-3 border-b border-stone-300/80 text-xs font-semibold uppercase tracking-widest text-stone-500">
-					<span><?php esc_html_e( 'Danh sách sản phẩm', 'bacera' ); ?></span>
-					<span class="text-center"><?php esc_html_e( 'Số lượng', 'bacera' ); ?></span>
-					<span class="text-right"><?php esc_html_e( 'Tổng', 'bacera' ); ?></span>
-					<span class="text-center"><?php esc_html_e( 'Chọn', 'bacera' ); ?></span>
+					<span><?php esc_html_e( 'Products', 'bacera' ); ?></span>
+					<span class="text-center"><?php esc_html_e( 'Quantity', 'bacera' ); ?></span>
+					<span class="text-right"><?php esc_html_e( 'Total', 'bacera' ); ?></span>
+					<span class="text-center"><?php esc_html_e( 'Select', 'bacera' ); ?></span>
 				</div>
 				<div id="bacera-cart-lines"></div>
 				<div id="bacera-cart-paid-wrap" class="hidden mt-10 pt-10 border-t border-stone-200/90">
-					<h2 class="m-0 mb-6 font-serif text-xl md:text-2xl font-semibold text-stone-800 tracking-tight"><?php esc_html_e( 'Đã thanh toán', 'bacera' ); ?></h2>
-					<p class="m-0 mb-6 text-sm text-stone-500"><?php esc_html_e( 'Các đơn hàng bạn vừa hoàn tất trên trang thanh toán.', 'bacera' ); ?></p>
+					<h2 class="m-0 mb-6 font-serif text-xl md:text-2xl font-semibold text-stone-800 tracking-tight"><?php esc_html_e( 'Completed orders', 'bacera' ); ?></h2>
+					<p class="m-0 mb-6 text-sm text-stone-500"><?php esc_html_e( 'Orders you have just completed on the checkout page.', 'bacera' ); ?></p>
 					<div id="bacera-cart-paid-orders" class="space-y-6"></div>
 				</div>
 				<div class="pt-8">
-					<a href="<?php echo esc_url( $shop_url ); ?>" class="text-base font-medium text-primary-700 underline underline-offset-4 decoration-primary-400 hover:text-primary-900"><?php esc_html_e( 'Tiếp tục mua hàng', 'bacera' ); ?></a>
+					<a href="<?php echo esc_url( $shop_url ); ?>" class="text-base font-medium text-primary-700 underline underline-offset-4 decoration-primary-400 hover:text-primary-900"><?php esc_html_e( 'Continue shopping', 'bacera' ); ?></a>
 				</div>
 			</div>
 
 			<aside class="lg:col-span-1 min-w-0">
 				<div class="rounded-2xl border border-stone-200/90 bg-white p-6 md:p-8 shadow-sm sticky top-28">
-					<label for="bacera-cart-order-notes" class="sr-only"><?php esc_html_e( 'Ghi chú đơn hàng', 'bacera' ); ?></label>
-					<textarea id="bacera-cart-order-notes" rows="4" placeholder="<?php esc_attr_e( 'Ghi chú đơn hàng', 'bacera' ); ?>" class="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-3 text-stone-800 placeholder:text-stone-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 focus:outline-none resize-y mb-6"></textarea>
+					<label for="bacera-cart-order-notes" class="sr-only"><?php esc_html_e( 'Order notes', 'bacera' ); ?></label>
+					<textarea id="bacera-cart-order-notes" rows="4" placeholder="<?php esc_attr_e( 'Order notes', 'bacera' ); ?>" class="w-full rounded-xl border border-stone-200 bg-stone-50/50 px-4 py-3 text-stone-800 placeholder:text-stone-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 focus:outline-none resize-y mb-6"></textarea>
 
 					<dl class="space-y-3 text-sm text-stone-700 m-0">
 						<div class="flex justify-between gap-4">
@@ -230,12 +230,12 @@ get_header();
 							<dd class="m-0 tabular-nums font-medium" id="bacera-cart-subtotal-val">0đ</dd>
 						</div>
 						<div class="flex justify-between gap-4">
-							<dt class="m-0"><?php esc_html_e( 'Thuế VAT', 'bacera' ); ?></dt>
+							<dt class="m-0"><?php esc_html_e( 'VAT', 'bacera' ); ?></dt>
 							<dd class="m-0 tabular-nums">0đ</dd>
 						</div>
 						<div class="flex justify-between gap-4">
-							<dt class="m-0"><?php esc_html_e( 'Phí ship', 'bacera' ); ?></dt>
-							<dd class="m-0"><?php esc_html_e( 'Miễn phí', 'bacera' ); ?></dd>
+							<dt class="m-0"><?php esc_html_e( 'Shipping', 'bacera' ); ?></dt>
+							<dd class="m-0"><?php esc_html_e( 'Free', 'bacera' ); ?></dd>
 						</div>
 					</dl>
 
@@ -243,13 +243,13 @@ get_header();
 
 					<div class="flex justify-between items-end gap-4 mb-2">
 						<div>
-							<p class="m-0 font-serif text-xl font-bold text-stone-800"><?php esc_html_e( 'Giỏ hàng', 'bacera' ); ?></p>
+							<p class="m-0 font-serif text-xl font-bold text-stone-800"><?php esc_html_e( 'Cart', 'bacera' ); ?></p>
 							<p class="m-0 mt-1 text-sm text-stone-600"><?php esc_html_e( 'Total (VAT included)', 'bacera' ); ?></p>
 						</div>
 						<p class="m-0 text-2xl md:text-3xl font-semibold tabular-nums text-stone-800" id="bacera-cart-grand-total">0đ</p>
 					</div>
 
-					<a id="bacera-cart-checkout-btn" href="<?php echo esc_url( $checkout_shipping_url ); ?>" class="mt-6 flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-4 text-base font-semibold text-white no-underline shadow-sm hover:bg-accent-600 transition-colors"><?php esc_html_e( 'Đến thanh toán', 'bacera' ); ?></a>
+					<a id="bacera-cart-checkout-btn" href="<?php echo esc_url( $checkout_shipping_url ); ?>" class="mt-6 flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-4 text-base font-semibold text-white no-underline shadow-sm hover:bg-accent-600 transition-colors"><?php esc_html_e( 'Proceed to checkout', 'bacera' ); ?></a>
 				</div>
 			</aside>
 		</div>
@@ -257,7 +257,7 @@ get_header();
 		<?php if ( ! empty( $related_items ) ) : ?>
 		<section class="mt-16 md:mt-24 pt-12 border-t border-stone-200/80" aria-labelledby="bacera-cart-fbt-heading">
 			<div class="flex items-center justify-between gap-4 mb-8">
-				<h2 id="bacera-cart-fbt-heading" class="m-0 font-serif text-2xl md:text-3xl font-semibold text-stone-800"><?php esc_html_e( 'Thường được mua cùng', 'bacera' ); ?></h2>
+				<h2 id="bacera-cart-fbt-heading" class="m-0 font-serif text-2xl md:text-3xl font-semibold text-stone-800"><?php esc_html_e( 'Frequently bought together', 'bacera' ); ?></h2>
 				<div class="flex gap-2 shrink-0">
 					<button type="button" id="bacera-fbt-prev" class="h-10 w-10 rounded-full border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 shadow-sm" aria-label="<?php esc_attr_e( 'Previous', 'bacera' ); ?>">‹</button>
 					<button type="button" id="bacera-fbt-next" class="h-10 w-10 rounded-full border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 shadow-sm" aria-label="<?php esc_attr_e( 'Next', 'bacera' ); ?>">›</button>
@@ -311,9 +311,9 @@ get_header();
 	var CHECKOUT_ITEMS_KEY = 'bacera_checkout_items';
 	var PAID_ORDERS_KEY = 'bacera_cart_paid_orders_v1';
 	var ariaIncludeCheckout = <?php echo wp_json_encode( __( 'Include in checkout', 'bacera' ) ); ?>;
-	var txtCartEmptyButPaid = <?php echo wp_json_encode( __( 'Giỏ hàng hiện không có sản phẩm. Bạn có thể xem các đơn đã thanh toán bên dưới.', 'bacera' ) ); ?>;
-	var txtOrderRef = <?php echo wp_json_encode( __( 'Mã đơn hàng', 'bacera' ) ); ?>;
-	var txtOrderTotal = <?php echo wp_json_encode( __( 'Tổng đơn', 'bacera' ) ); ?>;
+	var txtCartEmptyButPaid = <?php echo wp_json_encode( __( 'Your cart is empty. You can view your completed orders below.', 'bacera' ) ); ?>;
+	var txtOrderRef = <?php echo wp_json_encode( __( 'Order reference', 'bacera' ) ); ?>;
+	var txtOrderTotal = <?php echo wp_json_encode( __( 'Order total', 'bacera' ) ); ?>;
 
 	var emptyEl = document.getElementById('bacera-cart-empty');
 	var mainEl = document.getElementById('bacera-cart-main');
@@ -368,7 +368,7 @@ get_header();
 					+ '    <p class="m-0 text-[10px] uppercase tracking-wider text-stone-500">' + brand + '</p>'
 					+ '    <p class="m-0 mt-0.5 font-medium text-stone-900 leading-snug">' + title + '</p>'
 					+ attrHtml
-					+ '    <p class="m-0 mt-2 text-sm text-stone-600"><?php echo esc_js( __( 'SL', 'bacera' ) ); ?>: ' + String(Number(item.qty || 1)) + '</p>'
+					+ '    <p class="m-0 mt-2 text-sm text-stone-600"><?php echo esc_js( __( 'Qty', 'bacera' ) ); ?>: ' + String(Number(item.qty || 1)) + '</p>'
 					+ '  </div>'
 					+ '  <div class="shrink-0 text-right">'
 					+ '    <p class="m-0 text-sm font-semibold tabular-nums text-stone-900">' + toCurrency(lt) + '</p>'

@@ -433,3 +433,41 @@ add_action( 'wp_ajax_nopriv_bacera_get_blog_posts', 'bacera_ajax_get_blog_posts'
 
 // Load Theme Customizer settings
 require_once BACERA_THEME_DIR . 'inc/customizer.php';
+
+/* ==========================================================================
+   GTRANSLATE — AUTO-CONFIGURE FOR BACERA
+   Tự động set GTranslate settings phù hợp với custom language switcher
+   của header Bacera (en, vi, fr). Chỉ update nếu chưa config đúng.
+   ========================================================================== */
+add_action( 'init', function() {
+    if ( ! is_admin() ) return;
+    if ( ! function_exists( 'get_option' ) ) return;
+
+    $gt_data = get_option( 'GTranslate' );
+    if ( ! is_array( $gt_data ) ) $gt_data = array();
+
+    // Kiểm tra xem đã config đúng chưa (marker key)
+    if ( ! empty( $gt_data['bacera_configured_v1'] ) ) return;
+
+    // Set đúng settings cho Bacera theme
+    $gt_data['default_language']          = 'en';
+    $gt_data['widget_look']               = 'flags_name';
+    $gt_data['floating_language_selector'] = 'no';  // Bacera dùng custom dropdown
+    $gt_data['show_in_menu']              = '';
+    $gt_data['enable_cdn']                = 1;      // Dùng CDN để load nhanh hơn
+    $gt_data['detect_browser_language']   = '';
+    $gt_data['native_language_names']     = '';
+    $gt_data['wrapper_selector']          = '.gtranslate_wrapper';
+    $gt_data['flag_style']                = '2d';
+    $gt_data['flag_size']                 = 24;
+
+    // Danh sách ngôn ngữ: en, vi, fr (khớp với header Bacera)
+    $gt_data['fincl_langs'] = array( 'en', 'vi', 'fr' );
+    $gt_data['incl_langs']  = array( 'en', 'vi', 'fr' );
+
+    // Marker để không chạy lại lần sau
+    $gt_data['bacera_configured_v1'] = true;
+
+    update_option( 'GTranslate', $gt_data );
+}, 20 );
+

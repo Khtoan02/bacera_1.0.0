@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bacera – Shop Redesign (PLP)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #F8F4EE;
+    --cream-mid: #F2EDE5;
+    --sand: #E8DFD3;
+    --clay-100: #E5D8CC;
+    --clay-300: #C0A28E;
+    --clay-500: #A9846B;
+    --clay-600: #8D6A54;
+    --clay-700: #6B5344;
+    --clay-800: #4d3d32;
+    --clay-900: #3d2f26;
+    --accent: #C06B3A;
+    --accent-dark: #A55630;
+    --text-primary: #2A1F17;
+    --text-secondary: #6B5344;
+    --text-muted: #9A8478;
+    --border: #DDD5CB;
+    --border-light: #EDE6DD;
+    --white: #FFFFFF;
+    --shadow-sm: 0 1px 3px rgba(42,31,23,0.06), 0 1px 2px rgba(42,31,23,0.04);
+    --shadow-md: 0 4px 16px rgba(42,31,23,0.08), 0 2px 6px rgba(42,31,23,0.04);
+    --shadow-lg: 0 12px 32px rgba(42,31,23,0.1), 0 4px 12px rgba(42,31,23,0.06);
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --easing: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--cream);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── HEADER / NAV (mockup) ─── */
+  .site-header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(248,244,238,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0 max(1.5rem, 5vw);
+  }
+  .site-header-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 68px; max-width: 1440px; margin: 0 auto;
+  }
+  .site-logo {
+    font-family: var(--font-serif);
+    font-size: 1.55rem; font-weight: 600; letter-spacing: 0.04em;
+    color: var(--text-primary); text-decoration: none;
+  }
+  .site-nav { display: flex; gap: 2rem; list-style: none; }
+  .site-nav a { font-size: 0.875rem; font-weight: 400; color: var(--text-secondary); text-decoration: none; transition: color .2s; }
+  .site-nav a:hover, .site-nav a.active { color: var(--text-primary); }
+  .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+  .header-icon-btn {
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border);
+    background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); transition: background .2s, color .2s;
+  }
+  .header-icon-btn:hover { background: var(--sand); color: var(--text-primary); }
+
+  /* ─── SHOP PAGE LAYOUT ─── */
+  .shop-page { max-width: 1440px; margin: 0 auto; padding: min(4rem, 5vw) max(1.5rem, 4vw) 5rem; }
+
+  /* ─── HERO BANNER ─── */
+  .shop-hero {
+    background: linear-gradient(135deg, #F2EBE0 0%, #EAE0D5 40%, #DDD0C4 100%);
+    border-radius: var(--radius-xl);
+    padding: 3.5rem 3rem 3rem;
+    margin-bottom: 3rem;
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column; gap: 2rem;
+  }
+  .shop-hero::before {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,107,58,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .shop-hero-label {
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--clay-600);
+  }
+  .shop-hero h1 {
+    font-family: var(--font-serif); font-size: clamp(2.2rem, 4vw, 3.2rem);
+    font-weight: 400; line-height: 1.15; color: var(--text-primary);
+    max-width: 480px;
+  }
+  .shop-hero h1 em { font-style: italic; color: var(--accent); }
+
+  /* ─── SHOP BY CATEGORIES (horizontal pills) ─── */
+  .shop-by-row {
+    display: flex; align-items: center; gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .shop-by-label {
+    font-size: 0.75rem; font-weight: 500; color: var(--text-muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-right: 0.25rem;
+  }
+  .cat-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 1rem; border-radius: 999px;
+    font-size: 0.8rem; font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--white); color: var(--text-secondary);
+    cursor: pointer; text-decoration: none;
+    transition: all .2s var(--easing);
+  }
+  .cat-pill:hover { border-color: var(--clay-500); color: var(--clay-700); }
+  .cat-pill.active {
+    background: var(--clay-800); color: var(--white);
+    border-color: var(--clay-800);
+  }
+  .cat-pill-count {
+    font-size: 0.7rem; opacity: 0.65;
+  }
+
+  /* ─── MAIN CONTENT SPLIT ─── */
+  .shop-split {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .shop-sidebar {
+    position: sticky; top: 88px;
+    background: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .sidebar-section { margin-bottom: 1.75rem; }
+  .sidebar-section:last-child { margin-bottom: 0; }
+  .sidebar-heading {
+    font-family: var(--font-sans); font-size: 0.65rem;
+    font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .filter-list { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+  .filter-item { display: flex; align-items: center; gap: 0.6rem; }
+  .filter-item label {
+    font-size: 0.875rem; color: var(--text-secondary); cursor: pointer;
+    flex: 1; transition: color .15s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .filter-item label:hover { color: var(--text-primary); }
+  .filter-item input[type="checkbox"] {
+    width: 15px; height: 15px;
+    border: 1.5px solid var(--clay-300); border-radius: 3px;
+    appearance: none; cursor: pointer;
+    flex-shrink: 0; position: relative;
+    transition: background .15s, border-color .15s;
+  }
+  .filter-item input[type="checkbox"]:checked {
+    background: var(--clay-800); border-color: var(--clay-800);
+  }
+  .filter-item input[type="checkbox"]:checked::after {
+    content: '✓'; position: absolute;
+    font-size: 10px; color: white;
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-weight: 700;
+  }
+  .filter-count { font-size: 0.7rem; color: var(--text-muted); }
+
+  /* Price range slider (visual only) */
+  .price-range-track {
+    width: 100%; height: 3px; background: var(--sand);
+    border-radius: 9999px; position: relative; margin: 1.25rem 0 0.5rem;
+  }
+  .price-range-fill {
+    position: absolute; height: 100%; border-radius: 9999px;
+    background: var(--clay-700); left: 20%; right: 35%;
+  }
+  .price-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--white); border: 2px solid var(--clay-700);
+    position: absolute; top: 50%; transform: translateY(-50%);
+    box-shadow: var(--shadow-sm); cursor: grab;
+  }
+  .price-range-thumb.left { left: calc(20% - 8px); }
+  .price-range-thumb.right { right: calc(35% - 8px); }
+  .price-range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); }
+
+  /* Clear filters */
+  .clear-filters {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .clear-filters-btn {
+    font-size: 0.75rem; color: var(--accent); background: none; border: none;
+    cursor: pointer; padding: 0; font-family: var(--font-sans);
+    text-decoration: underline; text-underline-offset: 3px; transition: color .15s;
+  }
+  .clear-filters-btn:hover { color: var(--accent-dark); }
+  .active-filter-count {
+    font-size: 0.75rem; font-weight: 600;
+    background: var(--clay-800); color: white;
+    padding: 2px 8px; border-radius: 999px;
+  }
+
+  /* ─── MAIN AREA ─── */
+  .shop-main {}
+  .shop-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;
+  }
+  .product-count { font-size: 0.85rem; color: var(--text-muted); font-weight: 400; }
+  .product-count strong { color: var(--text-primary); font-weight: 600; }
+  .toolbar-right { display: flex; align-items: center; gap: 1rem; }
+
+  /* View toggle */
+  .view-toggle {
+    display: flex; gap: 2px;
+    background: var(--border-light); padding: 3px; border-radius: var(--radius-sm);
+  }
+  .view-btn {
+    width: 32px; height: 32px; border-radius: 6px; border: none;
+    background: transparent; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; color: var(--text-muted); transition: all .15s;
+  }
+  .view-btn.active { background: var(--white); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+
+  /* Sort select */
+  .sort-select {
+    font-family: var(--font-sans); font-size: 0.8rem;
+    color: var(--text-primary); background: var(--white);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 0.45rem 2rem 0.45rem 0.75rem;
+    cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B5344' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.6rem center;
+    outline: none; transition: border-color .2s;
+  }
+  .sort-select:focus { border-color: var(--clay-500); }
+
+  /* ─── PRODUCT GRID ─── */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  /* ─── PRODUCT CARD ─── */
+  .product-card {
+    display: flex; flex-direction: column;
+    cursor: pointer; position: relative;
+    text-decoration: none; color: inherit;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: transform .3s var(--easing), box-shadow .3s var(--easing);
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+  }
+  .product-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .product-card:hover .card-img-inner { transform: scale(1.05); }
+  .product-card:hover .card-quick-add { opacity: 1; transform: translateY(0); }
+
+  .card-img-wrap {
+    position: relative; overflow: hidden;
+    aspect-ratio: 4/5; background: var(--cream-mid);
+  }
+  .card-img-inner {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .5s var(--easing);
+  }
+  /* Fake img */
+  .card-img-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(145deg, var(--cream-mid) 0%, var(--sand) 60%, var(--clay-100) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-serif); font-size: 3rem; color: var(--clay-300);
+    transition: transform .5s var(--easing);
+  }
+  .product-card:hover .card-img-placeholder { transform: scale(1.05); }
+
+  .card-badge {
+    position: absolute; left: 10px; top: 10px; z-index: 2;
+    background: var(--white); color: var(--text-primary);
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em;
+    padding: 4px 8px; border-radius: 6px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-badge.sale { background: var(--accent); color: white; }
+  .card-badge.new { background: var(--clay-700); color: white; }
+
+  .card-quick-add {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--clay-800); color: white;
+    font-size: 0.8rem; font-weight: 500;
+    padding: 0.7rem 1rem; text-align: center;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .25s var(--easing), transform .25s var(--easing);
+    letter-spacing: 0.03em; cursor: pointer; border: none; width: 100%;
+    font-family: var(--font-sans);
+  }
+  .card-quick-add:hover { background: var(--clay-700); }
+
+  .card-wishlist {
+    position: absolute; right: 10px; top: 10px; z-index: 2;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.85); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: var(--clay-500);
+    opacity: 0; transition: opacity .2s, transform .2s;
+    backdrop-filter: blur(4px);
+  }
+  .product-card:hover .card-wishlist { opacity: 1; }
+  .card-wishlist:hover { transform: scale(1.1); color: var(--accent); }
+
+  .card-body {
+    padding: 0.9rem 1rem 1rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
+    border-top: 1px solid var(--border-light);
+  }
+  .card-collection {
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--clay-500);
+  }
+  .card-name {
+    font-family: var(--font-serif); font-size: 1.05rem; font-weight: 400;
+    color: var(--text-primary); line-height: 1.3;
+    transition: color .15s;
+  }
+  .product-card:hover .card-name { color: var(--accent); }
+  .card-pricing { display: flex; align-items: baseline; gap: 0.5rem; margin-top: 0.2rem; }
+  .card-price { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+  .card-old-price { font-size: 0.8rem; color: var(--text-muted); text-decoration: line-through; }
+  .card-rating { display: flex; align-items: center; gap: 0.25rem; margin-top: 0.2rem; }
+  .card-stars { font-size: 0.65rem; color: var(--accent); letter-spacing: -0.05em; }
+  .card-rating-count { font-size: 0.7rem; color: var(--text-muted); }
+
+  /* ─── PAGINATION ─── */
+  .pagination {
+    display: flex; justify-content: center; align-items: center;
+    gap: 0.4rem; margin-top: 3rem;
+  }
+  .page-btn {
+    width: 38px; height: 38px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--white);
+    font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;
+    transition: all .15s; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-sans);
+  }
+  .page-btn:hover { border-color: var(--clay-500); color: var(--text-primary); }
+  .page-btn.active { background: var(--clay-800); color: white; border-color: var(--clay-800); }
+  .page-btn.arrow { color: var(--text-muted); }
+
+  /* ─── FLOATING FILTER BUTTON (mobile) ─── */
+  .filter-fab {
+    display: none; position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100;
+    background: var(--clay-800); color: white;
+    padding: 0.8rem 1.25rem; border-radius: 999px;
+    font-size: 0.85rem; font-weight: 500;
+    box-shadow: var(--shadow-lg); border: none; cursor: pointer;
+    font-family: var(--font-sans); gap: 0.4rem; align-items: center;
+  }
+
+  /* ─── LABEL / ANNOTATION ─── */
+  .design-note {
+    position: absolute;
+    background: rgba(192,107,58,0.9); color: white;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em;
+    padding: 3px 8px; border-radius: 4px; pointer-events: none;
+    white-space: nowrap; z-index: 99;
+  }
+
+  /* ─── ANNOTATION CONTAINER ─── */
+  .annotation-bar {
+    background: var(--clay-800); color: white;
+    padding: 0.6rem 1.5rem; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center; gap: 2rem;
+    letter-spacing: 0.02em;
+  }
+  .annotation-bar strong { color: var(--clay-100); }
+
+  /* swatch mini row */
+  .card-swatches {
+    display: flex; gap: 3px; margin-top: 0.3rem;
+  }
+  .swatch-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    outline: 1px solid rgba(0,0,0,0.15);
+  }
+
+  @media (max-width: 900px) {
+    .shop-split { grid-template-columns: 1fr; }
+    .shop-sidebar { display: none; }
+    .filter-fab { display: flex; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Annotation bar at top -->
+<div class="annotation-bar">
+  <span>🎨 <strong>UX/UI Redesign Preview</strong> – Shop Page (PLP)</span>
+  <span>|</span>
+  <span>📌 Prototype – not connected to WordPress data</span>
+  <span>|</span>
+  <span><a href="product-redesign.html" style="color: var(--clay-100); text-underline-offset:3px;">→ View Product Detail (PDP)</a></span>
+</div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="site-header-inner">
+    <a href="#" class="site-logo">Bacera</a>
+    <nav>
+      <ul class="site-nav">
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#" class="active">Shop</a></li>
+        <li><a href="#">Workshop</a></li>
+        <li><a href="#">Our Team</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <button class="header-icon-btn" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="header-icon-btn" aria-label="Wishlist">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <button class="header-icon-btn" style="position:relative;" aria-label="Cart">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:1.5px solid var(--cream);"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Shop page -->
+<div class="shop-page">
+
+  <!-- Hero header area -->
+  <div class="shop-hero">
+    <div>
+      <div class="shop-hero-label">Handcrafted · Vietnamese Ceramics</div>
+      <h1 style="margin-top:0.5rem;">
+        Every piece holds<br/><em>a quiet story.</em>
+      </h1>
+    </div>
+    <!-- Category pills -->
+    <div>
+      <div class="shop-by-row">
+        <span class="shop-by-label">Browse</span>
+        <a href="#" class="cat-pill active">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          All <span class="cat-pill-count">48</span>
+        </a>
+        <a href="#" class="cat-pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10c0-3 2.5-5 6-5s6 2 6 5v8H5v-8z"/><path d="M17 10h2a2 2 0 012 2v1a2 2 0 01-2 2h-2"/></svg>
+          Teapots <span class="cat-pill-count">12</span>
+        </a>
+        <a href="#" class="cat-pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4h8l-1 14a2 2 0 01-2 2h-2a2 2 0 01-2-2L8 4z"/></svg>
+          Drinkware <span class="cat-pill-count">16</span>
+        </a>
+        <a href="#" class="cat-pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="14" rx="8" ry="4"/><path d="M4 14c0-4 3.5-7 8-7s8 3 8 7"/></svg>
+          Bowls <span class="cat-pill-count">9</span>
+        </a>
+        <a href="#" class="cat-pill">Plates <span class="cat-pill-count">7</span></a>
+        <a href="#" class="cat-pill">Vases &amp; Decor <span class="cat-pill-count">4</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Split layout -->
+  <div class="shop-split">
+
+    <!-- Sidebar -->
+    <aside class="shop-sidebar">
+      <div class="clear-filters">
+        <span style="font-size:0.8rem;font-weight:600;color:var(--text-primary);">Filters</span>
+        <span class="active-filter-count">3</span>
+      </div>
+      <button class="clear-filters-btn" style="margin-bottom:1.5rem;display:block;">Clear all filters</button>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Collection</div>
+        <ul class="filter-list">
+          <li class="filter-item">
+            <input type="checkbox" id="f-all" checked />
+            <label for="f-all">All products <span class="filter-count">48</span></label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-teapot" checked />
+            <label for="f-teapot">Teapots <span class="filter-count">12</span></label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-cup" />
+            <label for="f-cup">Cups &amp; Mugs <span class="filter-count">16</span></label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-bowl" />
+            <label for="f-bowl">Bowls <span class="filter-count">9</span></label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-plate" />
+            <label for="f-plate">Plates <span class="filter-count">7</span></label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-vase" />
+            <label for="f-vase">Vases &amp; Decor <span class="filter-count">4</span></label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Price Range</div>
+        <div class="price-range-track">
+          <div class="price-range-fill"></div>
+          <div class="price-range-thumb left"></div>
+          <div class="price-range-thumb right"></div>
+        </div>
+        <div class="price-range-labels">
+          <span>₫500,000</span>
+          <span>₫2,400,000</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Glaze Finish</div>
+        <ul class="filter-list">
+          <li class="filter-item">
+            <input type="checkbox" id="f-smooth" checked />
+            <label for="f-smooth">Smooth</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-reactive" />
+            <label for="f-reactive">Reactive</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-matte" />
+            <label for="f-matte">Matte</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-glossy" />
+            <label for="f-glossy">Glossy</label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Best For</div>
+        <ul class="filter-list">
+          <li class="filter-item">
+            <input type="checkbox" id="f-tea" checked />
+            <label for="f-tea">Tea</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-coffee" />
+            <label for="f-coffee">Coffee</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-espresso" />
+            <label for="f-espresso">Espresso</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-juice" />
+            <label for="f-juice">Juice</label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Capacity</div>
+        <ul class="filter-list">
+          <li class="filter-item">
+            <input type="checkbox" id="f-lt100" />
+            <label for="f-lt100">&lt;100ml</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-100" />
+            <label for="f-100">100–150ml</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-150" />
+            <label for="f-150">150–250ml</label>
+          </li>
+          <li class="filter-item">
+            <input type="checkbox" id="f-gt250" />
+            <label for="f-gt250">&gt;250ml</label>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Main product area -->
+    <div class="shop-main">
+      <!-- Toolbar -->
+      <div class="shop-toolbar">
+        <p class="product-count"><strong>48</strong> products found</p>
+        <div class="toolbar-right">
+          <div class="view-toggle">
+            <button class="view-btn active" aria-label="Grid view">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            </button>
+            <button class="view-btn" aria-label="List view">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+          <select class="sort-select">
+            <option>Price: Low to High</option>
+            <option>Price: High to Low</option>
+            <option>Newest First</option>
+            <option>Most Popular</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="product-grid">
+
+        <!-- Card 1 -->
+        <a href="product-redesign.html" class="product-card">
+          <div class="card-img-wrap">
+            <div class="card-img-placeholder" style="font-size:4rem;">🍵</div>
+            <button class="card-wishlist" aria-label="Add to wishlist">♡</button>
+            <span class="card-badge sale">-18%</span>
+            <button class="card-quick-add">+ Add to cart</button>
+          </div>
+          <div class="card-body">
+            <div class="card-collection">Drinkware</div>
+            <div class="card-name">Whisper Tea Cup</div>
+            <div class="card-swatches">
+              <span class="swatch-dot" style="background:#3d2f26;"></span>
+              <span class="swatch-dot" style="background:#8d6a54;"></span>
+              <span class="swatch-dot" style="background:#c0a28e;"></span>
+            </div>
+            <div class="card-pricing">
+              <span class="card-price">820,000 ₫</span>
+              <span class="card-old-price">1,000,000 ₫</span>
+            </div>
+            <div class="card-rating">
+              <span class="card-stars">★★★★★</span>
+              <span class="card-rating-count">(24)</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 2 -->
+        <a href="product-redesign.html" class="product-card">
+          <div class="card-img-wrap">
+            <div class="card-img-placeholder" style="background:linear-gradient(145deg,#EBE3D8,#D5C9BC);">⚱️</div>
+            <button class="card-wishlist" aria-label="Add to wishlist">♡</button>
+            <span class="card-badge new">New</span>
+            <button class="card-quick-add">+ Add to cart</button>
+          </div>
+          <div class="card-body">
+            <div class="card-collection">Teapots</div>
+            <div class="card-name">Clay Earth Teapot</div>
+            <div class="card-swatches">
+              <span class="swatch-dot" style="background:#4d3d32;"></span>
+              <span class="swatch-dot" style="background:#a9846b;"></span>
+            </div>
+            <div class="card-pricing">
+              <span class="card-price">1,450,000 ₫</span>
+            </div>
+            <div class="card-rating">
+              <span class="card-stars">★★★★☆</span>
+              <span class="card-rating-count">(11)</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 3 -->
+        <a href="product-redesign.html" class="product-card">
+          <div class="card-img-wrap">
+            <div class="card-img-placeholder" style="background:linear-gradient(145deg,#E0D5C8,#D4C8B8);">🥣</div>
+            <button class="card-wishlist" aria-label="Add to wishlist">♡</button>
+            <button class="card-quick-add">+ Add to cart</button>
+          </div>
+          <div class="card-body">
+            <div class="card-collection">Bowls</div>
+            <div class="card-name">Stillwater Ramen Bowl</div>
+            <div class="card-swatches">
+              <span class="swatch-dot" style="background:#6b5344;"></span>
+              <span class="swatch-dot" style="background:#8d6a54;"></span>
+              <span class="swatch-dot" style="background:#c0a28e;"></span>
+              <span class="swatch-dot" style="background:#3d2f26;"></span>
+            </div>
+            <div class="card-pricing">
+              <span class="card-price">680,000 ₫</span>
+            </div>
+            <div class="card-rating">
+              <span class="card-stars">★★★★★</span>
+              <span class="card-rating-count">(36)</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 4 – Sold out -->
+        <div class="product-card" style="opacity:0.75;">
+          <div class="card-img-wrap">
+            <div class="card-img-placeholder" style="background:linear-gradient(145deg,#E8E0D6,#D8CFC4);filter:grayscale(0.3);">🫖</div>
+            <div style="position:absolute;inset:0;background:rgba(248,244,238,0.5);display:flex;align-items:center;justify-content:center;z-index:5;">
+              <span style="background:rgba(42,31,23,0.85);color:white;font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:6px 14px;border-radius:6px;">Sold Out</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-collection">Teapots</div>
+            <div class="card-name">Morning Fog Pot</div>
+            <div class="card-pricing">
+              <span class="card-price" style="color:var(--text-muted);">2,100,000 ₫</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <a href="product-redesign.html" class="product-card">
+          <div class="card-img-wrap">
+            <div class="card-img-placeholder" style="background:linear-gradient(145deg,#F0E8DC,#E4D9CD);">🫙</div>
+            <button class="card-wishlist" aria-label="Add to wishlist">♡</button>
+            <span class="card-badge sale">-25%</span>
+            <button class="card-quick-add">+ Add to cart</button>
+          </div>
+          <div class="card-body">
+            <div class="card-collection">Storage</div>
+            <div class="card-name">Harvest Jar – Medium</div>
+            <div class="card-swatches">
+              <span class="swatch-dot" style="background:#3d2f26;"></span>
+              <span class="swatch-dot" style="background:#c0a28e;"></span>
+            </div>
+            <div class="card-pricing">
+              <span class="card-price">590,000 ₫</span>
+              <span class="card-old-price">790,000 ₫</span>
+            </div>
+            <div class="card-rating">
+              <span class="card-stars">★★★★☆</span>
+              <span class="card-rating-count">(8)</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 6 -->
+        <a href="product-redesign.html" class="product-card">
+          <div class="card-img-wrap">
+            <div class="card-img-placeholder" style="background:linear-gradient(145deg,#E5DDCF,#DAD0C2);">🌸</div>
+            <button class="card-wishlist" aria-label="Add to wishlist">♡</button>
+            <button class="card-quick-add">+ Add to cart</button>
+          </div>
+          <div class="card-body">
+            <div class="card-collection">Vases &amp; Decor</div>
+            <div class="card-name">Blossom Bud Vase</div>
+            <div class="card-swatches">
+              <span class="swatch-dot" style="background:#6b5344;"></span>
+              <span class="swatch-dot" style="background:#a9846b;"></span>
+            </div>
+            <div class="card-pricing">
+              <span class="card-price">920,000 ₫</span>
+            </div>
+            <div class="card-rating">
+              <span class="card-stars">★★★★★</span>
+              <span class="card-rating-count">(19)</span>
+            </div>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button class="page-btn arrow">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span style="color:var(--text-muted);padding:0 0.25rem;font-size:0.85rem;">…</span>
+        <button class="page-btn">6</button>
+        <button class="page-btn arrow">›</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile filter FAB -->
+<button class="filter-fab">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+  Filters (3)
+</button>
+
+<script>
+// Simple interactivity
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.cat-pill').forEach(pill => {
+  pill.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.card-wishlist').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    this.innerHTML = this.innerHTML.trim() === '♡' ? '♥' : '♡';
+    this.style.color = this.innerHTML.trim() === '♥' ? 'var(--accent)' : 'var(--clay-500)';
+  });
+});
+</script>
+</body>
+</html>

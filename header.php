@@ -59,6 +59,42 @@ $bacera_hdr_workshop_url = get_post_type_archive_link( 'workshop' ) ?: home_url(
 $bacera_hdr_blog_url     = get_post_type_archive_link( 'post' ) ?: home_url( '/blog/' );
 $bacera_hdr_contact_url  = home_url( '/contact/' );
 
+// ── Fetch Pancake categories + local meta for header mega-panel ──
+$hdr_pancake_cats = [];
+$hdr_cat_meta_map = [];
+if ( class_exists( 'Pancake_API_Client' ) ) {
+    // Try transient cache first (5 min) to avoid API call on every page load
+    $hdr_cats_cached = get_transient( 'bacera_hdr_categories' );
+    if ( false !== $hdr_cats_cached ) {
+        $hdr_pancake_cats = $hdr_cats_cached;
+    } else {
+        try {
+            $hdr_api = new Pancake_API_Client();
+            $hdr_resp = $hdr_api->request( '/shops/{SHOP_ID}/categories', 'GET' );
+            if ( is_array( $hdr_resp ) && ! empty( $hdr_resp['success'] ) && ! empty( $hdr_resp['data'] ) ) {
+                $hdr_pancake_cats = array_slice( $hdr_resp['data'], 0, 8 );
+                set_transient( 'bacera_hdr_categories', $hdr_pancake_cats, 5 * MINUTE_IN_SECONDS );
+            }
+        } catch ( \Exception $e ) {}
+    }
+    // Fetch local meta (images) for these categories
+    if ( ! empty( $hdr_pancake_cats ) ) {
+        global $wpdb;
+        $hdr_cids  = array_map( fn($c) => (string)($c['id']??''), $hdr_pancake_cats );
+        $hdr_cids  = array_filter( $hdr_cids );
+        if ( $hdr_cids ) {
+            $ph   = implode( ',', array_fill( 0, count($hdr_cids), '%s' ) );
+            $rows = $wpdb->get_results(
+                $wpdb->prepare( "SELECT pancake_category_id, image_url, name_override, is_active FROM {$wpdb->prefix}bacera_category_meta WHERE pancake_category_id IN ($ph)", ...$hdr_cids ),
+                ARRAY_A
+            ) ?: [];
+            foreach ( $rows as $r ) {
+                $hdr_cat_meta_map[ $r['pancake_category_id'] ] = $r;
+            }
+        }
+    }
+}
+
 // Find Our Process page
 $proc_page_id = $wpdb->get_var(
     "SELECT p.ID FROM {$wpdb->posts} p
@@ -391,7 +427,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
         <div class="flex items-center gap-5 pl-6 xl:pl-8 pr-6 xl:pr-10">
 
-            <button id="search-btn" class="hdr-icon w-9 h-9 flex items-center justify-center hover:scale-110 transition-transform focus:outline-none" title="Tìm kiếm">
+            <button id="search-btn" class="hdr-icon w-9 h-9 flex items-center justify-center hover:scale-110 transition-transform focus:outline-none" title="Search">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
@@ -434,10 +470,10 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
                     <?php
                     $my_account_url = home_url('/tai-khoan-cua-toi/');
                     $acct_menu = [
-                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'Tài khoản của tôi',   'url'=>$my_account_url],
-                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Điểm tích lũy',       'url'=> $my_account_url . '#loyalty'],
-                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'Đơn hàng của tôi',  'url'=>$my_account_url . '#orders'],
-                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Workshop đã đăng ký', 'url'=>$my_account_url . '#workshops'],
+                        ['icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',  'label'=>'My Account',        'url'=>$my_account_url],
+                        ['icon'=>'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label'=>'Loyalty Points',    'url'=> $my_account_url . '#loyalty'],
+                        ['icon'=>'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'label'=>'My Orders',         'url'=>$my_account_url . '#orders'],
+                        ['icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z', 'label'=>'Booked Workshops',  'url'=>$my_account_url . '#workshops'],
                     ];
                     foreach ($acct_menu as $am): ?>
                     <a href="<?php echo esc_url($am['url']); ?>"
@@ -458,7 +494,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                             </svg>
                         </div>
-                        Đăng xuất
+                        Sign out
                     </a>
                 </div>
             </div>
@@ -468,7 +504,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                 </svg>
-                Đăng nhập
+                Sign in
             </a>
             <?php endif; ?>
 
@@ -476,105 +512,185 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
     </div>
 
+    <!-- ── Shop mega panel: icon-card style ── -->
+    <style>
+    #panel-shop { background: #fdfaf6; border-top: 1px solid #ede5d8; }
+    .msp-wrap { max-width: 1232px; margin: 0 auto; padding: 24px 28px 22px; display: flex; gap: 28px; align-items: stretch; }
+
+    /* ── Left intro ── */
+    .msp-intro {
+        width: 200px; flex-shrink: 0;
+        display: flex; flex-direction: column;
+        padding-right: 28px; border-right: 1px solid #e8ddd0;
+        justify-content: space-between;
+    }
+    .msp-eyebrow {
+        font-size: 9.5px; font-weight: 800; letter-spacing: .18em;
+        text-transform: uppercase; color: #c06b3a;
+        margin-bottom: 6px; font-family: inherit;
+    }
+    .msp-heading {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 21px; font-weight: 400; color: #2a1f17;
+        line-height: 1.2; margin-bottom: 8px;
+    }
+    .msp-heading em { font-style: italic; color: #c06b3a; }
+    .msp-desc { font-size: 12px; color: #9a7d68; line-height: 1.65; font-family: inherit; }
+    .msp-all-btn {
+        margin-top: 16px;
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 9px 16px; border-radius: 9px;
+        background: #3d2f26; color: #fff !important;
+        font-size: 12px; font-weight: 600; font-family: inherit;
+        text-decoration: none;
+        transition: background .2s, box-shadow .2s;
+        box-shadow: 0 2px 6px rgba(61,47,38,.2);
+    }
+    .msp-all-btn:hover { background: #c06b3a; box-shadow: 0 4px 14px rgba(192,107,58,.3); }
+
+    /* ── Icon-card grid ── */
+    .msp-cats {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 8px; align-content: center;
+    }
+
+    /* Each category: vertical card with icon on warm chip + name below */
+    .msp-ic {
+        display: flex; flex-direction: column; align-items: center;
+        gap: 8px; padding: 12px 8px 10px;
+        border-radius: 12px; border: 1.5px solid transparent;
+        text-decoration: none;
+        background: #fff;
+        transition: border-color .18s, background .18s, transform .18s, box-shadow .18s;
+        cursor: pointer;
+    }
+    .msp-ic:hover {
+        border-color: #d4b896;
+        background: #fdf6ef;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(61,47,38,.09);
+    }
+
+    /* Icon chip — warm sand circle */
+    .msp-ic-chip {
+        width: 52px; height: 52px; border-radius: 14px;
+        background: linear-gradient(135deg, #f5ede0, #ede0ce);
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; flex-shrink: 0;
+        transition: background .18s, box-shadow .18s;
+        box-shadow: 0 1px 3px rgba(61,47,38,.08);
+    }
+    .msp-ic:hover .msp-ic-chip {
+        background: linear-gradient(135deg, #fdecd8, #f5dfc4);
+        box-shadow: 0 2px 8px rgba(192,107,58,.18);
+    }
+    .msp-ic-chip img {
+        width: 36px; height: 36px;
+        object-fit: contain; object-position: center;
+        transition: transform .25s;
+    }
+    .msp-ic:hover .msp-ic-chip img { transform: scale(1.12); }
+
+    /* Fallback SVG */
+    .msp-ic-svg { color: #c06b3a; transition: color .18s; }
+
+    /* Name + count below chip */
+    .msp-ic-label {
+        font-size: 11.5px; font-weight: 700; color: #3d2f26;
+        font-family: inherit; text-align: center; line-height: 1.3;
+        transition: color .18s;
+    }
+    .msp-ic:hover .msp-ic-label { color: #c06b3a; }
+    .msp-ic-count {
+        font-size: 10px; color: #b5906a;
+        font-family: inherit; font-weight: 500;
+        margin-top: -4px; text-align: center;
+    }
+
+    /* Entrance animation */
+    .mega-panel.is-active .msp-ic {
+        animation: mspIn .24s ease both;
+    }
+    <?php for ($__i = 1; $__i <= 10; $__i++): ?>
+    .mega-panel.is-active .msp-cats > :nth-child(<?php echo $__i; ?>) { animation-delay: <?php echo ($__i - 1) * 24; ?>ms; }
+    <?php endfor; ?>
+    @keyframes mspIn {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    </style>
+
     <div class="mega-panel" id="panel-shop">
-        <?php
-        // ── Fetch real product categories ─────────────────────────────────────
-        $mega_parent_cats = get_terms([
-            'taxonomy'   => 'bcm_product_cat',
-            'hide_empty' => false,
-            'parent'     => 0,
-            'orderby'    => 'name',
-            'number'     => 8,
-        ]);
+        <div class="msp-wrap">
 
-        // Default SVG paths as fallback icons (cycles through)
-        $fallback_icons = [
-            'M4 6h16M4 10h16M4 14h16M4 18h16',
-            'M3 3h18l-3 18H6L3 3z',
-            'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4',
-            'M17 8h1a4 4 0 010 8h-1M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z',
-            'M3 10c0 5.523 4.477 10 10 10s10-4.477 10-10H3z',
-            'M4 7h16M4 12h8m-8 5h16',
-            'M9 17V7m0 0a3 3 0 106 0v10',
-            'M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10A5 5 0 0112 7z',
-        ];
-
-        ?>
-        <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
-            <div class="w-52 shrink-0 flex flex-col justify-between py-1">
+            <!-- Intro -->
+            <div class="msp-intro">
                 <div>
-                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Mua hàng theo công năng</h3>
-                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Khám phá sản phẩm theo danh mục để mua sắm nhanh chóng hơn.</p>
+                    <div class="msp-eyebrow">Collections</div>
+                    <h3 class="msp-heading">Shop by <em>category</em></h3>
+                    <p class="msp-desc">Handcrafted ceramics for every moment — explore our full range.</p>
                 </div>
-                <a href="<?php echo esc_url( $bacera_hdr_shop_url ); ?>"
-                   class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">
-                    Xem tất cả
+                <a href="<?php echo esc_url( $bacera_hdr_shop_url ); ?>" class="msp-all-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    View all
                 </a>
             </div>
-            <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
 
-            <?php if (!is_wp_error($mega_parent_cats) && $mega_parent_cats): ?>
-            <div class="flex-1 grid grid-cols-4 gap-3">
-                <?php foreach ($mega_parent_cats as $i => $cat):
-                    $cat_url   = get_term_link($cat);
-                    $cat_url   = is_wp_error($cat_url) ? '#' : $cat_url;
-                    $img_id    = function_exists('bcm_get_cat_image_id') ? bcm_get_cat_image_id($cat->term_id) : 0;
-                    $img_url   = $img_id ? wp_get_attachment_image_url($img_id, 'thumbnail') : '';
-                    $icon_path = $fallback_icons[$i % count($fallback_icons)];
+            <!-- Icon grid -->
+            <div class="msp-cats">
+
+                <?php if (!empty($hdr_pancake_cats)):
+                    // Ceramic SVG fallbacks (stroke icons, artisan-appropriate)
+                    $hdr__svgs = [
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3c-4 0-7 3-7 7 0 4 3 7 7 8 4-1 7-4 7-8 0-4-3-7-7-7z"/>',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M6 8h12v10a2 2 0 01-2 2H8a2 2 0 01-2-2V8zM4 8h16M10 8V5a2 2 0 014 0v3"/>',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M5 10c0-3 3-6 7-6s7 3 7 6v8H5v-8z"/><path stroke-linecap="round" stroke-linejoin="round" d="M18 10h2a2 2 0 010 4h-2"/>',
+                        '<ellipse cx="12" cy="14" rx="8" ry="4" stroke-linecap="round" stroke-linejoin="round"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 14c0-4 3.5-7 8-7s8 3 8 7"/>',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6l2 5v10a2 2 0 01-2 2H9a2 2 0 01-2-2V8l2-5zM9 3l-1 5h8l-1-5"/>',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M12 2l3 7H21l-6 4.5 2.3 7L12 17l-5.3 3.5L9 13 3 8.5h6L12 2z"/>',
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M8 5v14l4-3 4 3V5a2 2 0 00-2-2h-4a2 2 0 00-2 2z"/>',
+                        '<circle cx="12" cy="12" r="9" stroke-linecap="round"/><path stroke-linecap="round" d="M8.5 12c0-2 1.5-4 3.5-4s3.5 2 3.5 4-1.5 4-3.5 4"/>',
+                    ];
+                    foreach ($hdr_pancake_cats as $__i => $__cat):
+                        $__cid = (string)($__cat['id']??'');
+                        if (!$__cid) continue;
+                        $__meta = $hdr_cat_meta_map[$__cid] ?? [];
+                        if (isset($__meta['is_active']) && !(int)$__meta['is_active']) continue;
+                        $__name  = ($__meta['name_override']??'') ?: ($__cat['text']??$__cat['name']??'');
+                        $__img   = $__meta['image_url'] ?? '';
+                        $__cnt   = intval($__cat['products_count']??$__cat['product_count']??0);
+                        $__url   = add_query_arg('filter_collection', $__cid, $bacera_hdr_shop_url);
+                        $__svg   = $hdr__svgs[$__i % count($hdr__svgs)];
                 ?>
-
-                <a href="<?php echo esc_url($cat_url); ?>"
-                   class="group/sc flex flex-col items-center justify-center gap-2.5 py-3 px-2 rounded-xl border border-neutral-300 bg-white hover:border-[#d95f47] hover:bg-[#fef8f7] transition-all duration-200 h-[100px]">
-
-                    <div class="w-12 h-12 rounded-xl bg-neutral-100 group-hover/sc:bg-[#fff0ec] border border-neutral-300 group-hover/sc:border-[#f5c8be] flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
-                        <?php if ($img_url): ?>
-                        <img src="<?php echo esc_url($img_url); ?>"
-                             class="w-9 h-9 object-contain transition-transform duration-300 group-hover/sc:scale-110"
-                             alt="<?php echo esc_attr($cat->name); ?>" loading="lazy">
+                <a href="<?php echo esc_url($__url); ?>" class="msp-ic">
+                    <div class="msp-ic-chip">
+                        <?php if ($__img): ?>
+                        <img src="<?php echo esc_url($__img); ?>" alt="<?php echo esc_attr($__name); ?>" loading="lazy">
                         <?php else: ?>
-                        <svg class="w-[22px] h-[22px] text-primary-600 group-hover/sc:text-[#d95f47] transition-colors"
-                             fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="<?php echo $icon_path; ?>"/>
-                        </svg>
+                        <svg class="msp-ic-svg" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><?php echo $__svg; ?></svg>
                         <?php endif; ?>
                     </div>
-
-                    <div class="text-center leading-none">
-                        <span class="block text-primary-700 text-[11.5px] font-semibold font-sans group-hover/sc:text-[#d95f47] transition-colors leading-tight line-clamp-2">
-                            <?php echo esc_html($cat->name); ?>
-                        </span>
-                        <?php if ($cat->count > 0): ?>
-                        <span class="block text-primary-400 text-[10px] font-sans mt-0.5"><?php echo $cat->count; ?> sản phẩm</span>
-                        <?php endif; ?>
-                    </div>
+                    <span class="msp-ic-label"><?php echo esc_html($__name); ?></span>
+                    <?php if ($__cnt > 0): ?>
+                    <span class="msp-ic-count"><?php echo $__cnt; ?> items</span>
+                    <?php endif; ?>
                 </a>
-                <?php endforeach; ?>
-            </div>
+                <?php endforeach; endif; ?>
 
-            <?php else: ?>
-
-            <div class="flex-1 flex items-center justify-center">
-                <div class="text-center text-primary-400">
-                    <svg class="w-10 h-10 mx-auto mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                    </svg>
-                    <p class="text-[13px] font-sans">Chưa có danh mục sản phẩm.<br>
-                    <a href="<?php echo admin_url('admin.php?page=bacera-product-cats'); ?>" class="text-[#d95f47] underline text-[12px]">Thêm danh mục</a></p>
-                </div>
-            </div>
-            <?php endif; ?>
-
-        </div>
+            </div><!-- .msp-cats -->
+        </div><!-- .msp-wrap -->
     </div>
 
     <div class="mega-panel" id="panel-workshop">
         <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
                 <div>
-                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Khám phá workshop</h3>
-                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Trải nghiệm nghệ thuật làm gốm thủ công đầy cảm hứng cùng chúng tôi.</p>
+                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Explore workshops</h3>
+                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Discover the joy of handcrafted ceramics — a creative experience you won't forget.</p>
                 </div>
-                <a href="<?php echo esc_url( $bacera_hdr_workshop_url ); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors no-underline">Xem tất cả lịch</a>
+                <a href="<?php echo esc_url( $bacera_hdr_workshop_url ); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors no-underline">View all sessions</a>
             </div>
             <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <div class="flex-1 grid grid-cols-2 gap-4">
@@ -589,7 +705,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
                 ]);
                 foreach ($mega_wks as $mw_post):
                     $mw_url   = get_permalink($mw_post);
-                    $mw_price = get_post_meta($mw_post->ID, '_price', true) ?: 'Liên hệ';
+                    $mw_price = get_post_meta($mw_post->ID, '_price', true) ?: 'Contact us';
                     $mw_price_fmt = is_numeric(str_replace([',','.'], '', $mw_price))
                         ? number_format((float)preg_replace('/[^0-9.]/', '', $mw_price), 0, ',', '.') . 'đ'
                         : $mw_price;
@@ -610,7 +726,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
                 </a>
                 <?php endforeach;
                 if (empty($mega_wks)): ?>
-                <div class="col-span-2 flex items-center justify-center text-primary-400 text-[13px] font-sans">Chưa có workshop nào. <a href="<?= admin_url('post-new.php?post_type=workshop') ?>" class="ml-1 text-[#d95f47] underline">Thêm ngay</a></div>
+                <div class="col-span-2 flex items-center justify-center text-primary-400 text-[13px] font-sans">No workshops yet. <a href="<?= admin_url('post-new.php?post_type=workshop') ?>" class="ml-1 text-[#d95f47] underline">Add one</a></div>
                 <?php endif; ?>
             </div>
         </div>
@@ -620,10 +736,10 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
         <div class="max-w-[1232px] mx-auto px-6 py-6 flex gap-8">
             <div class="w-52 shrink-0 flex flex-col justify-between py-1">
                 <div>
-                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Về chúng tôi</h3>
-                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Xưởng gốm Bacera — nơi nghệ thuật thủ công gặp gỡ tâm hồn.</p>
+                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">About us</h3>
+                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Bacera Pottery Studio — where craftsmanship meets soul.</p>
                 </div>
-                <a href="<?php echo esc_url($about_page); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Đọc thêm</a>
+                <a href="<?php echo esc_url($about_page); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Read more</a>
             </div>
             <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
             <nav class="flex-1 grid grid-cols-3 gap-x-8 gap-y-1 content-start py-1">
@@ -697,7 +813,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
     <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" class="flex flex-1 items-center gap-3">
         <input type="search" id="search-input" name="s"
-               placeholder="Tìm kiếm sản phẩm, bài viết..."
+               placeholder="Search products, articles..."
                value="<?php echo get_search_query(); ?>"
                autocomplete="off">
         <button type="submit"
@@ -812,10 +928,77 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     }
 
     // ── Language switch ─────────────────────────────────────
-    window.mstSwitchLang = function(lang, label) {
-        document.getElementById('mst-current-lang').textContent = label;
-        if (typeof window.mstTranslatePage === 'function') window.mstTranslatePage(lang);
+    // Map lang code → display label (cho detect khi load trang)
+    var mstLangLabels = { 'en': 'English', 'vi': 'Tiếng Việt', 'fr': 'Français' };
+
+    // Gọi GTranslate engine để dịch trang (dùng doGTranslate API chính thức)
+    window.mstTranslatePage = function(lang) {
+        var fromLang = 'en'; // ngôn ngữ gốc của trang
+        var combo    = fromLang + '|' + lang;
+
+        // GTranslate v3 expose doGTranslate() sau khi widget script load
+        if (typeof window.doGTranslate === 'function') {
+            window.doGTranslate(combo);
+        } else {
+            // Nếu widget chưa load xong, chờ thêm và thử lại
+            var tries = 0;
+            var wait  = setInterval(function() {
+                tries++;
+                if (typeof window.doGTranslate === 'function') {
+                    clearInterval(wait);
+                    window.doGTranslate(combo);
+                } else if (tries > 30) {
+                    clearInterval(wait); // timeout 3s
+                }
+            }, 100);
+        }
+
+        // Lưu lựa chọn để restore khi load trang mới
+        try { localStorage.setItem('mst_lang', lang); } catch(e) {}
     };
+
+    window.mstSwitchLang = function(lang, label) {
+        // Cập nhật label hiển thị
+        var el = document.getElementById('mst-current-lang');
+        if (el) el.textContent = label;
+
+        // Đánh dấu button đang active (đổi màu)
+        document.querySelectorAll('#lang-panel button').forEach(function(btn) {
+            btn.classList.remove('text-[#d95f47]', 'font-medium');
+            btn.classList.add('text-primary-600');
+        });
+        // Tìm button tương ứng lang và highlight
+        document.querySelectorAll('#lang-panel button').forEach(function(btn) {
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').indexOf("'" + lang + "'") !== -1) {
+                btn.classList.add('text-[#d95f47]', 'font-medium');
+                btn.classList.remove('text-primary-600');
+            }
+        });
+
+        window.mstTranslatePage(lang);
+    };
+
+    // ── Auto-restore ngôn ngữ khi tải trang ─────────────────
+    (function() {
+        try {
+            var savedLang = localStorage.getItem('mst_lang');
+            if (savedLang && savedLang !== 'en' && mstLangLabels[savedLang]) {
+                // Chờ GTranslate engine sẵn sàng rồi tự động switch
+                var waitRestore = setInterval(function() {
+                    if (typeof window.doGTranslate === 'function') {
+                        clearInterval(waitRestore);
+                        // Cập nhật label
+                        var el = document.getElementById('mst-current-lang');
+                        if (el) el.textContent = mstLangLabels[savedLang];
+                        // Gọi dịch
+                        window.doGTranslate('en|' + savedLang);
+                    }
+                }, 150);
+                // Stop sau 5s nếu engine không load
+                setTimeout(function() { clearInterval(waitRestore); }, 5000);
+            }
+        } catch(e) {}
+    })();
 })();
 
 // Global logout — defined outside IIFE so onclick="baceraLogout()" always works
