@@ -532,6 +532,9 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
     <!-- ── Shop mega panel: icon-card style ── -->
     <style>
+    /* ── Brand fonts: Bricolage Grotesque (sans) + Gowun Batang (serif) ── */
+    .mega-panel, .mega-panel * { font-family: 'Bricolage Grotesque', sans-serif; }
+
     #panel-shop { background: #fdfaf6; border-top: 1px solid #ede5d8; }
     .msp-wrap { max-width: 1232px; margin: 0 auto; padding: 24px 28px 22px; display: flex; gap: 28px; align-items: stretch; }
 
@@ -544,22 +547,21 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     }
     .msp-eyebrow {
         font-size: 9.5px; font-weight: 800; letter-spacing: .18em;
-        text-transform: uppercase; color: #c06b3a;
-        margin-bottom: 6px; font-family: inherit;
+        text-transform: uppercase; color: #c06b3a; margin-bottom: 6px;
     }
     .msp-heading {
-        font-family: 'Cormorant Garamond', Georgia, serif;
-        font-size: 21px; font-weight: 400; color: #2a1f17;
-        line-height: 1.2; margin-bottom: 8px;
+        font-family: 'Gowun Batang', Georgia, serif;
+        font-size: 22px; font-weight: 400; color: #2a1f17;
+        line-height: 1.18; margin-bottom: 8px;
     }
     .msp-heading em { font-style: italic; color: #c06b3a; }
-    .msp-desc { font-size: 12px; color: #9a7d68; line-height: 1.65; font-family: inherit; }
+    .msp-desc { font-size: 12.5px; color: #9a7d68; line-height: 1.6; }
     .msp-all-btn {
         margin-top: 16px;
         display: inline-flex; align-items: center; gap: 6px;
         padding: 9px 16px; border-radius: 9px;
         background: #3d2f26; color: #fff !important;
-        font-size: 12px; font-weight: 600; font-family: inherit;
+        font-size: 12.5px; font-weight: 600;
         text-decoration: none;
         transition: background .2s, box-shadow .2s;
         box-shadow: 0 2px 6px rgba(61,47,38,.2);
@@ -574,24 +576,22 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
         gap: 8px; align-content: center;
     }
 
-    /* Each category: vertical card with icon on warm chip + name below */
+    /* Each category card */
     .msp-ic {
         display: flex; flex-direction: column; align-items: center;
         gap: 8px; padding: 12px 8px 10px;
         border-radius: 12px; border: 1.5px solid transparent;
-        text-decoration: none;
-        background: #fff;
+        text-decoration: none; background: #fff;
         transition: border-color .18s, background .18s, transform .18s, box-shadow .18s;
         cursor: pointer;
     }
     .msp-ic:hover {
-        border-color: #d4b896;
-        background: #fdf6ef;
+        border-color: #d4b896; background: #fdf6ef;
         transform: translateY(-2px);
         box-shadow: 0 4px 14px rgba(61,47,38,.09);
     }
 
-    /* Icon chip — warm sand circle */
+    /* Icon chip */
     .msp-ic-chip {
         width: 52px; height: 52px; border-radius: 14px;
         background: linear-gradient(135deg, #f5ede0, #ede0ce);
@@ -604,33 +604,23 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
         background: linear-gradient(135deg, #fdecd8, #f5dfc4);
         box-shadow: 0 2px 8px rgba(192,107,58,.18);
     }
-    .msp-ic-chip img {
-        width: 36px; height: 36px;
-        object-fit: contain; object-position: center;
-        transition: transform .25s;
-    }
+    .msp-ic-chip img { width: 36px; height: 36px; object-fit: contain; transition: transform .25s; }
     .msp-ic:hover .msp-ic-chip img { transform: scale(1.12); }
-
-    /* Fallback SVG */
     .msp-ic-svg { color: #c06b3a; transition: color .18s; }
 
-    /* Name + count below chip */
+    /* Label + count */
     .msp-ic-label {
-        font-size: 11.5px; font-weight: 700; color: #3d2f26;
-        font-family: inherit; text-align: center; line-height: 1.3;
-        transition: color .18s;
+        font-size: 12px; font-weight: 700; color: #3d2f26;
+        text-align: center; line-height: 1.3; transition: color .18s;
     }
     .msp-ic:hover .msp-ic-label { color: #c06b3a; }
     .msp-ic-count {
-        font-size: 10px; color: #b5906a;
-        font-family: inherit; font-weight: 500;
+        font-size: 10.5px; color: #b5906a; font-weight: 500;
         margin-top: -4px; text-align: center;
     }
 
     /* Entrance animation */
-    .mega-panel.is-active .msp-ic {
-        animation: mspIn .24s ease both;
-    }
+    .mega-panel.is-active .msp-ic { animation: mspIn .24s ease both; }
     <?php for ($__i = 1; $__i <= 10; $__i++): ?>
     .mega-panel.is-active .msp-cats > :nth-child(<?php echo $__i; ?>) { animation-delay: <?php echo ($__i - 1) * 24; ?>ms; }
     <?php endfor; ?>
