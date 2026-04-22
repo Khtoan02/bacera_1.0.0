@@ -56,8 +56,26 @@ $about_page = $about_page_id ? get_permalink( (int) $about_page_id ) : home_url(
 $bacera_hdr_shop_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_shop_page_url() : home_url( '/' );
 $bacera_hdr_cart_url     = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_cart_page_url() : home_url( '/cart/' );
 $bacera_hdr_workshop_url = get_post_type_archive_link( 'workshop' ) ?: home_url( '/workshop/' );
-$bacera_hdr_blog_url     = get_post_type_archive_link( 'post' ) ?: home_url( '/blog/' );
-$bacera_hdr_contact_url  = home_url( '/contact/' );
+
+// Blog: find page using template-blog.php (custom template, not WP posts archive)
+$_hdr_blog_page_id = $wpdb->get_var(
+    "SELECT p.ID FROM {$wpdb->posts} p
+     INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+     WHERE p.post_type = 'page' AND p.post_status = 'publish'
+       AND pm.meta_key = '_wp_page_template'
+       AND pm.meta_value IN ('templates/template-blog.php','template-blog.php')
+     LIMIT 1"
+);
+$bacera_hdr_blog_url = $_hdr_blog_page_id ? get_permalink( (int)$_hdr_blog_page_id ) : home_url( '/blog/' );
+
+// Contact: find page using template or slug
+$_hdr_contact_page_id = $wpdb->get_var(
+    "SELECT ID FROM {$wpdb->posts}
+     WHERE post_type = 'page' AND post_status = 'publish'
+       AND (post_name = 'contact' OR post_name = 'lien-he' OR post_name = 'contact-us')
+     LIMIT 1"
+);
+$bacera_hdr_contact_url = $_hdr_contact_page_id ? get_permalink( (int)$_hdr_contact_page_id ) : home_url( '/contact/' );
 
 // ── Fetch Pancake categories + local meta for header mega-panel ──
 $hdr_pancake_cats = [];
