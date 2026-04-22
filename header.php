@@ -373,11 +373,11 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
                 <?php
                 $nav_items = [
-                    ['key'=>'shop',     'label'=>'Shop',     'has_sub'=>true,  'url'=>$bacera_hdr_shop_url],
-                    ['key'=>'workshop', 'label'=>'Workshop', 'has_sub'=>true,  'url'=>$bacera_hdr_workshop_url],
-                    ['key'=>'about',    'label'=>'About us', 'has_sub'=>true,  'url'=>$about_page],
-                    ['key'=>'blog',     'label'=>'Blog',     'has_sub'=>false, 'url'=>$bacera_hdr_blog_url],
-                    ['key'=>'contact',  'label'=>'Contact',  'has_sub'=>false, 'url'=>$bacera_hdr_contact_url],
+                    ['key'=>'shop',     'label'=>'Shop',     'has_sub'=>true, 'url'=>$bacera_hdr_shop_url],
+                    ['key'=>'workshop', 'label'=>'Workshop', 'has_sub'=>true, 'url'=>$bacera_hdr_workshop_url],
+                    ['key'=>'about',    'label'=>'About us', 'has_sub'=>true, 'url'=>$about_page],
+                    ['key'=>'blog',     'label'=>'Blog',     'has_sub'=>true, 'url'=>$bacera_hdr_blog_url],
+                    ['key'=>'contact',  'label'=>'Contact',  'has_sub'=>true, 'url'=>$bacera_hdr_contact_url],
                 ];
                 foreach ($nav_items as $item):
                 ?>
@@ -684,81 +684,164 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     </div>
 
     <div class="mega-panel" id="panel-workshop">
-        <div class="max-w-[1232px] mx-auto px-6 py-8 flex gap-8">
-            <div class="w-52 shrink-0 flex flex-col justify-between py-1">
+        <div class="msp-wrap">
+            <div class="msp-intro">
                 <div>
-                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">Explore workshops</h3>
-                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Discover the joy of handcrafted ceramics — a creative experience you won't forget.</p>
+                    <div class="msp-eyebrow">Experiences</div>
+                    <h3 class="msp-heading">Explore <em>workshops</em></h3>
+                    <p class="msp-desc">Discover the joy of handcrafted ceramics — a creative experience you won't forget.</p>
                 </div>
-                <a href="<?php echo esc_url( $bacera_hdr_workshop_url ); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors no-underline">View all sessions</a>
+                <a href="<?php echo esc_url($bacera_hdr_workshop_url); ?>" class="msp-all-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    View all sessions
+                </a>
             </div>
-            <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
-            <div class="flex-1 grid grid-cols-2 gap-4">
+            <div class="flex-1 padding-left" style="padding-left:24px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:center;">
                 <?php
-                // Fetch real published workshops from DB
-                $mega_wks = get_posts([
-                    'post_type'      => 'workshop',
-                    'post_status'    => 'publish',
-                    'posts_per_page' => 4,
-                    'orderby'        => 'date',
-                    'order'          => 'DESC',
-                ]);
+                $mega_wks = get_posts(['post_type'=>'workshop','post_status'=>'publish','posts_per_page'=>4,'orderby'=>'date','order'=>'DESC']);
                 foreach ($mega_wks as $mw_post):
-                    $mw_url   = get_permalink($mw_post);
-                    $mw_price = get_post_meta($mw_post->ID, '_price', true) ?: 'Contact us';
-                    $mw_price_fmt = is_numeric(str_replace([',','.'], '', $mw_price))
-                        ? number_format((float)preg_replace('/[^0-9.]/', '', $mw_price), 0, ',', '.') . 'đ'
-                        : $mw_price;
-                    $mw_thumb = get_post_meta($mw_post->ID, '_thumbnail_url', true)
-                                ?: 'https://images.unsplash.com/photo-1565193566173-7a0e46e4d7a8?auto=format&fit=crop&q=80&w=120';
-                    $mw_tagline = get_post_meta($mw_post->ID, '_tagline', true) ?: wp_trim_words($mw_post->post_excerpt ?: strip_tags($mw_post->post_content), 10, '…');
+                    $mw_url  = get_permalink($mw_post);
+                    $mw_price = get_post_meta($mw_post->ID,'_price',true) ?: '';
+                    $mw_price_fmt = ($mw_price && is_numeric(preg_replace('/[^0-9.]/','',$mw_price)))
+                        ? number_format((float)preg_replace('/[^0-9.]/','',$mw_price),0,',','.') . 'đ' : $mw_price;
+                    $mw_thumb = get_post_meta($mw_post->ID,'_thumbnail_url',true) ?: '';
+                    $mw_tagline = get_post_meta($mw_post->ID,'_tagline',true) ?: wp_trim_words(strip_tags($mw_post->post_content),9,'…');
                 ?>
-                <a href="<?= esc_url($mw_url) ?>" class="group/mw flex items-center gap-4 p-3 rounded-xl hover:bg-neutral-100 transition-colors">
-                    <div class="w-[88px] h-[88px] overflow-hidden rounded-xl shrink-0 bg-neutral-200">
-                        <img src="<?= esc_url($mw_thumb) ?>"
-                             class="w-full h-full object-cover group-hover/mw:scale-105 transition-transform duration-500" alt="<?= esc_attr($mw_post->post_title) ?>">
+                <a href="<?php echo esc_url($mw_url); ?>" style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;border:1.5px solid transparent;background:#fff;text-decoration:none;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s;" onmouseenter="this.style.borderColor='#d4b896';this.style.background='#fdf6ef';this.style.boxShadow='0 4px 14px rgba(61,47,38,.09)';" onmouseleave="this.style.borderColor='transparent';this.style.background='#fff';this.style.boxShadow='none';">
+                    <div style="width:68px;height:68px;border-radius:12px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#f5ede0,#ede0ce);">
+                        <?php if ($mw_thumb): ?>
+                        <img src="<?php echo esc_url($mw_thumb); ?>" style="width:100%;height:100%;object-fit:cover;" alt="<?php echo esc_attr($mw_post->post_title); ?>" loading="lazy">
+                        <?php else: ?>
+                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" fill="none" stroke="#c06b3a" stroke-width="1.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                        <?php endif; ?>
                     </div>
-                    <div class="flex flex-col min-w-0">
-                        <h4 class="text-primary-800 text-[14px] font-semibold font-sans mb-1 group-hover/mw:text-[#d95f47] transition-colors leading-snug"><?= esc_html($mw_post->post_title) ?></h4>
-                        <p class="text-primary-600 text-[12px] font-sans leading-snug mb-2 line-clamp-2"><?= esc_html($mw_tagline) ?></p>
-                        <p class="text-primary-800 text-[13px] font-medium font-sans"><?= esc_html($mw_price_fmt) ?></p>
+                    <div style="min-width:0;flex:1;">
+                        <div style="font-size:12.5px;font-weight:700;color:#3d2f26;line-height:1.3;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;"><?php echo esc_html($mw_post->post_title); ?></div>
+                        <div style="font-size:11px;color:#9a7d68;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:4px;"><?php echo esc_html($mw_tagline); ?></div>
+                        <?php if ($mw_price_fmt): ?><div style="font-size:11.5px;font-weight:600;color:#c06b3a;"><?php echo esc_html($mw_price_fmt); ?></div><?php endif; ?>
                     </div>
                 </a>
                 <?php endforeach;
                 if (empty($mega_wks)): ?>
-                <div class="col-span-2 flex items-center justify-center text-primary-400 text-[13px] font-sans">No workshops yet. <a href="<?= admin_url('post-new.php?post_type=workshop') ?>" class="ml-1 text-[#d95f47] underline">Add one</a></div>
+                <div style="grid-column:span 2;display:flex;align-items:center;justify-content:center;color:#9a7d68;font-size:13px;">No workshops found. <a href="<?php echo admin_url('post-new.php?post_type=workshop'); ?>" style="margin-left:6px;color:#c06b3a;text-decoration:underline;">Add one</a></div>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 
     <div class="mega-panel" id="panel-about">
-        <div class="max-w-[1232px] mx-auto px-6 py-6 flex gap-8">
-            <div class="w-52 shrink-0 flex flex-col justify-between py-1">
+        <div class="msp-wrap">
+            <div class="msp-intro">
                 <div>
-                    <h3 class="text-primary-800 text-[17px] font-semibold font-sans mb-2">About us</h3>
-                    <p class="text-primary-600 text-[13px] font-sans leading-relaxed">Bacera Pottery Studio — where craftsmanship meets soul.</p>
+                    <div class="msp-eyebrow">Our studio</div>
+                    <h3 class="msp-heading">About <em>Bacera</em></h3>
+                    <p class="msp-desc">Bacera Pottery Studio — where craftsmanship meets soul.</p>
                 </div>
-                <a href="<?php echo esc_url($about_page); ?>" class="mt-5 inline-flex items-center justify-center px-5 py-2.5 bg-[#d95f47] hover:bg-[#c0533e] text-white text-[13px] font-medium rounded-xl transition-colors">Read more</a>
+                <a href="<?php echo esc_url($about_page); ?>" class="msp-all-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    Read our story
+                </a>
             </div>
-            <div class="w-px bg-neutral-200 self-stretch shrink-0"></div>
-            <nav class="flex-1 grid grid-cols-3 gap-x-8 gap-y-1 content-start py-1">
+            <div class="msp-cats" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));">
                 <?php
                 $about_links = [
-                    ['label'=>'About us',      'desc'=>'Our story & values',     'url'=>$about_page],
-                    ['label'=>'Our team',      'desc'=>'Meet the craftspeople',  'url'=>home_url('/our-team/')],
-                    ['label'=>'Our video',     'desc'=>'Behind the wheel',       'url'=>home_url('/our-video/')],
-                    ['label'=>'Our process',   'desc'=>'From clay to ceramic',   'url'=>$proc_page],
-                    ['label'=>'Sustainability','desc'=>'Earth-conscious craft',  'url'=>$sustain_page],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.5 0-3 1-3 2.5S10.5 13 12 13s3 1 3 2.5S13.5 18 12 18m0-10V6m0 12v2"/>', 'label'=>'About us',       'desc'=>'Our story & values',     'url'=>$about_page],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-1a4 4 0 00-4-4H6a4 4 0 00-4 4v1h5M12 12a4 4 0 100-8 4 4 0 000 8z"/>',    'label'=>'Our team',       'desc'=>'Meet the craftspeople',  'url'=>home_url('/our-team/')],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 10v4a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',  'label'=>'Our video',      'desc'=>'Behind the wheel',       'url'=>home_url('/our-video/')],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h8M4 18h8"/>',                                                   'label'=>'Our process',    'desc'=>'From clay to ceramic',   'url'=>$proc_page],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>','label'=>'Sustainability', 'desc'=>'Earth-conscious craft',  'url'=>$sustain_page],
                 ];
                 foreach ($about_links as $al): ?>
-                <a href="<?php echo esc_url($al['url']); ?>"
-                   class="flex flex-col gap-0.5 px-3 py-3 rounded-xl hover:bg-neutral-100 transition-colors group/al">
-                    <span class="text-primary-800 text-[14px] font-medium font-sans group-hover/al:text-[#d95f47] transition-colors"><?php echo esc_html($al['label']); ?></span>
-                    <span class="text-primary-400 text-[12px] font-sans"><?php echo esc_html($al['desc']); ?></span>
+                <a href="<?php echo esc_url($al['url']); ?>" class="msp-ic">
+                    <div class="msp-ic-chip">
+                        <svg class="msp-ic-svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><?php echo $al['icon']; ?></svg>
+                    </div>
+                    <span class="msp-ic-label"><?php echo esc_html($al['label']); ?></span>
+                    <span class="msp-ic-count"><?php echo esc_html($al['desc']); ?></span>
                 </a>
                 <?php endforeach; ?>
-            </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="mega-panel" id="panel-blog">
+        <div class="msp-wrap">
+            <div class="msp-intro">
+                <div>
+                    <div class="msp-eyebrow">Stories</div>
+                    <h3 class="msp-heading">From the <em>studio</em></h3>
+                    <p class="msp-desc">Tips, inspiration, and stories from our potters and makers.</p>
+                </div>
+                <a href="<?php echo esc_url($bacera_hdr_blog_url); ?>" class="msp-all-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    View all articles
+                </a>
+            </div>
+            <div class="flex-1" style="padding-left:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:center;">
+                <?php
+                $mega_posts = get_posts(['post_type'=>'post','post_status'=>'publish','posts_per_page'=>3,'orderby'=>'date','order'=>'DESC']);
+                foreach ($mega_posts as $mp):
+                    $mp_url   = get_permalink($mp);
+                    $mp_thumb = get_the_post_thumbnail_url($mp->ID,'medium') ?: '';
+                    $mp_cat   = get_the_category($mp->ID);
+                    $mp_cat_n = $mp_cat ? $mp_cat[0]->name : '';
+                    $mp_date  = get_the_date('M j, Y', $mp->ID);
+                ?>
+                <a href="<?php echo esc_url($mp_url); ?>" style="display:flex;flex-direction:column;border-radius:12px;border:1.5px solid transparent;background:#fff;text-decoration:none;overflow:hidden;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s;" onmouseenter="this.style.borderColor='#d4b896';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px rgba(61,47,38,.09)';" onmouseleave="this.style.borderColor='transparent';this.style.transform='';this.style.boxShadow='none';">
+                    <?php if ($mp_thumb): ?>
+                    <div style="height:80px;overflow:hidden;background:#ede0ce;">
+                        <img src="<?php echo esc_url($mp_thumb); ?>" style="width:100%;height:100%;object-fit:cover;" alt="" loading="lazy">
+                    </div>
+                    <?php else: ?>
+                    <div style="height:80px;background:linear-gradient(135deg,#f5ede0,#ede0ce);display:flex;align-items:center;justify-content:center;">
+                        <svg width="28" height="28" fill="none" stroke="#c06b3a" stroke-width="1.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                    </div>
+                    <?php endif; ?>
+                    <div style="padding:10px 10px 12px;">
+                        <?php if ($mp_cat_n): ?><span style="font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#c06b3a;"><?php echo esc_html($mp_cat_n); ?></span><?php endif; ?>
+                        <div style="font-size:12px;font-weight:700;color:#3d2f26;line-height:1.3;margin-top:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;"><?php echo esc_html($mp->post_title); ?></div>
+                        <div style="font-size:10px;color:#b5906a;margin-top:4px;"><?php echo esc_html($mp_date); ?></div>
+                    </div>
+                </a>
+                <?php endforeach;
+                if (empty($mega_posts)): ?>
+                <div style="grid-column:span 3;display:flex;align-items:center;justify-content:center;color:#9a7d68;font-size:13px;">No articles yet.</div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <div class="mega-panel" id="panel-contact">
+        <div class="msp-wrap">
+            <div class="msp-intro">
+                <div>
+                    <div class="msp-eyebrow">Get in touch</div>
+                    <h3 class="msp-heading">Say <em>hello</em></h3>
+                    <p class="msp-desc">We'd love to hear from you — questions, custom orders, or just a chat about ceramics.</p>
+                </div>
+                <a href="<?php echo esc_url($bacera_hdr_contact_url); ?>" class="msp-all-btn">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    Go to contact
+                </a>
+            </div>
+            <div class="msp-cats" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
+                <?php
+                $contact_tiles = [
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>',                 'label'=>'Email us',      'desc'=>'hello@bacera.vn',                  'url'=>'mailto:hello@bacera.vn'],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>','label'=>'Call us',        'desc'=>'+84 (0)28 xxxx xxxx',               'url'=>'tel:+84028xxxxxxxx'],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>',                                            'label'=>'Visit us',       'desc'=>'Ho Chi Minh City, Vietnam',         'url'=>$bacera_hdr_contact_url],
+                    ['icon'=>'<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>',                                                         'label'=>'WhatsApp',       'desc'=>'Chat with us directly',             'url'=>'https://wa.me/84xxxxxxxxx'],
+                ];
+                foreach ($contact_tiles as $ct): ?>
+                <a href="<?php echo esc_url($ct['url'] ?? '#'); ?>" class="msp-ic">
+                    <div class="msp-ic-chip">
+                        <svg class="msp-ic-svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><?php echo $ct['icon']; ?></svg>
+                    </div>
+                    <span class="msp-ic-label"><?php echo esc_html($ct['label']); ?></span>
+                    <span class="msp-ic-count"><?php echo esc_html($ct['desc']); ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 
