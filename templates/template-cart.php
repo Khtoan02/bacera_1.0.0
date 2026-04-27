@@ -282,19 +282,15 @@ get_header();
 						$product_detail_url = '#';
 					}
 					?>
-				<div class="rounded-2xl border border-stone-100 bg-white p-3 shadow-sm">
-					<a href="<?php echo esc_url( $product_detail_url ); ?>" class="block no-underline group">
-						<div class="relative aspect-[4/5] overflow-hidden rounded-xl bg-stone-100 mb-3">
-							<?php if ( $discount_percent ) : ?>
-							<span class="absolute left-2 top-2 z-10 rounded bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-stone-800 shadow-sm"><?php echo esc_html( $discount_percent ); ?></span>
-							<?php endif; ?>
-							<img src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $name ); ?>" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-						</div>
-						<p class="m-0 mb-1 text-[10px] font-medium uppercase tracking-widest text-stone-500"><?php echo esc_html( $brand ); ?></p>
-						<p class="m-0 mb-2 font-serif text-lg leading-snug text-stone-800 group-hover:text-accent-600 transition-colors"><?php echo esc_html( $name ); ?></p>
-						<p class="m-0 text-base font-medium tabular-nums text-stone-800"><?php echo esc_html( number_format( $price, 0, ',', '.' ) . ' ₫' ); ?></p>
-					</a>
-				</div>
+				<?php get_template_part( 'app/Views/components/product-card', null, [
+					'title'     => $name,
+					'brand'     => $brand,
+					'price'     => number_format( $price, 0, ',', '.' ) . ' ₫',
+					'old_price' => $original_price > 0 ? number_format( $original_price, 0, ',', '.' ) . ' ₫' : '',
+					'image'     => $image_url,
+					'discount'  => $discount_percent,
+					'url'       => $product_detail_url,
+				] ); ?>
 				<?php endforeach; ?>
 			</div>
 		</section>

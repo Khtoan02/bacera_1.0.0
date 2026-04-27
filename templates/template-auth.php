@@ -543,6 +543,11 @@ window.baceraDoLogin = function() {
                 setTimeout(function() { baceraShowScreen('register'); }, 1500);
             }
         } else {
+            if (res.data && res.data.skip_otp) {
+                baceraShowScreen('success');
+                return;
+            }
+
             baceraState.identifier = identifier;
             baceraState.prevScreen = 'login';
             document.getElementById('otp-target').textContent = identifier;
@@ -617,6 +622,11 @@ window.baceraDoRegister = function() {
                 setTimeout(function() { baceraShowScreen('login'); }, 1500);
             }
         } else {
+            if (res.data && res.data.skip_otp) {
+                baceraShowScreen('success');
+                return;
+            }
+
             baceraState.identifier = identifier;
             baceraState.prevScreen = 'register';
             document.getElementById('otp-target').textContent = identifier;

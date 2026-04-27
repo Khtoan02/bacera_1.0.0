@@ -22,7 +22,8 @@ class ConfigController {
     private array $tabs = [
         'branding'  => ['label' => '🎨 Giao diện',     'icon' => '🎨'],
         'homepage'  => ['label' => '🏠 Trang Chủ',    'icon' => '🏠'],
-        'mail'      => ['label' => '✉️ Mail Config',    'icon' => '✉️'],
+        'mail'      => ['label' => '✉️ Mail Config',  'icon' => '✉️'],
+        'otp'       => ['label' => '🔐 OTP & SMS',    'icon' => '🔐'],
         'google'    => ['label' => '🔵 Google Login',   'icon' => '🔵'],
         'facebook'  => ['label' => '📘 Facebook Login', 'icon' => '📘'],
         'captcha'   => ['label' => '🛡️ CAPTCHA',       'icon' => '🛡️'],
@@ -76,8 +77,10 @@ class ConfigController {
             'bacera_smtp_pass', 'bacera_smtp_secure',
             // Google
             'bacera_google_enabled', 'bacera_google_client_id', 'bacera_google_client_secret',
-            // Facebook
             'bacera_facebook_enabled', 'bacera_facebook_app_id', 'bacera_facebook_app_secret',
+            // OTP
+            'bacera_otp_email_enabled', 'bacera_otp_phone_enabled',
+            'bacera_esms_api_key', 'bacera_esms_secret_key', 'bacera_esms_brandname',
             // CAPTCHA
             'bacera_turnstile_site_key', 'bacera_turnstile_secret_key',
         ];
@@ -158,6 +161,58 @@ class ConfigController {
         }
 
         return wp_mail( $to, $subject, $body, $headers );
+    }
+
+    /* ── Static: send OTP SMS via eSMS ───────────────────────────── */
+
+    public static function send_otp_sms( string $phone, string $otp, string $type = 'login' ): bool {
+        if ( ! get_option( 'bacera_otp_phone_enabled', '1' ) ) return false;
+
+        $api_key    = get_option( 'bacera_esms_api_key', '' );
+        $secret_key = get_option( 'bacera_esms_secret_key', '' );
+        $brandname  = get_option( 'bacera_esms_brandname', 'Baotrixemay' );
+
+        if ( empty( $api_key ) || empty( $secret_key ) ) {
+            return false;
+        }
+
+        $phone = preg_replace( '/[^0-9]/', '', $phone );
+        if ( substr( $phone, 0, 1 ) !== '0' && substr( $phone, 0, 2 ) !== '84' ) {
+            $phone = '0' . $phone;
+        }
+
+        $site   = get_bloginfo( 'name' );
+        $labels = [ 'login' => 'dang nhap', 'register' => 'dang ky', 'update' => 'xac nhan' ];
+        $label  = $labels[ $type ] ?? 'xac thuc';
+        
+        $message = "Ma OTP {$label} tai {$site} cua ban la: {$otp}. Vui long khong chia se ma nay voi bat ky ai.";
+
+        $url = 'http://rest.esms.vn/MainService.svc/json/SendMultipleMessage_V4_get';
+        $params = [
+            'Phone'     => $phone,
+            'Content'   => $message,
+            'ApiKey'    => $api_key,
+            'SecretKey' => $secret_key,
+            'Brandname' => $brandname,
+            'SmsType'   => 2
+        ];
+
+        $request_url = add_query_arg( $params, $url );
+
+        $response = wp_remote_get( $request_url, [ 'timeout' => 15 ] );
+
+        if ( is_wp_error( $response ) ) {
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( isset( $data['CodeResult'] ) && $data['CodeResult'] == 100 ) {
+            return true;
+        }
+
+        return false;
     }
 
     /* ── AJAX: send test email ───────────────────────────────────── */
@@ -919,7 +974,7 @@ class ConfigController {
         $is_on   = $enabled && $host;
         ?>
         <div class="bcfg-ch">
-            <h1>✉️ Mail & SMTP</h1>
+            <h1>✉️ Mail Config (SMTP)</h1>
             <?php if ($is_on): ?>
             <span class="bcfg-badge-on">● Đang hoạt động</span>
             <?php else: ?>
@@ -983,6 +1038,34 @@ class ConfigController {
                         <label>SMTP Password / App Password</label>
                         <input type="password" name="bacera_smtp_pass" value="<?php echo esc_attr($pass); ?>" placeholder="••••••••••••••••">
                         <span class="bcfg-hint">Gmail: tạo <a href="https://myaccount.google.com/apppasswords" target="_blank">App Password</a> tại Google Account → Security.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bcfg-card">
+            <div class="bcfg-card-header">
+                <span style="font-size:17px">📱</span>
+                <h2>Cấu hình eSMS (Gửi OTP qua điện thoại)</h2>
+            </div>
+            <div class="bcfg-card-body">
+                <div class="bcfg-info">
+                    💡 <strong>eSMS.vn:</strong> Dịch vụ gửi tin nhắn Brandname tại Việt Nam. Bạn cần đăng ký tài khoản tại <a href="https://esms.vn" target="_blank">esms.vn</a> để lấy API Key và Secret Key.
+                </div>
+
+                <div class="bcfg-grid">
+                    <div class="bcfg-field">
+                        <label>API Key</label>
+                        <input type="text" name="bacera_esms_api_key" value="<?php echo esc_attr($esms_api); ?>" placeholder="Nhập API Key">
+                    </div>
+                    <div class="bcfg-field">
+                        <label>Secret Key</label>
+                        <input type="password" name="bacera_esms_secret_key" value="<?php echo esc_attr($esms_secret); ?>" placeholder="Nhập Secret Key">
+                    </div>
+                    <div class="bcfg-field">
+                        <label>Brandname</label>
+                        <input type="text" name="bacera_esms_brandname" value="<?php echo esc_attr($esms_brand); ?>" placeholder="Ví dụ: Baotrixemay">
+                        <span class="bcfg-hint">Tên thương hiệu đã đăng ký với eSMS (Mặc định nếu để trống có thể dùng Brandname chung của eSMS hỗ trợ).</span>
                     </div>
                 </div>
             </div>

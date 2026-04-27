@@ -227,11 +227,19 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
                                     $price = $p_item['retail_price'] ?? $p_item['price_at_counter'] ?? 0;
                                     $img   = Bacera_Utils::get_proxy_url($p_item);
                                     $prod_url = Bacera_Utils::get_product_permalink($p_item) ?: $url_shop;
+                                    $p_brand = '';
+                                    if (!empty($p_item['product']['category']['name'])) {
+                                        $p_brand = $p_item['product']['category']['name'];
+                                    } elseif (!empty($p_item['product']['categories'][0]['name'])) {
+                                        $p_brand = $p_item['product']['categories'][0]['name'];
+                                    }
+                                    if (!$p_brand) $p_brand = 'Bacera';
                                     ?>
                                     <div class="swiper-slide h-auto">
                                         <?php
                                         get_template_part('app/Views/components/product-card', null, [
                                             'name'  => $name,
+                                            'brand' => $p_brand,
                                             'price' => $price > 0 ? number_format($price, 0, ',', '.') . ' ₫' : 'Liên hệ',
                                             'image' => $img,
                                             'url'   => $prod_url,
@@ -245,26 +253,33 @@ if (!$url_workshop) $url_workshop = home_url('/workshop/');
                                 if (!empty($prods)) {
                                     foreach ($prods as $prod) {
                                         $img = wp_get_attachment_image_url($prod->get_image_id(), 'medium') ?: 'https://images.unsplash.com/photo-1578308691517-8e68e43425f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+                                        $prod_price = $prod->get_price();
                                         ?>
-                                        <div class="swiper-slide group cursor-pointer" onclick="window.location='<?php echo esc_url($prod->get_permalink()); ?>'">
-                                            <div class="aspect-[4/5] overflow-hidden rounded-md mb-4 bg-[#EBE7DF]">
-                                                <img src="<?php echo esc_url($img); ?>" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                            </div>
-                                            <h3 class="font-serif text-lg text-textmain truncate border-b border-transparent group-hover:border-accentdark inline-block transition-all"><?php echo esc_html($prod->get_name()); ?></h3>
-                                            <p class="text-xs font-sans text-textmuted mt-1 tracking-wider"><?php echo strip_tags($prod->get_price_html()); ?></p>
+                                        <div class="swiper-slide h-auto">
+                                            <?php
+                                            get_template_part('app/Views/components/product-card', null, [
+                                                'name'  => $prod->get_name(),
+                                                'brand' => 'Bacera',
+                                                'price' => $prod_price > 0 ? number_format((float)$prod_price, 0, ',', '.') . ' ₫' : '',
+                                                'image' => $img,
+                                                'url'   => $prod->get_permalink(),
+                                            ]);
+                                            ?>
                                         </div>
                                         <?php
                                     }
                                 }
                             } else {
-                                // Fallback
+                                // Fallback — static placeholder cards
                                 for($i=1; $i<=3; $i++): ?>
-                                <div class="swiper-slide group cursor-pointer">
-                                    <div class="aspect-[4/5] overflow-hidden rounded-md mb-4 bg-[#EBE7DF]">
-                                        <img src="https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                    </div>
-                                    <h3 class="font-serif text-lg text-textmain truncate">Handcrafted Vase <?php echo $i; ?></h3>
-                                    <p class="text-xs font-sans text-textmuted mt-1 tracking-wider">$85.00</p>
+                                <div class="swiper-slide h-auto">
+                                    <?php get_template_part('app/Views/components/product-card', null, [
+                                        'name'  => 'Handcrafted Vase ' . $i,
+                                        'brand' => 'Bacera',
+                                        'price' => '850.000 ₫',
+                                        'image' => 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                                        'url'   => $url_shop,
+                                    ]); ?>
                                 </div>
                             <?php endfor; } ?>
                         </div>

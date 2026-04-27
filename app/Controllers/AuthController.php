@@ -96,7 +96,38 @@ class AuthController {
                 wp_send_json_error(['message' => 'Tài khoản đã tồn tại!', 'action_needed' => 'login']);
             }
 
-            // Save temp data
+            $is_email = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+            $otp_enabled = $is_email ? get_option('bacera_otp_email_enabled', '1') : get_option('bacera_otp_phone_enabled', '1');
+
+            if (!$otp_enabled) {
+                // OTP disabled: Register and Login immediately
+                $email = $is_email ? $identifier : '';
+                $phone = !$is_email ? $identifier : '';
+                
+                $inserted = $wpdb->insert($table_name, [
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'has_password' => 1,
+                    'password_hash' => wp_hash_password($password),
+                    'created_at' => current_time('mysql'),
+                    'password_updated_at' => current_time('mysql')
+                ]);
+
+                if (!$inserted) {
+                    wp_send_json_error(['message' => 'Lỗi hệ thống khi lưu tài khoản: ' . $wpdb->last_error]);
+                }
+                $user_id = $wpdb->insert_id;
+
+                if ( class_exists( '\\Bacera_Module_Customers', false ) ) {
+                    \Bacera_Module_Customers::sync_bacera_customer_row_to_pancake( (int) $user_id );
+                }
+
+                $this->set_auth_cookie($user_id, $identifier);
+                wp_send_json_success(['skip_otp' => true, 'message' => 'Đăng ký thành công.']);
+            }
+
+            // Save temp data for OTP
             set_transient($transient_key, [
                 'type' => 'register',
                 'name' => $name,
@@ -105,15 +136,17 @@ class AuthController {
                 'otp' => $real_otp
             ], 15 * MINUTE_IN_SECONDS);
 
-            // Send OTP via email if identifier is an email address
+            // Send OTP
             $otp_sent = false;
-            if ( filter_var( $identifier, FILTER_VALIDATE_EMAIL ) ) {
+            if ( $is_email ) {
                 $otp_sent = ConfigController::send_otp_email( $identifier, $real_otp, 'register' );
+            } else {
+                $otp_sent = ConfigController::send_otp_sms( $identifier, $real_otp, 'register' );
             }
 
             $message = $otp_sent
-                ? 'Mã OTP đã được gửi đến email của bạn.'
-                : 'Mã OTP đã được tạo. Vui lòng kiểm tra email (hoặc liên hệ admin nếu không nhận được).';
+                ? ($is_email ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được gửi đến số điện thoại của bạn.')
+                : 'Mã OTP đã được tạo. Vui lòng kiểm tra hộp thư hoặc tin nhắn SMS.';
 
             $response_data = ['message' => $message];
             // Dev helper: include OTP in response when email not sent (no SMTP)
@@ -147,6 +180,15 @@ class AuthController {
                 wp_send_json_error(['message' => 'Sai mật khẩu.']);
             }
 
+            $is_email = filter_var($identifier, FILTER_VALIDATE_EMAIL);
+            $otp_enabled = $is_email ? get_option('bacera_otp_email_enabled', '1') : get_option('bacera_otp_phone_enabled', '1');
+
+            if (!$otp_enabled) {
+                // OTP disabled: Login immediately
+                $this->set_auth_cookie($user->id, $identifier);
+                wp_send_json_success(['skip_otp' => true, 'message' => 'Đăng nhập thành công.']);
+            }
+
             set_transient($transient_key, [
                 'type' => 'login',
                 'user_id' => $user->id,
@@ -154,15 +196,17 @@ class AuthController {
                 'otp' => $real_otp
             ], 15 * MINUTE_IN_SECONDS);
 
-            // Send OTP via email if identifier is an email address
+            // Send OTP
             $otp_sent = false;
-            if ( filter_var( $identifier, FILTER_VALIDATE_EMAIL ) ) {
+            if ( $is_email ) {
                 $otp_sent = ConfigController::send_otp_email( $identifier, $real_otp, 'login' );
+            } else {
+                $otp_sent = ConfigController::send_otp_sms( $identifier, $real_otp, 'login' );
             }
 
             $message = $otp_sent
-                ? 'Mã OTP đã được gửi đến email của bạn.'
-                : 'Mã OTP đã được tạo. Vui lòng kiểm tra email.';
+                ? ($is_email ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được gửi đến số điện thoại của bạn.')
+                : 'Mã OTP đã được tạo. Vui lòng kiểm tra hộp thư hoặc tin nhắn SMS.';
 
             $response_data = ['message' => $message];
             // Dev helper: include OTP in response when email not sent (no SMTP)
@@ -336,13 +380,17 @@ class AuthController {
         $otp_key = 'bacera_update_' . md5( $customer['id'] . $field . $value );
         set_transient( $otp_key, [ 'otp' => $update_otp, 'field' => $field, 'value' => $value ], 10 * MINUTE_IN_SECONDS );
 
-        // Send OTP via email
+        // Send OTP
         $otp_sent = false;
         $email_target = ( $field === 'email' ) ? $value : ( $customer['email'] ?? '' );
-        if ( $email_target && filter_var( $email_target, FILTER_VALIDATE_EMAIL ) ) {
-            $otp_sent = ConfigController::send_otp_email( $email_target, $update_otp, 'update' );
+        if ( $field === 'email' ) {
+            if ( $email_target && filter_var( $email_target, FILTER_VALIDATE_EMAIL ) ) {
+                $otp_sent = ConfigController::send_otp_email( $email_target, $update_otp, 'update' );
+            }
+        } else {
+            $otp_sent = ConfigController::send_otp_sms( $value, $update_otp, 'update' );
         }
-        $msg = $otp_sent ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được tạo.';
+        $msg = $otp_sent ? ($field === 'email' ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được gửi đến số điện thoại của bạn.') : 'Mã OTP đã được tạo.';
         wp_send_json_success( [ 'message' => $msg ] );
     }
 
@@ -398,12 +446,15 @@ class AuthController {
         $otp_key = 'bacera_pw_update_' . md5( $customer['id'] );
         set_transient( $otp_key, [ 'otp' => $pw_otp, 'contact' => $contact ], 10 * MINUTE_IN_SECONDS );
 
-        // Send to email if contact looks like an email
+        // Send OTP
         $otp_sent = false;
-        if ( filter_var( $contact, FILTER_VALIDATE_EMAIL ) ) {
+        $is_email = filter_var( $contact, FILTER_VALIDATE_EMAIL );
+        if ( $is_email ) {
             $otp_sent = ConfigController::send_otp_email( $contact, $pw_otp, 'update' );
+        } else {
+            $otp_sent = ConfigController::send_otp_sms( $contact, $pw_otp, 'update' );
         }
-        $msg = $otp_sent ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được tạo.';
+        $msg = $otp_sent ? ($is_email ? 'Mã OTP đã được gửi đến email của bạn.' : 'Mã OTP đã được gửi đến số điện thoại của bạn.') : 'Mã OTP đã được tạo.';
         wp_send_json_success( [ 'message' => $msg ] );
     }
 
