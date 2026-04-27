@@ -12,8 +12,9 @@ namespace Bacera\Controllers;
 class SocialLoginController {
 
     public function __construct() {
-        // Chỉ hook OAuth callbacks — kiểm tra URL trước để tránh nặng mọi request
-        add_action( 'init', [ $this, 'handle_oauth_callbacks' ], 5 );
+        // Được khởi tạo từ MainController (vốn đã ở trong hook 'init').
+        // Gọi trực tiếp để bắt routing ngay, không cần add_action 'init' với priority 5 nữa vì priority 5 đã trôi qua.
+        $this->handle_oauth_callbacks();
     }
 
     /* ── OAuth callback routing ──────────────────────────────────── */
