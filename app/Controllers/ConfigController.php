@@ -268,7 +268,8 @@ class ConfigController {
         $nav_items = [
             'branding'  => ['icon' => '🎨', 'label' => 'Giao diện',       'on' => $br_on],
             'homepage'  => ['icon' => '🏠',  'label' => 'Trang Chủ',       'on' => $hp_on],
-            'mail'      => ['icon' => '✉️',  'label' => 'Mail & SMTP',     'on' => $smtp_on],
+            'mail'      => ['icon' => '✉️',  'label' => 'Mail Config',     'on' => $smtp_on],
+            'otp'       => ['icon' => '🔐',  'label' => 'OTP & SMS',       'on' => true],
             'google'    => ['icon' => '🔵',  'label' => 'Google Login',    'on' => $gg_on],
             'facebook'  => ['icon' => '📘',  'label' => 'Facebook Login',  'on' => $fb_on],
             'captcha'   => ['icon' => '🛡️', 'label' => 'CAPTCHA',          'on' => $ts_on],
@@ -398,6 +399,7 @@ class ConfigController {
                     <?php if ($active_tab === 'branding')  $this->tab_branding(); ?>
                     <?php if ($active_tab === 'homepage')  $this->tab_homepage(); ?>
                     <?php if ($active_tab === 'mail')      $this->tab_mail($nonce); ?>
+                    <?php if ($active_tab === 'otp')       $this->tab_otp(); ?>
                     <?php if ($active_tab === 'google')    $this->tab_google(); ?>
                     <?php if ($active_tab === 'facebook')  $this->tab_facebook(); ?>
                     <?php if ($active_tab === 'captcha')   $this->tab_captcha(); ?>
@@ -1041,6 +1043,56 @@ class ConfigController {
                     </div>
                 </div>
             </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bcfg-footer">
+            <button type="submit" class="bcfg-btn-primary">💾 Lưu cài đặt</button>
+            <button type="button" id="bcfg-test-email" class="bcfg-btn-secondary">📧 Gửi email test</button>
+            <span id="bcfg-test-result"></span>
+        </div>
+        <?php
+    }
+
+    private function tab_otp() {
+        $otp_email = get_option('bacera_otp_email_enabled', '1');
+        $otp_phone = get_option('bacera_otp_phone_enabled', '1');
+        
+        $esms_api    = get_option('bacera_esms_api_key', '');
+        $esms_secret = get_option('bacera_esms_secret_key', '');
+        $esms_brand  = get_option('bacera_esms_brandname', '');
+        ?>
+        <div class="bcfg-ch">
+            <h1>🔐 Cấu hình OTP & SMS</h1>
+        </div>
+
+        <div class="bcfg-card" style="margin-bottom:20px;">
+            <div class="bcfg-card-header">
+                <h2>Cài đặt yêu cầu xác thực OTP</h2>
+            </div>
+            <div class="bcfg-card-body">
+                <div class="bcfg-grid" style="margin-bottom:20px;">
+                    <div class="bcfg-field">
+                        <label>OTP qua Email</label>
+                        <div class="bcfg-toggle-wrap">
+                            <input type="checkbox" name="bacera_otp_email_enabled" value="1" <?php checked($otp_email, '1'); ?>>
+                            <span>Yêu cầu xác thực OTP khi người dùng đăng nhập/đăng ký bằng Email</span>
+                        </div>
+                    </div>
+                    <div class="bcfg-field">
+                        <label>OTP qua SĐT (SMS/Zalo)</label>
+                        <div class="bcfg-toggle-wrap">
+                            <input type="checkbox" name="bacera_otp_phone_enabled" value="1" <?php checked($otp_phone, '1'); ?>>
+                            <span>Yêu cầu xác thực OTP khi người dùng đăng nhập/đăng ký bằng Số điện thoại</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bcfg-warn" style="margin-bottom: 20px;">
+                    💡 <strong>Lưu ý:</strong> Nếu bạn Tắt OTP, người dùng sẽ chỉ cần Mật khẩu để đăng nhập. Sau khi đăng ký thành công cũng sẽ được đăng nhập tự động.
+                </div>
+            </div>
         </div>
 
         <div class="bcfg-card">
@@ -1073,8 +1125,6 @@ class ConfigController {
 
         <div class="bcfg-footer">
             <button type="submit" class="bcfg-btn-primary">💾 Lưu cài đặt</button>
-            <button type="button" id="bcfg-test-email" class="bcfg-btn-secondary">📧 Gửi email test</button>
-            <span id="bcfg-test-result"></span>
         </div>
         <?php
     }

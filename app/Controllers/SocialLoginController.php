@@ -19,15 +19,22 @@ class SocialLoginController {
     /* ── OAuth callback routing ──────────────────────────────────── */
 
     public function handle_oauth_callbacks() {
-        $uri  = $_SERVER['REQUEST_URI'] ?? '';
-        $path = trim( parse_url( $uri, PHP_URL_PATH ), '/' );
+        $uri_path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
+        
+        $callback_google = parse_url( home_url( '/bacera-auth/google/callback' ), PHP_URL_PATH );
+        $callback_fb     = parse_url( home_url( '/bacera-auth/facebook/callback' ), PHP_URL_PATH );
+
+        // Normalize trailing slashes
+        $uri_path = rtrim( $uri_path, '/' );
+        $callback_google = rtrim( $callback_google, '/' );
+        $callback_fb = rtrim( $callback_fb, '/' );
 
         // Chỉ chạy khi đúng path — tránh DB query trên mọi request
-        if ( $path === 'bacera-auth/google/callback' ) {
+        if ( $uri_path === $callback_google ) {
             $this->google_callback();
             exit;
         }
-        if ( $path === 'bacera-auth/facebook/callback' ) {
+        if ( $uri_path === $callback_fb ) {
             $this->facebook_callback();
             exit;
         }
@@ -270,14 +277,17 @@ class SocialLoginController {
         $payload = base64_encode( $user_id . '|' . $token );
         set_transient( 'bacera_auth_' . $user_id . '_' . substr( $token, 0, 8 ), $token, 30 * DAY_IN_SECONDS );
 
-        setcookie( 'bacera_customer_auth', $payload, [
-            'expires'  => time() + ( 30 * DAY_IN_SECONDS ),
-            'path'     => COOKIEPATH ?: '/',
-            'domain'   => COOKIE_DOMAIN ?: '',
-            'secure'   => is_ssl(),
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ] );
+        setcookie(
+            'bacera_customer_auth',
+            $payload,
+            time() + ( 30 * DAY_IN_SECONDS ),
+            COOKIEPATH,
+            COOKIE_DOMAIN,
+            is_ssl(),
+            true
+        );
+
+        $_COOKIE['bacera_customer_auth'] = $payload;
 
         wp_safe_redirect( home_url( '/' ) );
         exit;
