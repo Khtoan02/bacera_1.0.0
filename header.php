@@ -1,5 +1,9 @@
 <?php
+$is_search_view = (bool) get_query_var( 'bacera_search_type' );
 $is_homepage = is_front_page() || is_page_template('templates/template-home-page.php');
+if ( $is_search_view ) {
+    $is_homepage = false;
+}
 $homepage_js = $is_homepage ? 'true' : 'false';
 
 // ── Bacera Customer Session ──────────────────────────────────────────────────
@@ -76,6 +80,21 @@ $_hdr_contact_page_id = $wpdb->get_var(
      LIMIT 1"
 );
 $bacera_hdr_contact_url = $_hdr_contact_page_id ? get_permalink( (int)$_hdr_contact_page_id ) : home_url( '/contact/' );
+$bacera_search_ajax_url = admin_url( 'admin-ajax.php' );
+$bacera_search_nonce    = wp_create_nonce( 'bacera_header_search_nonce' );
+$bacera_search_product_url  = home_url( '/search/product/' );
+$bacera_search_blog_url     = home_url( '/search/blog/' );
+$bacera_search_workshop_url = home_url( '/search/workshop/' );
+$bacera_search_scope = 'global';
+if ( is_page_template( 'templates/template-shop.php' ) || is_singular( 'pancake_product' ) ) {
+    $bacera_search_scope = 'product';
+} elseif ( is_page_template( 'templates/template-workshop.php' ) || is_post_type_archive( 'workshop' ) || is_singular( 'workshop' ) ) {
+    $bacera_search_scope = 'workshop';
+} elseif ( is_page_template( 'templates/template-blog.php' ) || get_query_var( 'bacera_blog_cat_slug' ) || is_singular( 'post' ) || is_category() ) {
+    $bacera_search_scope = 'blog';
+} elseif ( is_front_page() || is_page_template( 'templates/template-home-page.php' ) ) {
+    $bacera_search_scope = 'global';
+}
 
 // ── Fetch Pancake categories + local meta for header mega-panel ──
 $hdr_pancake_cats = [];
@@ -202,6 +221,18 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     #site-header.is-hero:hover .hdr-icon { color: #57534e; transition: none; }
     .hdr-icon:hover { color: #d95f47; }
 
+    /* Force normal header state when search opens */
+    #site-header.force-solid .hdr-bg {
+        opacity: 1 !important;
+        box-shadow: 0 1px 12px rgba(0,0,0,.06) !important;
+    }
+    #site-header.force-solid .hdr-link,
+    #site-header.force-solid .hdr-icon {
+        color: #57534e;
+    }
+    #site-header.force-solid .hdr-logo-dark { display: none !important; }
+    #site-header.force-solid .hdr-logo-light { display: block !important; filter: none !important; }
+
     /* ── Avatar border ── */
     .hdr-avatar {
         border: 2px solid #e7e5e4; /* stone-200 */
@@ -305,42 +336,192 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
     /* ── Search overlay ── */
     .search-overlay {
         position: fixed;
-        top: 0; left: 0; right: 0;
-        background: rgba(255,255,255,0.98);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        z-index: 200;
-        padding: 0 1.5rem;
-        height: 76px;
+        left: 0; right: 0; top: 76px; bottom: 0;
+        background: rgba(0, 0, 0, .26);
+        z-index: 45;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s ease;
+    }
+    .search-overlay.is-active { opacity: 1; pointer-events: auto; }
+    .search-overlay-panel {
+        background: #f7f6f3;
+        transform: translateY(-10px);
+        transition: transform .2s ease;
+        max-height: calc(100vh - 76px);
+        overflow: auto;
+    }
+    .search-overlay.is-active .search-overlay-panel { transform: translateY(0); }
+    .search-overlay-head {
+        max-width: 1232px;
+        margin: 0 auto;
+        padding: 12px 24px 10px;
         display: flex;
         align-items: center;
-        gap: 1rem;
-        opacity: 0;
-        transform: translateY(-100%);
-        transition: opacity .25s ease, transform .25s ease;
-        pointer-events: none;
-        box-shadow: 0 4px 24px rgba(0,0,0,.08);
+        gap: 12px;
     }
-    .search-overlay.is-active {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-    .search-overlay input {
-        flex: 1;
-        height: 48px;
-        border: 1.5px solid #e7e5e4;
-        border-radius: 0.75rem;
-        padding: 0 1rem;
+    .search-overlay-input {
+        width: 100%;
+        height: 50px;
+        border: 1.5px solid #d6d3d1;
+        border-radius: 10px;
+        padding: 0 40px 0 14px;
         font-size: 15px;
-        font-family: inherit;
         color: #292524;
         outline: none;
-        background: #fafaf9;
-        transition: border-color .15s ease;
+        background: #fff;
     }
-    .search-overlay input:focus { border-color: #d95f47; }
-    .search-overlay input::placeholder { color: #a8a29e; }
+    .search-overlay-input:focus { border-color: #a8a29e; }
+    .search-overlay-body {
+        max-width: 1232px;
+        margin: 0 auto;
+        padding: 0 24px 20px;
+    }
+    .search-default-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding-bottom: 12px;
+    }
+    .search-block { padding: 0; }
+    .search-block h4 {
+        margin: 0 0 4px;
+        color: #a8a29e;
+        font-size: 11px;
+        letter-spacing: 0;
+        text-transform: none;
+        font-weight: 500;
+    }
+    .search-chip-list { display: flex; flex-direction: column; gap: 1px; }
+    .search-chip {
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        font-size: 14px;
+        color: #292524;
+        text-decoration: none;
+        background: transparent;
+    }
+    .search-chip:hover { color: #d95f47; }
+    .search-default-cats {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 6px;
+        border-top: 1px solid #eceae6;
+        padding-top: 12px;
+    }
+    .search-default-cat {
+        text-decoration: none;
+        color: #57534e;
+        border: 1px solid #e7e5e4;
+        border-radius: 10px;
+        background: #fff;
+        padding: 8px 6px;
+        text-align: center;
+        min-height: 78px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .search-default-cat img {
+        width: 24px; height: 24px; object-fit: contain;
+    }
+    .search-default-cat span { font-size: 11px; line-height: 1.2; }
+    .search-loading { font-size: 13px; color: #78716c; padding: 8px 0; }
+    .search-empty {
+        border: 1px dashed #d6d3d1;
+        border-radius: 12px;
+        padding: 22px 14px;
+        text-align: center;
+        color: #78716c;
+        font-size: 13px;
+    }
+    .search-results-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 22px;
+        border-top: 1px solid #e8e5df;
+        padding-top: 10px;
+    }
+    .search-panel-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .search-panel-title h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #292524;
+        font-family: "Gowun Batang", Georgia, serif;
+    }
+    .search-panel-title a { font-size: 12px; color: #78716c; text-decoration: none; }
+    .search-panel-title a:hover { color: #d95f47; }
+    .search-cards-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .search-cards-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .search-card { text-decoration: none; color: inherit; display: block; }
+    .search-card-thumb {
+        width: 100%;
+        aspect-ratio: 4/5;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #f5f5f4;
+        margin-bottom: 6px;
+    }
+    .search-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .search-card-meta { margin: 0 0 2px; font-size: 11px; color: #a8a29e; }
+    .search-card-title { margin: 0 0 2px; font-size: 12px; color: #292524; line-height: 1.35; }
+    .search-card-price { margin: 0; font-size: 12px; color: #292524; font-weight: 600; }
+    .search-blogs-list { display: flex; flex-direction: column; gap: 9px; }
+    .search-blog-item { display: block; text-decoration: none; color: inherit; padding-bottom: 8px; border-bottom: 1px solid #ece8e2; }
+    .search-blog-meta { font-size: 10px; color: #a8a29e; margin: 0 0 2px; }
+    .search-blog-title { font-size: 13px; line-height: 1.33; color: #292524; margin: 0 0 3px; }
+    .search-blog-excerpt { font-size: 11px; color: #78716c; line-height: 1.4; margin: 0; }
+    .search-workshop-desc { margin: 0; font-size: 10px; color: #78716c; line-height: 1.35; }
+    @media (max-width: 900px) {
+        /* Keep mobile search UI legacy */
+        .search-overlay {
+            top: 0;
+            bottom: auto;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            transform: translateY(-100%);
+            transition: opacity .25s ease, transform .25s ease;
+            pointer-events: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,.08);
+            z-index: 200;
+        }
+        .search-overlay.is-active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .search-overlay-panel {
+            max-height: none;
+            overflow: visible;
+            background: transparent;
+            transform: none !important;
+        }
+        .search-overlay-head {
+            max-width: none;
+            padding: 8px 12px;
+            gap: 8px;
+        }
+        .search-overlay-input {
+            height: 46px;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #fafaf9;
+        }
+        .search-overlay-body { display: none; }
+    }
     </style>
 
     <?php
@@ -878,7 +1059,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
         </a>
         
-        <button onclick="document.getElementById('search-overlay').classList.add('is-active'); document.getElementById('search-input').focus();" 
+        <button onclick="document.getElementById('search-overlay').classList.add('is-active'); document.body.style.overflow='hidden'; document.getElementById('search-input').focus();" 
                 class="hdr-icon w-10 h-10 flex items-center justify-center -mr-2 focus:outline-none" aria-label="Search">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -888,40 +1069,113 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 
 </header>
 
-<div class="search-overlay" id="search-overlay" role="search" aria-label="Tìm kiếm">
+<div class="search-overlay" id="search-overlay" role="dialog" aria-label="Search overlay">
+    <div class="search-overlay-panel">
+        <div class="search-overlay-head">
+            <a href="<?php echo esc_url(home_url('/')); ?>" class="shrink-0 flex items-center pr-2">
+                <img src="<?php echo esc_url( bacera_get_brand_logo_url() ); ?>" class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
+            </a>
 
-    <a href="<?php echo esc_url(home_url('/')); ?>" class="shrink-0 flex items-center pr-4">
-        <?php
-        $srch_dark_id  = (int)get_option('bacera_logo_dark_id', 0);
-        $srch_logo_src = $srch_dark_id
-            ? wp_get_attachment_image_url($srch_dark_id, 'full')
-            : bacera_get_brand_logo_url();
-        $srch_style    = $srch_dark_id ? '' : 'style="filter:brightness(0)invert(1)"';
-        ?>
-        <img src="<?php echo esc_url($srch_logo_src); ?>" <?php echo $srch_style; ?>
-             class="h-8 w-auto object-contain" alt="<?php echo esc_attr(get_bloginfo('name')); ?>">
-    </a>
+            <form id="search-overlay-form" class="flex-1 relative">
+                <input
+                    type="search"
+                    id="search-input"
+                    class="search-overlay-input"
+                    placeholder="<?php echo esc_attr( $bacera_search_scope === 'product' ? 'Search products...' : ( $bacera_search_scope === 'workshop' ? 'Search workshops...' : ( $bacera_search_scope === 'blog' ? 'Search blogs...' : 'Search products, workshops, blogs...' ) ) ); ?>"
+                    autocomplete="off"
+                >
+                <button type="submit" aria-label="Search" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-700">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </button>
+            </form>
 
-    <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" class="flex flex-1 items-center gap-3">
-        <input type="search" id="search-input" name="s"
-               placeholder="Search products, articles..."
-               value="<?php echo get_search_query(); ?>"
-               autocomplete="off">
-        <button type="submit"
-                class="shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-[#d95f47] hover:bg-[#c0533e] text-white transition-colors">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-        </button>
-    </form>
+            <button id="search-close"
+                    class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-neutral-100 text-primary-600 hover:text-primary-800 transition-colors"
+                    aria-label="Close search">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
 
-    <button id="search-close"
-            class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl hover:bg-neutral-100 text-primary-600 hover:text-primary-800 transition-colors"
-            aria-label="Đóng tìm kiếm">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-    </button>
+        <div class="search-overlay-body">
+            <div id="search-default-state">
+                <div class="search-default-grid">
+                    <div class="search-block">
+                        <h4>Popular search</h4>
+                        <div class="search-chip-list">
+                            <a class="search-chip" href="<?php echo esc_url( add_query_arg( 'q', 'Ceramics', $bacera_search_product_url ) ); ?>">Ceramics</a>
+                            <a class="search-chip" href="<?php echo esc_url( add_query_arg( 'q', 'Workshop', $bacera_search_workshop_url ) ); ?>">Workshop</a>
+                            <a class="search-chip" href="<?php echo esc_url( add_query_arg( 'q', 'Coffee cup', $bacera_search_product_url ) ); ?>">Coffee cup</a>
+                        </div>
+                    </div>
+                    <div class="search-block">
+                        <h4>Quicklink</h4>
+                        <div class="search-chip-list">
+                            <a class="search-chip" href="<?php echo esc_url( $bacera_hdr_shop_url ); ?>">New arrival</a>
+                            <a class="search-chip" href="<?php echo esc_url( add_query_arg( 'sort', 'price_high', $bacera_hdr_shop_url ) ); ?>">Bestseller</a>
+                            <a class="search-chip" href="<?php echo esc_url( $bacera_hdr_workshop_url ); ?>">Workshop</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="search-default-cats" <?php echo $bacera_search_scope === 'global' || $bacera_search_scope === 'product' ? '' : 'style="display:none;"'; ?>>
+                    <a class="search-default-cat" href="<?php echo esc_url( $bacera_hdr_shop_url ); ?>">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                        <span>Shop all</span>
+                    </a>
+                    <?php foreach ( array_slice( $hdr_pancake_cats, 0, 7 ) as $__cat ) :
+                        $__cid = isset( $__cat['id'] ) ? (string) $__cat['id'] : '';
+                        $__name = isset( $__cat['text'] ) ? $__cat['text'] : ( $__cat['name'] ?? '' );
+                        if ( $__cid === '' || $__name === '' ) { continue; }
+                        $__img = '';
+                        if ( isset( $hdr_cat_meta_map[ $__cid ]['image_url'] ) ) {
+                            $__img = (string) $hdr_cat_meta_map[ $__cid ]['image_url'];
+                        }
+                    ?>
+                        <a class="search-default-cat" href="<?php echo esc_url( add_query_arg( 'filter_collection', $__cid, $bacera_hdr_shop_url ) ); ?>">
+                            <?php if ( $__img ) : ?>
+                                <img src="<?php echo esc_url( $__img ); ?>" alt="<?php echo esc_attr( $__name ); ?>" loading="lazy" />
+                            <?php else : ?>
+                                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10c0-3 3-6 7-6s7 3 7 6v8H5v-8z"/><path stroke-linecap="round" stroke-linejoin="round" d="M18 10h2a2 2 0 010 4h-2"/></svg>
+                            <?php endif; ?>
+                            <span><?php echo esc_html( $__name ); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div id="search-loading" class="search-loading" style="display:none;">Searching...</div>
+            <div id="search-empty" class="search-empty" style="display:none;">No results found.</div>
+
+            <div id="search-results" style="display:none;">
+                <div class="search-results-grid">
+                    <div id="search-products-section">
+                        <div class="search-panel-title">
+                            <h3 id="search-products-title">Products</h3>
+                            <a id="search-products-view-all" href="<?php echo esc_url( $bacera_search_product_url ); ?>">View all</a>
+                        </div>
+                        <div id="search-products-list" class="search-cards-3"></div>
+                    </div>
+                    <div id="search-blogs-section">
+                        <div class="search-panel-title">
+                            <h3 id="search-blogs-title">Blogs</h3>
+                            <a id="search-blogs-view-all" href="<?php echo esc_url( $bacera_search_blog_url ); ?>">View all</a>
+                        </div>
+                        <div id="search-blogs-list" class="search-blogs-list"></div>
+                    </div>
+                </div>
+                <div id="search-workshops-section" style="margin-top:18px;">
+                    <div class="search-panel-title">
+                        <h3 id="search-workshops-title">Workshops</h3>
+                        <a id="search-workshops-view-all" href="<?php echo esc_url( $bacera_search_workshop_url ); ?>">View all</a>
+                    </div>
+                    <div id="search-workshops-list" class="search-cards-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -934,7 +1188,13 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
 (function() {
     const header   = document.getElementById('site-header');
     const isHome   = <?php echo $homepage_js; ?>;
+    const isSearchViewPage = <?php echo get_query_var( 'bacera_search_type' ) ? 'true' : 'false'; ?>;
     let threshold  = window.innerHeight * 0.85;
+
+    if (isSearchViewPage && header) {
+        header.classList.remove('is-hero');
+        header.classList.add('force-solid');
+    }
 
     // ── Scroll: toggle is-hero ──────────────────────────────
     function updateHero() {
@@ -966,6 +1226,7 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
         leaveTimer = setTimeout(() => openPanel(null), 80);
     }
 
+    openPanel(null);
     document.querySelectorAll('.hdr-nav-item[data-menu]').forEach(item => {
         item.addEventListener('mouseenter', () => openPanel(item.dataset.menu));
         item.addEventListener('mouseleave', scheduleClose);
@@ -995,28 +1256,188 @@ $sustain_page = $sustain_page_id ? get_permalink( (int) $sustain_page_id ) : hom
         });
     }
 
-    // ── Search overlay (click toggle) ───────────────────────
-    const searchBtn     = document.getElementById('search-btn');
+    // ── Search overlay (rewrite full flow) ───────────────────
+    const searchBtn = document.getElementById('search-btn');
     const searchOverlay = document.getElementById('search-overlay');
-    const searchInput   = document.getElementById('search-input');
-    const searchClose   = document.getElementById('search-close');
+    const searchInput = document.getElementById('search-input');
+    const searchClose = document.getElementById('search-close');
+    const searchForm = document.getElementById('search-overlay-form');
+    const defaultState = document.getElementById('search-default-state');
+    const loadingEl = document.getElementById('search-loading');
+    const emptyEl = document.getElementById('search-empty');
+    const resultsEl = document.getElementById('search-results');
+    const productsListEl = document.getElementById('search-products-list');
+    const blogsListEl = document.getElementById('search-blogs-list');
+    const workshopsListEl = document.getElementById('search-workshops-list');
+    const productsSectionEl = document.getElementById('search-products-section');
+    const blogsSectionEl = document.getElementById('search-blogs-section');
+    const workshopsSectionEl = document.getElementById('search-workshops-section');
+    const productsTitleEl = document.getElementById('search-products-title');
+    const blogsTitleEl = document.getElementById('search-blogs-title');
+    const workshopsTitleEl = document.getElementById('search-workshops-title');
+    const productsViewAllEl = document.getElementById('search-products-view-all');
+    const blogsViewAllEl = document.getElementById('search-blogs-view-all');
+    const workshopsViewAllEl = document.getElementById('search-workshops-view-all');
+    const SEARCH_AJAX_URL = '<?php echo esc_js( $bacera_search_ajax_url ); ?>';
+    const SEARCH_NONCE = '<?php echo esc_js( $bacera_search_nonce ); ?>';
+    const SEARCH_PRODUCT_URL = '<?php echo esc_js( $bacera_search_product_url ); ?>';
+    const SEARCH_BLOG_URL = '<?php echo esc_js( $bacera_search_blog_url ); ?>';
+    const SEARCH_WORKSHOP_URL = '<?php echo esc_js( $bacera_search_workshop_url ); ?>';
+    const SEARCH_SCOPE = '<?php echo esc_js( $bacera_search_scope ); ?>';
+    let searchTimer = null;
 
+    function escHtml(v) {
+        const d = document.createElement('div');
+        d.textContent = String(v || '');
+        return d.innerHTML;
+    }
+    function showDefault() {
+        if (defaultState) defaultState.style.display = '';
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (resultsEl) resultsEl.style.display = 'none';
+    }
     function openSearch() {
+        if (!searchOverlay) return;
         searchOverlay.classList.add('is-active');
-        setTimeout(() => searchInput && searchInput.focus(), 250);
         document.body.style.overflow = 'hidden';
+        if (header) header.classList.add('force-solid');
+        if (!searchInput || !searchInput.value.trim()) {
+            showDefault();
+        }
+        setTimeout(() => searchInput && searchInput.focus(), 120);
     }
     function closeSearch() {
+        if (!searchOverlay) return;
         searchOverlay.classList.remove('is-active');
         document.body.style.overflow = '';
+        if (header && !isSearchViewPage) header.classList.remove('force-solid');
+    }
+    function updateViewAll(query) {
+        const q = encodeURIComponent(query || '');
+        if (productsViewAllEl) productsViewAllEl.href = SEARCH_PRODUCT_URL + '?q=' + q;
+        if (blogsViewAllEl) blogsViewAllEl.href = SEARCH_BLOG_URL + '?q=' + q;
+        if (workshopsViewAllEl) workshopsViewAllEl.href = SEARCH_WORKSHOP_URL + '?q=' + q;
+    }
+    function applyScope(scope) {
+        const showProducts = scope === 'global' || scope === 'product';
+        const showWorkshops = scope === 'global' || scope === 'workshop';
+        const showBlogs = scope === 'global' || scope === 'blog';
+        if (productsSectionEl) productsSectionEl.style.display = showProducts ? '' : 'none';
+        if (workshopsSectionEl) workshopsSectionEl.style.display = showWorkshops ? '' : 'none';
+        if (blogsSectionEl) blogsSectionEl.style.display = showBlogs ? '' : 'none';
+    }
+    function renderProducts(items) {
+        if (!productsListEl) return;
+        productsListEl.innerHTML = (items || []).map(item => (
+            '<a class="search-card" href="' + escHtml(item.url || '#') + '">' +
+                '<div class="search-card-thumb">' +
+                    '<img src="' + escHtml(item.image || '') + '" alt="' + escHtml(item.title || '') + '" loading="lazy">' +
+                '</div>' +
+                '<p class="search-card-meta">Whispers of Clay</p>' +
+                '<p class="search-card-title">' + escHtml(item.title || '') + '</p>' +
+                '<p class="search-card-price">' + escHtml(item.price_text || '') + '</p>' +
+            '</a>'
+        )).join('');
+    }
+    function renderBlogs(items) {
+        if (!blogsListEl) return;
+        blogsListEl.innerHTML = (items || []).map(item => (
+            '<a class="search-blog-item" href="' + escHtml(item.url || '#') + '">' +
+                '<p class="search-blog-meta">' + escHtml(item.cat_name || 'Blog') + '</p>' +
+                '<p class="search-blog-title">' + escHtml(item.title || '') + '</p>' +
+                '<p class="search-blog-excerpt">' + escHtml(item.excerpt || '') + '</p>' +
+            '</a>'
+        )).join('');
+    }
+    function renderWorkshops(items) {
+        if (!workshopsListEl) return;
+        workshopsListEl.innerHTML = (items || []).map(item => (
+            '<a class="search-card" href="' + escHtml(item.url || '#') + '">' +
+                '<div class="search-card-thumb"><img src="' + escHtml(item.image || '') + '" alt="' + escHtml(item.title || '') + '" loading="lazy"></div>' +
+                '<p class="search-card-meta">Workshop</p>' +
+                '<p class="search-card-title">' + escHtml(item.title || '') + '</p>' +
+                '<p class="search-workshop-desc">' + escHtml(item.description || '') + '</p>' +
+                '<p class="search-card-price">' + escHtml(item.price || 'Contact us') + '</p>' +
+            '</a>'
+        )).join('');
+    }
+    function runSearch(keyword) {
+        const q = (keyword || '').trim();
+        if (q.length < 2) {
+            showDefault();
+            return;
+        }
+        if (defaultState) defaultState.style.display = 'none';
+        if (resultsEl) resultsEl.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'none';
+        if (loadingEl) loadingEl.style.display = '';
+
+        const fd = new FormData();
+        fd.append('action', 'bacera_header_search');
+        fd.append('nonce', SEARCH_NONCE);
+        fd.append('q', q);
+        fd.append('scope', SEARCH_SCOPE);
+
+        fetch(SEARCH_AJAX_URL, { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (!res || !res.success || !res.data) {
+                    if (emptyEl) emptyEl.style.display = '';
+                    return;
+                }
+                const data = res.data;
+                const scope = data.scope || SEARCH_SCOPE;
+                applyScope(scope);
+                renderProducts(data.products || []);
+                renderBlogs(data.blogs || []);
+                renderWorkshops(data.workshops || []);
+                updateViewAll(data.query || q);
+                if (productsTitleEl) productsTitleEl.textContent = 'Product search for "' + (data.query || q) + '"';
+                if (blogsTitleEl) blogsTitleEl.textContent = 'Blogs';
+                if (workshopsTitleEl) workshopsTitleEl.textContent = 'Workshop search for "' + (data.query || q) + '"';
+                const hasData = (data.products || []).length || (data.blogs || []).length || (data.workshops || []).length;
+                if (!hasData) {
+                    if (emptyEl) emptyEl.style.display = '';
+                    return;
+                }
+                if (resultsEl) resultsEl.style.display = '';
+            })
+            .catch(() => {
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (emptyEl) emptyEl.style.display = '';
+            });
     }
 
-    if (searchBtn)   searchBtn.addEventListener('click', openSearch);
+    if (searchBtn) searchBtn.addEventListener('click', openSearch);
     if (searchClose) searchClose.addEventListener('click', closeSearch);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
     if (searchOverlay) {
         searchOverlay.addEventListener('click', e => { if (e.target === searchOverlay) closeSearch(); });
     }
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => runSearch(searchInput.value), 280);
+        });
+    }
+    if (searchForm) {
+        searchForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const q = (searchInput && searchInput.value ? searchInput.value : '').trim();
+            if (q.length < 2) return;
+            if (SEARCH_SCOPE === 'blog') {
+                window.location.href = SEARCH_BLOG_URL + '?q=' + encodeURIComponent(q);
+            } else if (SEARCH_SCOPE === 'workshop') {
+                window.location.href = SEARCH_WORKSHOP_URL + '?q=' + encodeURIComponent(q);
+            } else {
+                window.location.href = SEARCH_PRODUCT_URL + '?q=' + encodeURIComponent(q);
+            }
+        });
+    }
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSearch();
+    });
 
     // ── Language switch ─────────────────────────────────────
     // Map lang code → display label (cho detect khi load trang)

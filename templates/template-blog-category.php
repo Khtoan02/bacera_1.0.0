@@ -89,6 +89,8 @@ $nonce      = wp_create_nonce('bacera_blog_cat_nonce');
 $init_slug  = esc_js($cat_slug);
 $init_name  = $cat_obj ? esc_js($cat_obj->name) : 'All posts';
 $init_count = $cat_obj ? (int)$cat_obj->count : wp_count_posts('post')->publish;
+$init_query = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) );
+$init_page  = max( 1, (int) ( $_GET['page'] ?? 1 ) );
 ?>
 
 <div class="font-sans antialiased bg-texture text-textmain w-full overflow-hidden" style="padding-top:76px;">
@@ -118,9 +120,14 @@ $init_count = $cat_obj ? (int)$cat_obj->count : wp_count_posts('post')->publish;
                     <?php echo $init_count; ?> articles
                 </p>
             </div>
-            <p class="text-textmuted text-[15px] leading-relaxed max-w-sm">
-                Stories, techniques, and inspirations from the world of ceramic craft.
-            </p>
+            <form id="blog-search-form" class="w-full lg:w-[360px]">
+                <div class="flex items-center h-[46px] rounded-xl border border-accent/30 bg-white px-3">
+                    <input id="blog-search-input" type="search" name="q" value="<?php echo esc_attr( $init_query ); ?>" placeholder="Search blog posts..." class="flex-1 border-0 outline-none text-[14px] bg-transparent text-textmain" />
+                    <button type="submit" class="w-8 h-8 rounded-lg text-textmuted hover:text-terracotta transition-colors" aria-label="Search blog">
+                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </button>
+                </div>
+            </form>
         </div>
 
     </div>
@@ -238,118 +245,68 @@ $init_count = $cat_obj ? (int)$cat_obj->count : wp_count_posts('post')->publish;
 (function() {
 'use strict';
 
-/* ─── Config ─────────────────────────────────────────────────────────── */
 var AJAX_URL   = '<?php echo esc_js($ajax_url); ?>';
 var NONCE      = '<?php echo esc_js($nonce); ?>';
 var BLOG_BASE  = '<?php echo esc_js(home_url('/blog/')); ?>';
 var CAT_BASE   = '<?php echo esc_js(home_url('/blog/category/')); ?>';
 var PER_PAGE   = 9;
 
-/* ─── State ──────────────────────────────────────────────────────────── */
 var state = {
-    slug:    '<?php echo $init_slug; ?>',
-    name:    '<?php echo $init_name; ?>',
-    count:   <?php echo $init_count; ?>,
-    page:    1,
-    loading: false,
+    slug: '<?php echo $init_slug; ?>',
+    name: '<?php echo $init_name; ?>',
+    count: <?php echo $init_count; ?>,
+    query: '<?php echo esc_js( $init_query ); ?>',
+    page: <?php echo (int) $init_page; ?>,
+    loading: false
 };
 
-/* ─── DOM refs ───────────────────────────────────────────────────────── */
-var grid       = document.getElementById('posts-grid');
-var emptyEl    = document.getElementById('empty-state');
+var grid = document.getElementById('posts-grid');
+var emptyEl = document.getElementById('empty-state');
 var paginationEl = document.getElementById('pagination');
-var pageTitle  = document.getElementById('page-title');
-var pageCount  = document.getElementById('page-count');
-var bcSep      = document.getElementById('bc-sep');
-var bcCat      = document.getElementById('bc-cat');
+var pageTitle = document.getElementById('page-title');
+var pageCount = document.getElementById('page-count');
+var bcSep = document.getElementById('bc-sep');
+var bcCat = document.getElementById('bc-cat');
+var searchForm = document.getElementById('blog-search-form');
+var searchInput = document.getElementById('blog-search-input');
 
-/* ─── Category pill click ────────────────────────────────────────────── */
-document.querySelectorAll('.cat-pill').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var slug  = btn.getAttribute('data-slug')  || '';
-        var name  = btn.getAttribute('data-name')  || 'All posts';
-        var count = parseInt(btn.getAttribute('data-count') || '0', 10);
-
-        // Update active pill
-        document.querySelectorAll('.cat-pill').forEach(function(b) {
-            b.classList.remove('active');
-        });
-        btn.classList.add('active');
-
-        // Update state & URL (without page reload)
-        state.slug  = slug;
-        state.name  = name;
-        state.count = count || state.count;
-        state.page  = 1;
-
-        var newUrl = slug ? CAT_BASE + slug + '/' : BLOG_BASE + 'category/';
-        window.history.pushState({ slug: slug, page: 1 }, '', newUrl);
-
-        updateMeta();
-        loadPosts();
-    });
-});
-
-/* ─── Browser back/forward ───────────────────────────────────────────── */
-window.addEventListener('popstate', function(e) {
-    if (e.state) {
-        state.slug = e.state.slug || '';
-        state.page = e.state.page || 1;
-        syncActivePill();
-        updateMeta();
-        loadPosts();
-    }
-});
-
-/* ─── Helpers ────────────────────────────────────────────────────────── */
+function escHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = String(str || '');
+    return d.innerHTML;
+}
+function basePath() {
+    return state.slug ? (CAT_BASE + state.slug + '/') : BLOG_BASE;
+}
+function buildUrl(targetPage) {
+    var params = new URLSearchParams();
+    if (state.query) params.set('q', state.query);
+    if (targetPage > 1) params.set('page', String(targetPage));
+    var qs = params.toString();
+    return basePath() + (qs ? '?' + qs : '');
+}
 function updateMeta() {
-    // Page title
     if (state.slug) {
         pageTitle.innerHTML = escHtml(state.name);
-    } else {
-        pageTitle.innerHTML = 'Our <span class="italic text-terracotta">journal</span>';
-    }
-
-    // Article count
-    pageCount.textContent = state.count + ' articles';
-
-    // Breadcrumb
-    if (state.slug) {
         bcSep.textContent = '/';
         bcCat.textContent = state.name;
     } else {
+        pageTitle.innerHTML = 'Our <span class="italic text-terracotta">journal</span>';
         bcSep.textContent = '';
         bcCat.textContent = '';
     }
-
-    // Document title
-    document.title = (state.slug ? state.name + ' — ' : '') + 'Blog — Bacera';
+    pageCount.textContent = state.count + ' articles';
+    document.title = (state.slug ? state.name + ' — ' : '') + (state.query ? '"' + state.query + '" — ' : '') + 'Blog — Bacera';
 }
-
 function syncActivePill() {
     document.querySelectorAll('.cat-pill').forEach(function(b) {
         b.classList.toggle('active', (b.getAttribute('data-slug') || '') === state.slug);
     });
 }
-
-function escHtml(str) {
-    var d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
-}
-
-/* ─── Skeleton ───────────────────────────────────────────────────────── */
 function showSkeleton(count) {
-    count = count || 6;
     var html = '';
-    for (var i = 0; i < count; i++) {
-        html += '<div class="flex flex-col gap-4">' +
-            '<div class="skeleton aspect-[4/3] rounded-xl"></div>' +
-            '<div class="skeleton h-3 w-1/3 rounded-full"></div>' +
-            '<div class="skeleton h-5 w-5/6 rounded-full"></div>' +
-            '<div class="skeleton h-4 w-full rounded-full"></div>' +
-            '<div class="skeleton h-4 w-4/5 rounded-full"></div>' +
-            '</div>';
+    for (var i = 0; i < (count || 6); i++) {
+        html += '<div class="flex flex-col gap-4"><div class="skeleton aspect-[4/3] rounded-xl"></div><div class="skeleton h-3 w-1/3 rounded-full"></div><div class="skeleton h-5 w-5/6 rounded-full"></div><div class="skeleton h-4 w-full rounded-full"></div><div class="skeleton h-4 w-4/5 rounded-full"></div></div>';
     }
     grid.innerHTML = html;
     grid.classList.remove('hidden');
@@ -358,17 +315,14 @@ function showSkeleton(count) {
     paginationEl.classList.add('hidden');
     paginationEl.classList.remove('flex');
 }
-
-/* ─── Render posts ───────────────────────────────────────────────────── */
 function renderPosts(posts) {
-    if (!posts || posts.length === 0) {
+    if (!posts || !posts.length) {
         grid.innerHTML = '';
         grid.classList.add('hidden');
         emptyEl.classList.remove('hidden');
         emptyEl.classList.add('flex');
         return;
     }
-
     grid.classList.remove('hidden');
     emptyEl.classList.add('hidden');
     emptyEl.classList.remove('flex');
@@ -384,22 +338,14 @@ function renderPosts(posts) {
                 (p.cat_name ? '<a href="' + escHtml(CAT_BASE + p.cat_slug + '/') + '" class="text-[10px] uppercase tracking-[0.25em] text-terracotta font-semibold hover:underline">' + escHtml(p.cat_name) + '</a><span class="w-1 h-1 rounded-full bg-accent/40"></span>' : '') +
                 '<span class="text-[11px] text-textmuted">' + escHtml(p.date) + '</span>' +
             '</div>' +
-            '<h2 class="text-[16px] font-semibold text-textmain leading-snug mb-2 group-hover:text-terracotta transition-colors">' +
-                '<a href="' + p.url + '">' + p.title + '</a>' +
-            '</h2>' +
+            '<h2 class="text-[16px] font-semibold text-textmain leading-snug mb-2 group-hover:text-terracotta transition-colors"><a href="' + p.url + '">' + p.title + '</a></h2>' +
             '<p class="text-[13px] text-textmuted leading-relaxed line-clamp-3 mb-4 flex-1">' + escHtml(p.excerpt) + '</p>' +
-            '<div class="flex items-center justify-between pt-4 border-t border-accent/20">' +
-                '<span class="text-[11px] text-textmuted/70">' + escHtml(p.author) + '</span>' +
-                '<a href="' + p.url + '" class="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-accentdark hover:text-terracotta transition-colors">' +
-                    'Read <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>' +
-                '</a>' +
-            '</div>' +
+            '<div class="flex items-center justify-between pt-4 border-t border-accent/20"><span class="text-[11px] text-textmuted/70">' + escHtml(p.author) + '</span>' +
+            '<a href="' + p.url + '" class="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-accentdark hover:text-terracotta transition-colors">Read <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></a></div>' +
             '</article>';
     });
     grid.innerHTML = html;
 }
-
-/* ─── Render pagination ──────────────────────────────────────────────── */
 function renderPagination(total, current) {
     if (total <= 1) {
         paginationEl.classList.add('hidden');
@@ -408,74 +354,43 @@ function renderPagination(total, current) {
     }
     paginationEl.classList.remove('hidden');
     paginationEl.classList.add('flex');
-
     var html = '';
-
-    // Prev
-    if (current > 1) {
-        html += '<button class="page-dot w-10 h-10 flex items-center justify-center rounded-full border border-accent/30 text-textmuted hover:border-accentdark hover:text-textmain" data-page="' + (current - 1) + '">' +
-            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>' +
-        '</button>';
-    }
-
-    // Pages
     for (var p = 1; p <= total; p++) {
-        var isCur = p === current;
-        html += '<button class="page-dot w-10 h-10 flex items-center justify-center rounded-full border border-accent/30 text-[13px] font-medium ' + (isCur ? 'active' : 'text-textmuted') + '" data-page="' + p + '">' + p + '</button>';
+        var cls = p === current ? 'active' : 'text-textmuted';
+        html += '<button class="page-dot w-10 h-10 flex items-center justify-center rounded-full border border-accent/30 text-[13px] font-medium ' + cls + '" data-page="' + p + '">' + p + '</button>';
     }
-
-    // Next
-    if (current < total) {
-        html += '<button class="page-dot w-10 h-10 flex items-center justify-center rounded-full border border-accent/30 text-textmuted hover:border-accentdark hover:text-textmain" data-page="' + (current + 1) + '">' +
-            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>' +
-        '</button>';
-    }
-
     paginationEl.innerHTML = html;
-
-    // Bind page buttons
     paginationEl.querySelectorAll('.page-dot').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            var pg = parseInt(btn.getAttribute('data-page'), 10);
-            if (pg && pg !== state.page) {
-                state.page = pg;
-                var url = window.location.pathname + (pg > 1 ? '?page=' + pg : '');
-                window.history.pushState({ slug: state.slug, page: pg }, '', url);
-                loadPosts();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            var nextPage = parseInt(btn.getAttribute('data-page') || '1', 10);
+            if (nextPage === state.page) return;
+            state.page = nextPage;
+            window.history.pushState({ slug: state.slug, page: state.page, query: state.query }, '', buildUrl(state.page));
+            loadPosts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 }
-
-/* ─── Load posts via AJAX ────────────────────────────────────────────── */
 function loadPosts() {
     if (state.loading) return;
     state.loading = true;
     showSkeleton(PER_PAGE);
-
-    var formData = new FormData();
-    formData.append('action', 'bacera_get_blog_posts');
-    formData.append('nonce',  NONCE);
-    formData.append('cat_slug', state.slug);
-    formData.append('page',   state.page);
-    formData.append('per_page', PER_PAGE);
-
-    fetch(AJAX_URL, { method: 'POST', body: formData })
+    var fd = new FormData();
+    fd.append('action', 'bacera_get_blog_posts');
+    fd.append('nonce', NONCE);
+    fd.append('cat_slug', state.slug);
+    fd.append('q', state.query || '');
+    fd.append('page', state.page);
+    fd.append('per_page', PER_PAGE);
+    fetch(AJAX_URL, { method: 'POST', body: fd })
         .then(function(r) { return r.json(); })
         .then(function(res) {
             state.loading = false;
-            if (res.success) {
-                // Update count from server if "All posts"
-                if (!state.slug) {
-                    state.count = res.data.total;
-                    pageCount.textContent = state.count + ' articles';
-                }
-                renderPosts(res.data.posts);
-                renderPagination(res.data.total_pages, state.page);
-            } else {
-                renderPosts([]);
-            }
+            if (!res || !res.success || !res.data) { renderPosts([]); return; }
+            state.count = res.data.total || 0;
+            updateMeta();
+            renderPosts(res.data.posts || []);
+            renderPagination(res.data.total_pages || 0, state.page);
         })
         .catch(function() {
             state.loading = false;
@@ -483,7 +398,39 @@ function loadPosts() {
         });
 }
 
-/* ─── Init: load posts on page load ─────────────────────────────────── */
+document.querySelectorAll('.cat-pill').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        state.slug = btn.getAttribute('data-slug') || '';
+        state.name = btn.getAttribute('data-name') || 'All posts';
+        state.page = 1;
+        syncActivePill();
+        window.history.pushState({ slug: state.slug, page: 1, query: state.query }, '', buildUrl(1));
+        loadPosts();
+    });
+});
+
+if (searchForm) {
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        state.query = (searchInput && searchInput.value ? searchInput.value : '').trim();
+        state.page = 1;
+        window.history.pushState({ slug: state.slug, page: 1, query: state.query }, '', buildUrl(1));
+        loadPosts();
+    });
+}
+
+window.addEventListener('popstate', function(e) {
+    if (!e.state) return;
+    state.slug = e.state.slug || '';
+    state.page = e.state.page || 1;
+    state.query = e.state.query || '';
+    if (searchInput) searchInput.value = state.query;
+    syncActivePill();
+    loadPosts();
+});
+
+syncActivePill();
+updateMeta();
 loadPosts();
 
 })();

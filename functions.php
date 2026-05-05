@@ -86,6 +86,14 @@ add_action( 'init', function() {
         'top'
     );
 
+    // ── Unified search route: /search/{product|blog|workshop}/ ─────────────
+    add_rewrite_tag( '%bacera_search_type%', '(product|blog|workshop)' );
+    add_rewrite_rule(
+        '^search/(product|blog|workshop)/?$',
+        'index.php?bacera_search_type=$matches[1]',
+        'top'
+    );
+
     register_post_type( 'pancake_product', [
         'labels'      => [ 'name' => 'Pancake Products' ],
         'public'      => true, // Quan trọng để get_page_by_path hoạt động
@@ -272,6 +280,7 @@ add_action('init', function() {
         || ! isset($rules['^workshop/([^/]+)/?$'])
         || ! isset($rules['^our-team/([^/]+)/?$'])
         || ! array_key_exists( '^blog/category/([^/]+)/?$', (array) $rules )
+        || ! array_key_exists( '^search/(product|blog|workshop)/?$', (array) $rules )
     ) {
         // Flush vào cuối request này (an toàn và được lưu vào DB ngay)
         add_action('shutdown', function() {
@@ -371,6 +380,7 @@ function bacera_ajax_get_blog_posts(): void {
     check_ajax_referer( 'bacera_blog_cat_nonce', 'nonce' );
 
     $cat_slug = sanitize_key( $_POST['cat_slug'] ?? '' );
+    $keyword  = sanitize_text_field( wp_unslash( $_POST['q'] ?? '' ) );
     $page     = max( 1, (int) ( $_POST['page']     ?? 1 ) );
     $per_page = min( 24, max( 1, (int) ( $_POST['per_page'] ?? 9 ) ) );
 
@@ -391,6 +401,9 @@ function bacera_ajax_get_blog_posts(): void {
         } else {
             wp_send_json_error( ['message' => 'Category not found'], 404 );
         }
+    }
+    if ( $keyword !== '' ) {
+        $args['s'] = $keyword;
     }
 
     $query = new WP_Query( $args );
@@ -430,6 +443,158 @@ function bacera_ajax_get_blog_posts(): void {
 }
 add_action( 'wp_ajax_bacera_get_blog_posts',        'bacera_ajax_get_blog_posts' );
 add_action( 'wp_ajax_nopriv_bacera_get_blog_posts', 'bacera_ajax_get_blog_posts' );
+
+/* ==========================================================================
+   GLOBAL SEARCH (HEADER + VIEW ALL)
+   ========================================================================== */
+
+/**
+ * @return array{0:array<int,array<string,mixed>>,1:int,2:int}
+ */
+function bacera_search_query_items( string $type, string $keyword, int $page = 1, int $per_page = 12 ): array {
+    $keyword  = trim( $keyword );
+    $page     = max( 1, $page );
+    $per_page = min( 36, max( 1, $per_page ) );
+    if ( $keyword === '' ) {
+        return [ [], 0, 0 ];
+    }
+
+    $post_type = 'pancake_product';
+    if ( $type === 'blog' ) {
+        $post_type = 'post';
+    } elseif ( $type === 'workshop' ) {
+        $post_type = 'workshop';
+    }
+
+    $query = new WP_Query(
+        [
+            'post_type'      => $post_type,
+            'post_status'    => 'publish',
+            's'              => $keyword,
+            'posts_per_page' => $per_page,
+            'paged'          => $page,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'no_found_rows'  => false,
+        ]
+    );
+
+    $items = [];
+    if ( $query->have_posts() ) {
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $post_id = get_the_ID();
+
+            if ( $type === 'blog' ) {
+                $cat = get_the_category( $post_id );
+                $items[] = [
+                    'id'       => $post_id,
+                    'title'    => get_the_title(),
+                    'url'      => get_permalink(),
+                    'image'    => get_the_post_thumbnail_url( $post_id, 'medium_large' ) ?: 'https://placehold.co/640x420/ece6db/8d6a54?text=Blog',
+                    'excerpt'  => wp_trim_words( wp_strip_all_tags( get_the_excerpt() ?: get_the_content() ), 20, '…' ),
+                    'cat_name' => $cat ? $cat[0]->name : '',
+                ];
+                continue;
+            }
+
+            if ( $type === 'workshop' ) {
+                $items[] = [
+                    'id'          => $post_id,
+                    'title'       => get_the_title(),
+                    'url'         => get_permalink(),
+                    'image'       => get_post_meta( $post_id, '_thumbnail_url', true ) ?: get_the_post_thumbnail_url( $post_id, 'medium_large' ) ?: 'https://placehold.co/640x420/ece6db/8d6a54?text=Workshop',
+                    'description' => wp_trim_words( wp_strip_all_tags( get_post_meta( $post_id, '_tagline', true ) ?: get_the_excerpt() ?: get_the_content() ), 16, '…' ),
+                    'price'       => (string) get_post_meta( $post_id, '_price', true ),
+                ];
+                continue;
+            }
+
+            $price = (float) get_post_meta( $post_id, '_price', true );
+            $old   = (float) get_post_meta( $post_id, '_regular_price', true );
+            $img   = get_the_post_thumbnail_url( $post_id, 'medium_large' ) ?: get_post_meta( $post_id, '_pancake_image_url', true );
+            $items[] = [
+                'id'             => $post_id,
+                'title'          => get_the_title(),
+                'url'            => get_permalink(),
+                'image'          => $img ?: 'https://placehold.co/640x800/f2ede5/8d6a54?text=Bacera',
+                'price'          => $price,
+                'price_text'     => $price > 0 ? number_format( $price, 0, ',', '.' ) . ' ₫' : '',
+                'old_price_text' => $old > $price && $old > 0 ? number_format( $old, 0, ',', '.' ) . ' ₫' : '',
+            ];
+        }
+        wp_reset_postdata();
+    }
+
+    return [ $items, (int) $query->found_posts, (int) $query->max_num_pages ];
+}
+
+function bacera_ajax_header_search(): void {
+    check_ajax_referer( 'bacera_header_search_nonce', 'nonce' );
+    $q = sanitize_text_field( wp_unslash( $_POST['q'] ?? '' ) );
+    $scope = sanitize_key( wp_unslash( $_POST['scope'] ?? 'global' ) );
+    if ( ! in_array( $scope, [ 'global', 'product', 'workshop', 'blog' ], true ) ) {
+        $scope = 'global';
+    }
+    if ( mb_strlen( trim( $q ) ) < 2 ) {
+        wp_send_json_success(
+            [
+                'query' => $q,
+                'scope' => $scope,
+                'products' => [],
+                'workshops' => [],
+                'blogs' => [],
+                'totals' => [ 'products' => 0, 'workshops' => 0, 'blogs' => 0 ],
+            ]
+        );
+    }
+
+    $products = [];
+    $workshops = [];
+    $blogs = [];
+    $total_products = 0;
+    $total_workshops = 0;
+    $total_blogs = 0;
+    if ( $scope === 'global' || $scope === 'product' ) {
+        [ $products, $total_products ] = bacera_search_query_items( 'product', $q, 1, 6 );
+    }
+    if ( $scope === 'global' || $scope === 'workshop' ) {
+        [ $workshops, $total_workshops ] = bacera_search_query_items( 'workshop', $q, 1, 6 );
+    }
+    if ( $scope === 'global' || $scope === 'blog' ) {
+        [ $blogs, $total_blogs ] = bacera_search_query_items( 'blog', $q, 1, 4 );
+    }
+
+    wp_send_json_success(
+        [
+            'query' => $q,
+            'scope' => $scope,
+            'products' => array_slice( $products, 0, 3 ),
+            'workshops' => array_slice( $workshops, 0, 4 ),
+            'blogs' => array_slice( $blogs, 0, 3 ),
+            'totals' => [
+                'products' => $total_products,
+                'workshops' => $total_workshops,
+                'blogs' => $total_blogs,
+            ],
+        ]
+    );
+}
+add_action( 'wp_ajax_bacera_header_search', 'bacera_ajax_header_search' );
+add_action( 'wp_ajax_nopriv_bacera_header_search', 'bacera_ajax_header_search' );
+
+add_action( 'template_redirect', function() {
+    $search_type = get_query_var( 'bacera_search_type' );
+    if ( ! $search_type ) {
+        return;
+    }
+    $_GET['search_type'] = sanitize_key( (string) $search_type );
+    $template = locate_template( 'templates/template-search-results.php' );
+    if ( $template ) {
+        include $template;
+        exit;
+    }
+} );
 
 // Load Theme Customizer settings
 require_once BACERA_THEME_DIR . 'inc/customizer.php';
