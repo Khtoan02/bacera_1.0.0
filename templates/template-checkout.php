@@ -1225,8 +1225,17 @@ get_header();
 			pollPaymentStatusOnce(orderId)
 				.then(function (res) {
 					if (res.ok && res.body && res.body.success && res.body.is_paid) {
+						var paidLines = loadItems();
+						baceraSyncCartAfterPayment(payload, paidLines, Number(payload.order_total || 0));
 						stopPaymentVerification();
 						hidePayWait();
+						try {
+							sessionStorage.removeItem(STORAGE_ITEMS);
+							sessionStorage.removeItem(STORAGE_STEP);
+							sessionStorage.removeItem(STORAGE_NOTES);
+							sessionStorage.removeItem(STORAGE_PAY_DETAILS);
+							sessionStorage.setItem(STORAGE_LAST_ORDER, JSON.stringify(payload));
+						} catch (eSync) {}
 						try { sessionStorage.removeItem(STORAGE_PENDING_ORDER); } catch (e2) {}
 						showInlineThankYou(payload);
 						return;
@@ -1993,17 +2002,17 @@ get_header();
 							estimated_delivery: formatViEstDelivery(est),
 							order_total: built.meta.grand
 						};
-						var paidLines = loadItems();
-						baceraSyncCartAfterPayment(successPayload, paidLines, built.meta.grand);
 						var paymentAction = getPaymentExecutionAction(successPayload.payment_method_id, successPayload.pancake_order_id);
 						var backendPaid = String(successPayload.payment_status || '').toLowerCase() === 'paid';
 						var needsVerify = requiresPaymentVerification(successPayload.payment_method_id) && !backendPaid;
 						try {
-							sessionStorage.removeItem(STORAGE_ITEMS);
-							sessionStorage.removeItem(STORAGE_STEP);
-							sessionStorage.removeItem(STORAGE_NOTES);
-							sessionStorage.removeItem(STORAGE_PAY_DETAILS);
 							if (!needsVerify) {
+								var paidLines = loadItems();
+								baceraSyncCartAfterPayment(successPayload, paidLines, built.meta.grand);
+								sessionStorage.removeItem(STORAGE_ITEMS);
+								sessionStorage.removeItem(STORAGE_STEP);
+								sessionStorage.removeItem(STORAGE_NOTES);
+								sessionStorage.removeItem(STORAGE_PAY_DETAILS);
 								sessionStorage.setItem(STORAGE_LAST_ORDER, JSON.stringify(successPayload));
 								sessionStorage.removeItem(STORAGE_PENDING_ORDER);
 							}
