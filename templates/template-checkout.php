@@ -31,6 +31,16 @@ if ( ! empty( $auth_pages[0] ) ) {
 /** REST proxy địa chỉ Pancake (plugin bacera-pancake): /bacera-pancake/v1/geo/… */
 $bacera_rest_geo_url = class_exists( 'Bacera_Module_Geo' ) ? untrailingslashit( rest_url( 'bacera-pancake/v1/geo' ) ) : '';
 $bacera_site_name      = get_bloginfo( 'name' );
+$bacera_shop_paypal_checkout_url = trim( (string) get_option( 'bacera_shop_paypal_checkout_url', '' ) );
+$bacera_shop_atm_checkout_url = trim( (string) get_option( 'bacera_shop_atm_checkout_url', '' ) );
+$bacera_shop_bank_transfer_instructions = (string) get_option(
+	'bacera_shop_bank_transfer_instructions',
+	"Ngân hàng: Vietcombank\nSố TK: 1234567890\nChủ TK: BACERA STUDIO\nNội dung CK: [Mã đơn hàng]"
+);
+$bacera_shop_bank_name = trim( (string) get_option( 'bacera_shop_bank_name', 'Vietcombank' ) );
+$bacera_shop_bank_account_name = trim( (string) get_option( 'bacera_shop_bank_account_name', 'BACERA STUDIO' ) );
+$bacera_shop_bank_account_number = trim( (string) get_option( 'bacera_shop_bank_account_number', '1234567890' ) );
+$bacera_shop_bank_qr_url = trim( (string) get_option( 'bacera_shop_bank_qr_url', '' ) );
 
 get_header();
 ?>
@@ -643,6 +653,40 @@ get_header();
 								</span>
 							</label>
 						</div>
+						<div id="bacera-chk-pay-extra" class="mt-4 space-y-4">
+							<div id="bacera-pay-extra-transfer" class="hidden rounded-xl border border-stone-200 bg-stone-50 p-4">
+								<p class="m-0 text-sm font-semibold text-stone-900"><?php esc_html_e( 'Bank transfer details', 'bacera' ); ?></p>
+								<div class="mt-2 space-y-1 text-sm text-stone-700">
+									<p class="m-0"><?php esc_html_e( 'Bank:', 'bacera' ); ?> <strong><?php echo esc_html( $bacera_shop_bank_name ); ?></strong></p>
+									<p class="m-0"><?php esc_html_e( 'Account number:', 'bacera' ); ?> <strong><?php echo esc_html( $bacera_shop_bank_account_number ); ?></strong></p>
+									<p class="m-0"><?php esc_html_e( 'Account name:', 'bacera' ); ?> <strong><?php echo esc_html( $bacera_shop_bank_account_name ); ?></strong></p>
+								</div>
+								<?php if ( $bacera_shop_bank_qr_url ) : ?>
+									<div class="mt-3">
+										<p class="m-0 mb-2 text-xs uppercase tracking-wide text-stone-500"><?php esc_html_e( 'Scan QR to transfer', 'bacera' ); ?></p>
+										<img src="<?php echo esc_url( $bacera_shop_bank_qr_url ); ?>" alt="<?php esc_attr_e( 'Bank transfer QR', 'bacera' ); ?>" class="h-44 w-44 rounded-lg border border-stone-200 bg-white object-contain" loading="lazy" />
+									</div>
+								<?php endif; ?>
+							</div>
+							<div id="bacera-pay-extra-atm" class="hidden rounded-xl border border-stone-200 bg-white p-4">
+								<p class="m-0 mb-3 text-sm font-semibold text-stone-900"><?php esc_html_e( 'Card information (for verification)', 'bacera' ); ?></p>
+								<div class="grid gap-3 sm:grid-cols-2">
+									<div>
+										<label for="bacera-pay-atm-holder" class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500"><?php esc_html_e( 'Card holder', 'bacera' ); ?></label>
+										<input id="bacera-pay-atm-holder" type="text" class="bacera-co-input" placeholder="<?php esc_attr_e( 'Nguyen Van A', 'bacera' ); ?>" />
+									</div>
+									<div>
+										<label for="bacera-pay-atm-last4" class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500"><?php esc_html_e( 'Last 4 digits', 'bacera' ); ?></label>
+										<input id="bacera-pay-atm-last4" type="text" class="bacera-co-input" maxlength="4" inputmode="numeric" placeholder="1234" />
+									</div>
+								</div>
+							</div>
+							<div id="bacera-pay-extra-paypal" class="hidden rounded-xl border border-stone-200 bg-white p-4">
+								<p class="m-0 mb-3 text-sm font-semibold text-stone-900"><?php esc_html_e( 'PayPal account (for verification)', 'bacera' ); ?></p>
+								<label for="bacera-pay-paypal-email" class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-stone-500"><?php esc_html_e( 'PayPal email', 'bacera' ); ?></label>
+								<input id="bacera-pay-paypal-email" type="email" class="bacera-co-input" placeholder="you@example.com" />
+							</div>
+						</div>
 					</div>
 
 					<div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-2">
@@ -658,6 +702,7 @@ get_header();
 				<!-- Bước 3 — phiếu xác nhận -->
 				<div id="bacera-chk-step-3" class="hidden space-y-8">
 					<p id="bacera-chk-pay-err" class="hidden m-0 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert"></p>
+					<p id="bacera-chk-pay-wait" class="hidden m-0 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 whitespace-pre-line" role="status"></p>
 					<div id="bacera-chk-success-wrap" class="bacera-chk-success hidden space-y-0">
 						<nav class="bacera-chk-success__crumb" aria-label="<?php esc_attr_e( 'Breadcrumb', 'bacera' ); ?>">
 							<a id="bacera-chk-succ-crumb-home" href="<?php echo esc_url( $home_url ); ?>"><?php esc_html_e( 'Home', 'bacera' ); ?></a>
@@ -700,6 +745,7 @@ get_header();
 								<div>
 									<p class="bacera-chk-success__subhd"><?php esc_html_e( 'Payment', 'bacera' ); ?></p>
 									<p class="m-0 text-sm text-stone-600" id="bacera-chk-succ-pay"></p>
+									<p class="m-0 mt-2 hidden rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700 whitespace-pre-line" id="bacera-chk-succ-pay-action"></p>
 								</div>
 								<div>
 									<p class="bacera-chk-success__subhd"><?php esc_html_e( 'Notes', 'bacera' ); ?></p>
@@ -855,14 +901,25 @@ get_header();
 	var STORAGE_NOTES = 'bacera_checkout_notes';
 	var STORAGE_SHIP = 'bacera_checkout_shipping';
 	var STORAGE_PAY = 'bacera_checkout_payment';
+	var STORAGE_PAY_DETAILS = 'bacera_checkout_payment_details';
 	var STORAGE_LAST_ORDER = 'bacera_last_order_success';
+	var STORAGE_PENDING_ORDER = 'bacera_pending_order_payment';
 	var LOCAL_CART_KEY = 'bacera_shop_cart_v1';
 	var PAID_ORDERS_KEY = 'bacera_cart_paid_orders_v1';
 
 	var REST_ORDERS = <?php echo wp_json_encode( $bacera_rest_orders_url ); ?>;
+	var REST_ORDER_STATUS_BASE = <?php echo wp_json_encode( untrailingslashit( rest_url( 'bacera-pancake/v1/orders' ) ) ); ?>;
 	var REST_NONCE = <?php echo wp_json_encode( $bacera_pancake_order_nonce ); ?>;
 	var WP_REST_NONCE = <?php echo wp_json_encode( $bacera_wp_rest_nonce ); ?>;
 	var SHOP_URL = <?php echo wp_json_encode( $shop_url ); ?>;
+	var CART_URL = <?php echo wp_json_encode( $cart_url ); ?>;
+	var PAYPAL_CHECKOUT_URL = <?php echo wp_json_encode( $bacera_shop_paypal_checkout_url ); ?>;
+	var ATM_CHECKOUT_URL = <?php echo wp_json_encode( $bacera_shop_atm_checkout_url ); ?>;
+	var BANK_TRANSFER_INSTRUCTIONS = <?php echo wp_json_encode( $bacera_shop_bank_transfer_instructions ); ?>;
+	var BANK_NAME = <?php echo wp_json_encode( $bacera_shop_bank_name ); ?>;
+	var BANK_ACCOUNT_NAME = <?php echo wp_json_encode( $bacera_shop_bank_account_name ); ?>;
+	var BANK_ACCOUNT_NUMBER = <?php echo wp_json_encode( $bacera_shop_bank_account_number ); ?>;
+	var BANK_QR_URL = <?php echo wp_json_encode( $bacera_shop_bank_qr_url ); ?>;
 
 	var txtChooseProvince = <?php echo wp_json_encode( __( 'Select province/city', 'bacera' ) ); ?>;
 	var txtChooseDistrict = <?php echo wp_json_encode( __( 'Select district', 'bacera' ) ); ?>;
@@ -874,6 +931,13 @@ get_header();
 	var txtPayDefault = <?php echo wp_json_encode( __( 'Pay now', 'bacera' ) ); ?>;
 	var txtPayErrItems = <?php echo wp_json_encode( __( 'Cannot submit order: missing Pancake variant ID on one or more items. Please re-add from the shop.', 'bacera' ) ); ?>;
 	var txtPayErrNetwork = <?php echo wp_json_encode( __( 'Unable to connect to server. Please try again.', 'bacera' ) ); ?>;
+	var txtRedirectingPayment = <?php echo wp_json_encode( __( 'Redirecting to payment gateway…', 'bacera' ) ); ?>;
+	var txtGatewayMissing = <?php echo wp_json_encode( __( 'Payment gateway is not configured yet. Please contact admin or choose another payment method.', 'bacera' ) ); ?>;
+	var txtCodPending = <?php echo wp_json_encode( __( 'Your order is confirmed with COD. Please prepare payment when receiving goods.', 'bacera' ) ); ?>;
+	var txtPendingPaymentState = <?php echo wp_json_encode( __( 'Payment status: pending verification.', 'bacera' ) ); ?>;
+	var txtPaidConfirmed = <?php echo wp_json_encode( __( 'Payment confirmed. Completing your order...', 'bacera' ) ); ?>;
+	var txtPendingCheckFailed = <?php echo wp_json_encode( __( 'Unable to verify payment now. Please try again in a moment.', 'bacera' ) ); ?>;
+	var txtWaitingForPayment = <?php echo wp_json_encode( __( 'Please wait while we verify your payment.', 'bacera' ) ); ?>;
 	var txtEmailSentPrefix = <?php echo wp_json_encode( __( 'We have sent your order details to:', 'bacera' ) ); ?>;
 	var txtEstShip = <?php echo wp_json_encode( __( 'Estimated delivery:', 'bacera' ) ); ?>;
 
@@ -905,6 +969,268 @@ get_header();
 		if (!payErrEl) return;
 		payErrEl.textContent = msg || txtPayErrNetwork;
 		payErrEl.classList.remove('hidden');
+	}
+
+	function getSelectedPaymentId() {
+		var payEl = document.querySelector('input[name="bacera_payment_method"]:checked');
+		return payEl ? String(payEl.value || '').toLowerCase() : '';
+	}
+
+	function updatePaymentExtraUI() {
+		var methodId = getSelectedPaymentId();
+		var transferEl = document.getElementById('bacera-pay-extra-transfer');
+		var atmEl = document.getElementById('bacera-pay-extra-atm');
+		var paypalEl = document.getElementById('bacera-pay-extra-paypal');
+		if (transferEl) transferEl.classList.toggle('hidden', methodId !== 'transfer');
+		if (atmEl) atmEl.classList.toggle('hidden', methodId !== 'atm');
+		if (paypalEl) paypalEl.classList.toggle('hidden', methodId !== 'paypal');
+	}
+
+	function readPaymentDetails() {
+		var methodId = getSelectedPaymentId();
+		var atmHolder = document.getElementById('bacera-pay-atm-holder');
+		var atmLast4 = document.getElementById('bacera-pay-atm-last4');
+		var paypalEmail = document.getElementById('bacera-pay-paypal-email');
+		return {
+			method_id: methodId,
+			atm_holder: atmHolder ? String(atmHolder.value || '').trim() : '',
+			atm_last4: atmLast4 ? String(atmLast4.value || '').trim() : '',
+			paypal_email: paypalEmail ? String(paypalEmail.value || '').trim() : ''
+		};
+	}
+
+	function persistPaymentDetails() {
+		try {
+			sessionStorage.setItem(STORAGE_PAY_DETAILS, JSON.stringify(readPaymentDetails()));
+		} catch (e) {}
+	}
+
+	function restorePaymentDetails() {
+		var raw = null;
+		try {
+			raw = sessionStorage.getItem(STORAGE_PAY_DETAILS);
+		} catch (e) {}
+		if (!raw) return;
+		try {
+			var data = JSON.parse(raw);
+			if (!data || typeof data !== 'object') return;
+			var atmHolder = document.getElementById('bacera-pay-atm-holder');
+			var atmLast4 = document.getElementById('bacera-pay-atm-last4');
+			var paypalEmail = document.getElementById('bacera-pay-paypal-email');
+			if (atmHolder && data.atm_holder) atmHolder.value = String(data.atm_holder);
+			if (atmLast4 && data.atm_last4) atmLast4.value = String(data.atm_last4);
+			if (paypalEmail && data.paypal_email) paypalEmail.value = String(data.paypal_email);
+		} catch (e2) {}
+	}
+
+	function validatePaymentDetails() {
+		var methodId = getSelectedPaymentId();
+		var details = readPaymentDetails();
+		if (methodId === 'atm') {
+			if (!details.atm_holder) {
+				showPayErr('Vui lòng nhập tên chủ thẻ ATM.');
+				return false;
+			}
+			if (!/^\d{4}$/.test(details.atm_last4)) {
+				showPayErr('Vui lòng nhập đúng 4 số cuối của thẻ ATM.');
+				return false;
+			}
+		}
+		if (methodId === 'paypal') {
+			if (!details.paypal_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(details.paypal_email)) {
+				showPayErr('Vui lòng nhập email PayPal hợp lệ.');
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function getPaymentExecutionAction(methodId, orderId) {
+		var id = String(methodId || '').toLowerCase();
+		if (id === 'cod') {
+			return { type: 'message', text: txtCodPending };
+		}
+		if (id === 'transfer') {
+			var transferText = String(BANK_TRANSFER_INSTRUCTIONS || '');
+			if (!transferText) {
+				transferText = 'Ngân hàng: ' + String(BANK_NAME || '') + '\n'
+					+ 'Số TK: ' + String(BANK_ACCOUNT_NUMBER || '') + '\n'
+					+ 'Chủ TK: ' + String(BANK_ACCOUNT_NAME || '') + '\n'
+					+ 'Nội dung CK: ' + String(orderId || '');
+			}
+			if (transferText) {
+				transferText = transferText
+					.replace(/\[Mã đơn hàng\]/g, String(orderId || ''))
+					.replace(/\[ORDER_ID\]/g, String(orderId || ''));
+			}
+			if (BANK_QR_URL) {
+				transferText += '\nQR: ' + BANK_QR_URL;
+			}
+			return {
+				type: 'instructions',
+				text: transferText || ('Order code: ' + String(orderId || ''))
+			};
+		}
+		if (id === 'atm') {
+			if (ATM_CHECKOUT_URL) {
+				return { type: 'redirect', url: ATM_CHECKOUT_URL, text: txtRedirectingPayment };
+			}
+			return { type: 'message', text: txtGatewayMissing };
+		}
+		if (id === 'paypal') {
+			if (PAYPAL_CHECKOUT_URL) {
+				return { type: 'redirect', url: PAYPAL_CHECKOUT_URL, text: txtRedirectingPayment };
+			}
+			return { type: 'message', text: txtGatewayMissing };
+		}
+		return { type: 'message', text: '' };
+	}
+
+	function applyPaymentExecutionAction(action) {
+		var payActionEl = document.getElementById('bacera-chk-succ-pay-action');
+		if (!payActionEl || !action || !action.type) return;
+
+		if (action.type === 'redirect') {
+			payActionEl.textContent = action.text || txtRedirectingPayment;
+			payActionEl.classList.remove('hidden');
+			setTimeout(function () { window.location.href = action.url; }, 800);
+			return;
+		}
+
+		if (action.type === 'instructions' || action.type === 'message') {
+			if (action.text) {
+				payActionEl.textContent = action.text;
+				payActionEl.classList.remove('hidden');
+			} else {
+				payActionEl.textContent = '';
+				payActionEl.classList.add('hidden');
+			}
+		}
+	}
+
+	function requiresPaymentVerification(methodId) {
+		var id = String(methodId || '').toLowerCase();
+		return id === 'atm' || id === 'transfer' || id === 'paypal';
+	}
+
+	function getPaymentStatusUrl(orderId) {
+		return REST_ORDER_STATUS_BASE + '/' + encodeURIComponent(String(orderId || '')) + '/payment-status';
+	}
+
+	var paymentVerifyTimer = null;
+
+	function hidePayWait() {
+		var el = document.getElementById('bacera-chk-pay-wait');
+		if (!el) return;
+		el.textContent = '';
+		el.classList.add('hidden');
+	}
+
+	function showPayWait(msg) {
+		var el = document.getElementById('bacera-chk-pay-wait');
+		if (!el) return;
+		el.textContent = msg || txtWaitingForPayment;
+		el.classList.remove('hidden');
+	}
+
+	function stopPaymentVerification() {
+		if (paymentVerifyTimer) {
+			clearTimeout(paymentVerifyTimer);
+			paymentVerifyTimer = null;
+		}
+	}
+
+	function isVisitFromCartPage() {
+		try {
+			if (!document.referrer) return false;
+			var ref = new URL(document.referrer);
+			var cart = new URL(CART_URL, window.location.origin);
+			return ref.origin === cart.origin && ref.pathname.replace(/\/+$/, '') === cart.pathname.replace(/\/+$/, '');
+		} catch (e) {
+			return false;
+		}
+	}
+
+	function pollPaymentStatusOnce(orderId) {
+		return fetch(getPaymentStatusUrl(orderId), {
+			method: 'GET',
+			credentials: 'same-origin',
+			headers: {
+				'X-WP-Nonce': WP_REST_NONCE,
+				'X-Bacera-Nonce': REST_NONCE
+			}
+		}).then(function (r) {
+			return r.text().then(function (t) {
+				var j = {};
+				if (t) {
+					try { j = JSON.parse(t); } catch (e) { j = { message: t }; }
+				}
+				return { ok: r.ok, body: j };
+			});
+		});
+	}
+
+	function startPaymentVerificationFlow(payload, action, skipRedirect) {
+		var orderId = payload && payload.pancake_order_id ? String(payload.pancake_order_id) : '';
+		if (!orderId) return;
+
+		stopPaymentVerification();
+		hidePayErr();
+		if (payBtn) {
+			payBtn.disabled = true;
+			payBtn.classList.add('hidden');
+		}
+
+		var waitMsg = txtWaitingForPayment + '\n' + txtPendingPaymentState;
+		if (action && action.text) waitMsg += '\n' + action.text;
+		if (payload && payload.expires_at) {
+			waitMsg += '\nExpires at: ' + payload.expires_at;
+		}
+		showPayWait(waitMsg);
+
+		try {
+			sessionStorage.setItem(STORAGE_PENDING_ORDER, JSON.stringify(payload));
+			sessionStorage.removeItem(STORAGE_LAST_ORDER);
+		} catch (e) {}
+
+		if (!skipRedirect && action && action.type === 'redirect' && action.url) {
+			setTimeout(function () { window.location.href = action.url; }, 700);
+		}
+
+		var loop = function () {
+			pollPaymentStatusOnce(orderId)
+				.then(function (res) {
+					if (res.ok && res.body && res.body.success && res.body.is_paid) {
+						stopPaymentVerification();
+						hidePayWait();
+						try { sessionStorage.removeItem(STORAGE_PENDING_ORDER); } catch (e2) {}
+						showInlineThankYou(payload);
+						return;
+					}
+					if (res.ok && res.body && res.body.payment_state === 'expired') {
+						showPayWait('Payment request expired. Please create a new order and pay again.');
+						stopPaymentVerification();
+						return;
+					}
+					if (res.ok && res.body && res.body.payment_state === 'failed') {
+						showPayWait('Payment status: failed. Please retry payment or contact support.');
+						stopPaymentVerification();
+						return;
+					}
+					if (res.ok && res.body && res.body.payment_state === 'partial') {
+						showPayWait(txtWaitingForPayment + '\nPayment status: partially paid. Waiting for full confirmation.');
+					} else {
+						showPayWait(waitMsg);
+					}
+					paymentVerifyTimer = setTimeout(loop, 4000);
+				})
+				.catch(function () {
+					showPayWait(txtWaitingForPayment + '\n' + txtPendingCheckFailed);
+					paymentVerifyTimer = setTimeout(loop, 6000);
+				});
+		};
+
+		paymentVerifyTimer = setTimeout(loop, 1500);
 	}
 
 	function estimateShipDate(shipId) {
@@ -1017,18 +1343,29 @@ get_header();
 		var grand = subtotal + fee;
 		var shipEl = document.querySelector('input[name="bacera_ship_method"]:checked');
 		var payEl = document.querySelector('input[name="bacera_payment_method"]:checked');
+		var paymentDetails = readPaymentDetails();
 		var shipLabel = shipEl && shipEl.closest('label') ? shipEl.closest('label').innerText.replace(/\s+/g, ' ').trim() : '';
 		var payLabel = payEl && payEl.closest('label') ? payEl.closest('label').innerText.replace(/\s+/g, ' ').trim() : '';
 		var noteParts = [];
 		if (noteEl && noteEl.value.trim()) noteParts.push(noteEl.value.trim());
 		noteParts.push('Delivery: ' + shipLabel);
 		noteParts.push('Payment: ' + payLabel);
+		noteParts.push('Payment code: ' + (payEl ? payEl.value : ''));
+		if (paymentDetails.method_id === 'atm') {
+			noteParts.push('ATM holder: ' + paymentDetails.atm_holder);
+			noteParts.push('ATM last4: ' + paymentDetails.atm_last4);
+		}
+		if (paymentDetails.method_id === 'paypal') {
+			noteParts.push('PayPal email: ' + paymentDetails.paypal_email);
+		}
 		return {
 			payload: {
 				bill_full_name: name ? name.value.trim() : '',
 				bill_phone_number: phone ? phone.value.trim() : '',
 				bill_email: email ? email.value.trim() : '',
 				shipping_address: { full_address: full ? full.value.trim() : '' },
+				payment_method: payEl ? payEl.value : '',
+				payment_meta: paymentDetails,
 				note: noteParts.join('\n'),
 				items: lines,
 				total_amount: grand,
@@ -1037,6 +1374,8 @@ get_header();
 			meta: {
 				ship_label: shipLabel,
 				pay_label: payLabel,
+				pay_id: payEl ? payEl.value : '',
+				pay_details: paymentDetails,
 				ship_id: shipEl ? shipEl.value : '',
 				ship_fee: fee,
 				grand: grand,
@@ -1046,6 +1385,8 @@ get_header();
 	}
 
 	function showInlineThankYou(data) {
+		stopPaymentVerification();
+		hidePayWait();
 		var wrap = document.getElementById('bacera-chk-success-wrap');
 		var bill = document.getElementById('bacera-chk-bill-wrap');
 		var act = document.getElementById('bacera-chk-step-3-actions');
@@ -1057,6 +1398,7 @@ get_header();
 		var addr = document.getElementById('bacera-chk-succ-address');
 		var ph = document.getElementById('bacera-chk-succ-phone');
 		var pay = document.getElementById('bacera-chk-succ-pay');
+		var payAction = document.getElementById('bacera-chk-succ-pay-action');
 		var nt = document.getElementById('bacera-chk-succ-note');
 		var sl = document.getElementById('bacera-chk-succ-ship-line');
 		var se = document.getElementById('bacera-chk-succ-ship-est');
@@ -1067,6 +1409,10 @@ get_header();
 		if (addr) addr.textContent = data.address || '—';
 		if (ph) ph.textContent = data.phone || '—';
 		if (pay) pay.textContent = data.payment_label || '—';
+		if (payAction) {
+			payAction.textContent = '';
+			payAction.classList.add('hidden');
+		}
 		if (nt) nt.textContent = (data.note && String(data.note).trim()) ? data.note : '—';
 		if (sl) sl.textContent = (data.shipping_label || '') + (data.free_shipping_line ? ' — ' + data.free_shipping_line : '');
 		if (se) se.textContent = txtEstShip + ' ' + (data.estimated_delivery || '');
@@ -1487,8 +1833,13 @@ get_header();
 		if (s3) s3.classList.toggle('hidden', n !== 3);
 		if (layoutChk) layoutChk.classList.toggle('bacera-chk-layout--step3', n === 3);
 		if (sidebar) sidebar.classList.toggle('hidden', n === 3);
+		if (n !== 3) {
+			stopPaymentVerification();
+			hidePayWait();
+		}
 		setStepIndicators(n);
 		try { sessionStorage.setItem(STORAGE_STEP, String(n)); } catch (e) {}
+		if (n === 2 || n === 3) updatePaymentExtraUI();
 		if (n === 3) fillReview();
 		renderLinesAndTotals();
 	}
@@ -1504,12 +1855,23 @@ get_header();
 	initVnAddress();
 	restoreContact();
 	restoreShipPay();
+	restorePaymentDetails();
+	updatePaymentExtraUI();
 
 	document.querySelectorAll('input[name="bacera_ship_method"]').forEach(function (el) {
 		el.addEventListener('change', function () { persistShipPay(); renderLinesAndTotals(); });
 	});
 	document.querySelectorAll('input[name="bacera_payment_method"]').forEach(function (el) {
-		el.addEventListener('change', persistShipPay);
+		el.addEventListener('change', function () {
+			persistShipPay();
+			persistPaymentDetails();
+			updatePaymentExtraUI();
+		});
+	});
+	var payDetailInputs = ['bacera-pay-atm-holder', 'bacera-pay-atm-last4', 'bacera-pay-paypal-email'];
+	payDetailInputs.forEach(function (id) {
+		var input = document.getElementById(id);
+		if (input) input.addEventListener('input', persistPaymentDetails);
 	});
 
 	var next1 = document.getElementById('bacera-chk-next-1');
@@ -1524,6 +1886,8 @@ get_header();
 	var next2 = document.getElementById('bacera-chk-next-2');
 	if (next2) next2.addEventListener('click', function () {
 		persistShipPay();
+		persistPaymentDetails();
+		if (!validatePaymentDetails()) return;
 		setStep(3);
 	});
 
@@ -1535,9 +1899,11 @@ get_header();
 		payBtn.addEventListener('click', function () {
 			hidePayErr();
 			persistShipPay();
+			persistPaymentDetails();
 			persistContact();
 			persistAddress();
 			try { sessionStorage.setItem(STORAGE_NOTES, noteEl ? noteEl.value : ''); } catch (e) {}
+			if (!validatePaymentDetails()) return;
 
 			var built = buildPancakePayload();
 			if (!built.payload.items.length) {
@@ -1592,6 +1958,10 @@ get_header();
 							phone: phone ? phone.value.trim() : '',
 							address: full ? full.value.trim() : '',
 							payment_label: built.meta.pay_label,
+							payment_method_id: built.meta.pay_id,
+							payment_details: built.meta.pay_details || {},
+							payment_status: (res.body && res.body.payment_status) ? String(res.body.payment_status) : '',
+							expires_at: (res.body && res.body.expires_at) ? String(res.body.expires_at) : '',
 							note: built.meta.note_customer,
 							shipping_label: built.meta.ship_label,
 							ship_fee: fee,
@@ -1601,13 +1971,25 @@ get_header();
 						};
 						var paidLines = loadItems();
 						baceraSyncCartAfterPayment(successPayload, paidLines, built.meta.grand);
+						var paymentAction = getPaymentExecutionAction(successPayload.payment_method_id, successPayload.pancake_order_id);
+						var backendPaid = String(successPayload.payment_status || '').toLowerCase() === 'paid';
+						var needsVerify = requiresPaymentVerification(successPayload.payment_method_id) && !backendPaid;
 						try {
-							sessionStorage.setItem(STORAGE_LAST_ORDER, JSON.stringify(successPayload));
 							sessionStorage.removeItem(STORAGE_ITEMS);
 							sessionStorage.removeItem(STORAGE_STEP);
 							sessionStorage.removeItem(STORAGE_NOTES);
+							sessionStorage.removeItem(STORAGE_PAY_DETAILS);
+							if (!needsVerify) {
+								sessionStorage.setItem(STORAGE_LAST_ORDER, JSON.stringify(successPayload));
+								sessionStorage.removeItem(STORAGE_PENDING_ORDER);
+							}
 						} catch (e2) {}
-						showInlineThankYou(successPayload);
+						if (needsVerify) {
+							startPaymentVerificationFlow(successPayload, paymentAction, false);
+						} else {
+							showInlineThankYou(successPayload);
+							applyPaymentExecutionAction(paymentAction);
+						}
 						payBtn.disabled = false;
 						payBtn.textContent = txtPayDefault;
 						payBtn.classList.add('hidden');
@@ -1634,6 +2016,30 @@ get_header();
 	}
 
 	try {
+		var pendingRaw = sessionStorage.getItem(STORAGE_PENDING_ORDER);
+		if (pendingRaw) {
+			var pendingData = JSON.parse(pendingRaw);
+			if (pendingData && pendingData.pancake_order_id) {
+				setStep(3);
+				startPaymentVerificationFlow(
+					pendingData,
+					getPaymentExecutionAction(pendingData.payment_method_id, pendingData.pancake_order_id),
+					true
+				);
+			}
+		}
+	} catch (ePending) {}
+
+	try {
+		if (isVisitFromCartPage()) {
+			sessionStorage.setItem(STORAGE_STEP, '1');
+			sessionStorage.removeItem(STORAGE_SHIP);
+			sessionStorage.removeItem(STORAGE_PAY);
+			sessionStorage.removeItem(STORAGE_PAY_DETAILS);
+		}
+	} catch (eReset) {}
+
+	try {
 		var rs = parseInt(sessionStorage.getItem(STORAGE_STEP) || '1', 10);
 		if (rs >= 1 && rs <= 3) {
 			if (rs > 1 && loadItems().length) setStep(rs);
@@ -1645,7 +2051,11 @@ get_header();
 		renderLinesAndTotals();
 	}
 
-	if (!loadItems().length) {
+	var hasPendingPayment = false;
+	try {
+		hasPendingPayment = !!sessionStorage.getItem(STORAGE_PENDING_ORDER);
+	} catch (eHasPending) {}
+	if (!loadItems().length && !hasPendingPayment) {
 		setStep(1);
 	}
 })();

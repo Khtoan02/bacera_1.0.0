@@ -97,6 +97,7 @@ add_action( 'init', function() {
     register_post_type( 'pancake_product', [
         'labels'      => [ 'name' => 'Pancake Products' ],
         'public'      => true, // Quan trọng để get_page_by_path hoạt động
+        'show_ui'     => false, // Ẩn menu/admin screen mặc định, dùng trang Bacera > Sản phẩm
         'has_archive' => false,
         'supports'    => [ 'title', 'editor', 'custom-fields', 'comments' ],
     ]);
