@@ -41,6 +41,17 @@ $bacera_shop_bank_name = trim( (string) get_option( 'bacera_shop_bank_name', 'Vi
 $bacera_shop_bank_account_name = trim( (string) get_option( 'bacera_shop_bank_account_name', 'BACERA STUDIO' ) );
 $bacera_shop_bank_account_number = trim( (string) get_option( 'bacera_shop_bank_account_number', '1234567890' ) );
 $bacera_shop_bank_qr_url = trim( (string) get_option( 'bacera_shop_bank_qr_url', '' ) );
+$bacera_customer_scope = 'guest';
+$bacera_auth_cookie    = $_COOKIE['bacera_customer_auth'] ?? '';
+if ( $bacera_auth_cookie ) {
+	$decoded = base64_decode( rawurldecode( $bacera_auth_cookie ) );
+	if ( $decoded && strpos( $decoded, '|' ) !== false ) {
+		$customer_id = (int) explode( '|', $decoded )[0];
+		if ( $customer_id > 0 ) {
+			$bacera_customer_scope = 'customer_' . $customer_id;
+		}
+	}
+}
 
 get_header();
 ?>
@@ -904,8 +915,10 @@ get_header();
 	var STORAGE_PAY_DETAILS = 'bacera_checkout_payment_details';
 	var STORAGE_LAST_ORDER = 'bacera_last_order_success';
 	var STORAGE_PENDING_ORDER = 'bacera_pending_order_payment';
+	var STORAGE_FORCE_STEP1 = 'bacera_checkout_force_step1';
 	var LOCAL_CART_KEY = 'bacera_shop_cart_v1';
-	var PAID_ORDERS_KEY = 'bacera_cart_paid_orders_v1';
+	var CUSTOMER_SCOPE = <?php echo wp_json_encode( $bacera_customer_scope ); ?>;
+	var PAID_ORDERS_KEY = 'bacera_cart_paid_orders_v1_' + CUSTOMER_SCOPE;
 
 	var REST_ORDERS = <?php echo wp_json_encode( $bacera_rest_orders_url ); ?>;
 	var REST_ORDER_STATUS_BASE = <?php echo wp_json_encode( untrailingslashit( rest_url( 'bacera-pancake/v1/orders' ) ) ); ?>;
@@ -1149,6 +1162,17 @@ get_header();
 		} catch (e) {
 			return false;
 		}
+	}
+
+	function shouldForceStepOneFromCart() {
+		try {
+			var params = new URLSearchParams(window.location.search || '');
+			if (params.get('from_cart') === '1') return true;
+		} catch (e) {}
+		try {
+			return sessionStorage.getItem(STORAGE_FORCE_STEP1) === '1';
+		} catch (e2) {}
+		return false;
 	}
 
 	function pollPaymentStatusOnce(orderId) {
@@ -2016,6 +2040,18 @@ get_header();
 	}
 
 	try {
+		if (shouldForceStepOneFromCart() || isVisitFromCartPage()) {
+			sessionStorage.setItem(STORAGE_STEP, '1');
+			sessionStorage.removeItem(STORAGE_SHIP);
+			sessionStorage.removeItem(STORAGE_PAY);
+			sessionStorage.removeItem(STORAGE_PAY_DETAILS);
+			sessionStorage.removeItem(STORAGE_PENDING_ORDER);
+			sessionStorage.removeItem(STORAGE_LAST_ORDER);
+			sessionStorage.removeItem(STORAGE_FORCE_STEP1);
+		}
+	} catch (eReset) {}
+
+	try {
 		var pendingRaw = sessionStorage.getItem(STORAGE_PENDING_ORDER);
 		if (pendingRaw) {
 			var pendingData = JSON.parse(pendingRaw);
@@ -2029,15 +2065,6 @@ get_header();
 			}
 		}
 	} catch (ePending) {}
-
-	try {
-		if (isVisitFromCartPage()) {
-			sessionStorage.setItem(STORAGE_STEP, '1');
-			sessionStorage.removeItem(STORAGE_SHIP);
-			sessionStorage.removeItem(STORAGE_PAY);
-			sessionStorage.removeItem(STORAGE_PAY_DETAILS);
-		}
-	} catch (eReset) {}
 
 	try {
 		var rs = parseInt(sessionStorage.getItem(STORAGE_STEP) || '1', 10);

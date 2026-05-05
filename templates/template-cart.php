@@ -11,6 +11,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 $shop_url              = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_shop_page_url() : home_url( '/' );
 $checkout_url          = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : $shop_url;
 $checkout_shipping_url = class_exists( 'Bacera_Utils' ) ? Bacera_Utils::get_checkout_shipping_page_url() : $checkout_url;
+$checkout_shipping_url = add_query_arg( 'from_cart', '1', $checkout_shipping_url );
+$bacera_customer_scope = 'guest';
+$bacera_auth_cookie    = $_COOKIE['bacera_customer_auth'] ?? '';
+if ( $bacera_auth_cookie ) {
+	$decoded = base64_decode( rawurldecode( $bacera_auth_cookie ) );
+	if ( $decoded && strpos( $decoded, '|' ) !== false ) {
+		$customer_id = (int) explode( '|', $decoded )[0];
+		if ( $customer_id > 0 ) {
+			$bacera_customer_scope = 'customer_' . $customer_id;
+		}
+	}
+}
 
 $related_items   = [];
 $categories_data = [];
@@ -305,7 +317,8 @@ get_header();
 	var SELECTED_KEY = 'bacera_cart_checkout_selected_v1';
 	var LAST_IDS_KEY = 'bacera_cart_id_snapshot_v1';
 	var CHECKOUT_ITEMS_KEY = 'bacera_checkout_items';
-	var PAID_ORDERS_KEY = 'bacera_cart_paid_orders_v1';
+	var CUSTOMER_SCOPE = <?php echo wp_json_encode( $bacera_customer_scope ); ?>;
+	var PAID_ORDERS_KEY = 'bacera_cart_paid_orders_v1_' + CUSTOMER_SCOPE;
 	var ariaIncludeCheckout = <?php echo wp_json_encode( __( 'Include in checkout', 'bacera' ) ); ?>;
 	var txtCartEmptyButPaid = <?php echo wp_json_encode( __( 'Your cart is empty. You can view your completed orders below.', 'bacera' ) ); ?>;
 	var txtOrderRef = <?php echo wp_json_encode( __( 'Order reference', 'bacera' ) ); ?>;
@@ -634,6 +647,7 @@ get_header();
 			try {
 				sessionStorage.setItem(CHECKOUT_ITEMS_KEY, JSON.stringify(picked));
 				sessionStorage.setItem('bacera_checkout_notes', notesEl ? notesEl.value : '');
+				sessionStorage.setItem('bacera_checkout_force_step1', '1');
 			} catch (err) {}
 		});
 	}

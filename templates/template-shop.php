@@ -954,7 +954,28 @@ function render(){
 }
 function setOpen(open){if(!open)previewId=null;drawer.classList.toggle('is-open',open);overlay.classList.toggle('is-open',open);drawer.setAttribute('aria-hidden',open?'false':'true');overlay.setAttribute('aria-hidden',open?'false':'true');document.body.classList.toggle('overflow-hidden',open);}
 function upsert(next){var c=loadCart(),i=c.findIndex(function(x){return String(x.id)===String(next.id);});if(i>=0){c[i].qty=Number(c[i].qty||1)+1;}else{next.qty=1;c.push(next);}saveCart(c);}
-document.addEventListener('click',function(e){var btn=e.target.closest('.bacera-shop-add-cart-btn');if(!btn)return;e.preventDefault();e.stopPropagation();var raw=btn.getAttribute('data-cart-item')||'';if(!raw)return;try{var p=JSON.parse(raw);if(!p||!p.id)return;upsert(p);previewId=String(p.id);render();setOpen(true);}catch(err){}});
+function handleShopAddToCart(btn,e){
+	if(e){e.preventDefault();e.stopPropagation();}
+	if(!btn)return;
+	var raw=btn.getAttribute('data-cart-item')||'';
+	if(!raw)return;
+	try{
+		var p=JSON.parse(raw);
+		if(!p||!p.id)return;
+		upsert(p);
+		previewId=String(p.id);
+		render();
+		setOpen(true);
+	}catch(err){}
+}
+document.addEventListener('click',function(e){
+	var btn=e.target.closest('.bacera-shop-add-cart-btn');
+	if(!btn)return;
+	handleShopAddToCart(btn,e);
+},true);
+document.querySelectorAll('.bacera-shop-add-cart-btn').forEach(function(btn){
+	btn.addEventListener('click',function(e){handleShopAddToCart(btn,e);});
+});
 listEl.addEventListener('click',function(e){var btn=e.target.closest('button[data-cart-action]');if(!btn)return;var row=btn.closest('.bacera-cart-item');if(!row)return;var id=row.getAttribute('data-cart-id'),action=btn.getAttribute('data-cart-action'),c=loadCart(),i=c.findIndex(function(x){return String(x.id)===String(id);});if(i<0)return;if(action==='remove')c.splice(i,1);else if(action==='minus'){c[i].qty=Number(c[i].qty||1)-1;if(c[i].qty<=0)c.splice(i,1);}else if(action==='plus')c[i].qty=Number(c[i].qty||1)+1;saveCart(c);render();});
 var co=document.getElementById('bacera-cart-go-checkout');if(co){co.addEventListener('click',function(e){var full=loadCart(),picked=previewId?full.filter(function(x){return String(x.id)===String(previewId);}):[];if(!picked.length){e.preventDefault();return;}try{sessionStorage.setItem(CK,JSON.stringify(picked));}catch(err){}});}
 closeBtn.addEventListener('click',function(){setOpen(false);});
